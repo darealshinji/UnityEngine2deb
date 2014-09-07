@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-VERSION = $(shell dpkg-parsechangelog | grep -e 'Version:' | cut -d' ' -f2 | cut -d'~' -f1)
+VERSION = $(shell dpkg-parsechangelog -SVersion | cut -d'~' -f1)
 
 %:
 	dh ${@}
@@ -15,4 +15,3 @@ override_dh_install:
 override_dh_installman:
 	sed -e 's/@VERSION@/$(VERSION)/;' debian/u2deb.1.in > debian/u2deb.1
 	dh_installman debian/u2deb.1
-
