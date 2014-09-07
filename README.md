@@ -4,18 +4,19 @@ UnityEngine2deb
 Create Debian packages of Unity Engine games
 ```
  Usage:
-   u2deb.sh -h|help
+   u2deb.sh -h|--help|-V|--version
    u2deb.sh -p|prepare <path> [-Z=<method>] [-d|--data]
    u2deb.sh -b|build|make [-Z=<method>]
    u2deb.sh -c|clean
 
  options:
-   -h, help             print this message
+   -h, --help           print this message
+   -V, --version        display version info and quit
+
    -p, prepare <path>   copy files from <path> and prepare a Debian
                            source package
    -b, build, make      build binary packages
-   -c, clean            clean the working tree including built .deb
-                           packages
+   -c, clean            clean the working tree
 
    -d, --data           build a separate package for architecture-
                            independent files
