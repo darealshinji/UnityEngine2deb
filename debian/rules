@@ -1,0 +1,18 @@
+#!/usr/bin/make -f
+
+VERSION = $(shell dpkg-parsechangelog | grep -e 'Version:' | cut -d' ' -f2 | cut -d'~' -f1)
+
+%:
+	dh ${@}
+
+override_dh_install:
+	dh_install
+	install -m755 u2deb.sh $(CURDIR)/debian/u2deb/usr/bin/u2deb
+
+	# actually not necessary, but Lintian complains
+	cd $(CURDIR)/debian/u2deb/usr/share/u2deb && chmod a+x make-icons.sh rules
+
+override_dh_installman:
+	sed -e 's/@VERSION@/$(VERSION)/;' debian/u2deb.1.in > debian/u2deb.1
+	dh_installman debian/u2deb.1
+

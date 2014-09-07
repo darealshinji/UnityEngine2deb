@@ -1,0 +1,47 @@
+.TH U2DEB 1 "" "@VERSION@"
+.SH NAME
+u2deb \- create Debian packages of Unity Engine games
+
+.SH SYNOPSIS
+.B u2deb \fR\-h|help
+.br
+.B u2deb \fR\-p|prepare <path> [\-Z=<method>] [\-d|\-\-data]
+.br
+.B u2deb \fR\-b|build|make [\-Z=<method>]
+.br
+.B u2deb \fR\-c|clean
+
+.SH OPTIONS
+\fB\-h, help
+print this message
+.TP
+\fB\-p, prepare \fR<path>
+copy files from <path> and prepare a Debian source package
+.TP
+\fB\-b, build, make
+build binary packages
+.TP
+\fB\-c, clean
+clean the working tree including built .deb packages
+.TP
+\fB\-d, \-\-data
+build a separate package for architecture-independent files
+.TP
+\fB\-Z\fR=<method>
+Specify compression method. Available are gzip/gz, bzip2/bz2 and xz.
+Default: xz
+.TP
+\fB\-\-icon\fR=<icon>
+use this icon for the desktop entry
+
+.SH DESCRIPTION
+Games that were built on the Unity engine became quite popular these days.
+Those games can be built to run natively on GNU/Linux systems.
+
+This Bash script helps you to almost automatically create proper Debian packages of such games.
+
+.SH SEE ALSO
+.I https://github.com/darealshinji/UnityEngine2deb
+
+.SH AUTHOR
+djcj <djcj@gmx.de>

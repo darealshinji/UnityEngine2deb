@@ -1,0 +1,31 @@
+Source: u2deb
+Section: devel
+Priority: optional
+Maintainer: Marshall Banana <djcj@gmx.de>
+Build-Depends:
+   debhelper (>= 9)
+Standards-Version: 3.9.5
+Homepage: https://github.com/darealshinji/UnityEngine2deb
+Vcs-Git: https://github.com/darealshinji/UnityEngine2deb.git
+Vcs-Browser: https://github.com/darealshinji/UnityEngine2deb
+
+Package: u2deb
+Architecture: all
+Depends:
+   debhelper (>= 9),
+   make | build-essential | dpkg-dev,
+   execstack,
+   librsvg2-bin,
+   imagemagick,
+   ${misc:Depends}
+Recommends:
+   libgtk2.0-0,
+   libgtk2.0-0:i386,
+   libglu1-mesa,
+   libglu1-mesa:i386
+Description: create Debian packages of Unity Engine games
+ Games that were built on the Unity engine became quite popular these days.
+ Those games can be built to run natively on GNU/Linux systems.
+ .
+ This Bash script helps you to almost automatically create proper
+ Debian packages of such games.
