@@ -12,8 +12,12 @@ u2deb \- create Debian packages of Unity Engine games
 .B u2deb \fR\-c|clean
 
 .SH OPTIONS
-\fB\-h, help
-print this message
+.TP
+\fB\-h, \-\-help
+show help text and quit
+.TP
+\fB\-V, \-\-version
+display version info and quit
 .TP
 \fB\-p, prepare \fR<path>
 copy files from <path> and prepare a Debian source package
@@ -27,11 +31,11 @@ clean the working tree including built .deb packages
 \fB\-d, \-\-data
 build a separate package for architecture-independent files
 .TP
-\fB\-Z\fR=<method>
+\fB\-Z=\fR<method>
 Specify compression method. Available are gzip/gz, bzip2/bz2 and xz.
 Default: xz
 .TP
-\fB\-\-icon\fR=<icon>
+\fB\-\-icon=\fR<icon>
 use this icon for the desktop entry
 
 .SH DESCRIPTION

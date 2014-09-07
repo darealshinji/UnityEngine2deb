@@ -24,6 +24,8 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
+appversion="14.09.07.1"
+
 appname=$(basename "$0")
 topsrc=$(pwd)
 debian="$topsrc/build/x86/debian"
@@ -40,20 +42,25 @@ else
   exit 1
 fi
 
-
+if [ "$1" = "-V" ] || [ "$1" = "--version" ] ; then
+  echo $appversion
+  exit 0
+fi
 if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "help" ] ; then
 cat << EOF
 
  Create Debian packages of Unity Engine games
 
  Usage:
-   $appname -h|help
+   $appname -h|--help|-V|--version
    $appname -p|prepare <path> [-Z=<method>] [-d|--data]
    $appname -b|build|make [-Z=<method>]
    $appname -c|clean
 
  options:
-   -h, help             print this message
+   -h, --help           print this message
+   -V, --version        display version info and quit
+
    -p, prepare <path>   copy files from <path> and prepare a Debian
                            source package
    -b, build, make      build binary packages
@@ -86,14 +93,16 @@ for opt; do
       echo "clean files in '$topsrc'"
       exit 0
       ;;
-    -Z=*)
-      Z="$optarg"
-      ;;
     "--data"|"-d")
       DATAPACKAGE="yes"
       ;;
+    -Z=*)
+      Z="$optarg"
+      ;;
     --icon=*)
       ICON="$optarg"
+      ;;
+    "help"|"-h"|"--version"|"-V")
       ;;
     *)
       path="$optarg"
