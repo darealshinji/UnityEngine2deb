@@ -53,7 +53,7 @@ cat << EOF
 
  Usage:
    $appname -h|--help|-V|--version
-   $appname -p|prepare <path> [-Z=<method>] [-d|--data]
+   $appname -p|prepare <path> [-Z=<method>] [-d|--data] [--icon=<icon>]
    $appname -b|build|make [-Z=<method>]
    $appname -c|clean
 
