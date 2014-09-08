@@ -5,7 +5,7 @@ Create Debian packages of Unity Engine games
 ```
  Usage:
    u2deb.sh -h|--help|-V|--version
-   u2deb.sh -p|prepare <path> [-Z=<method>] [-d|--data]
+   u2deb.sh -p|prepare <path> [-Z=<method>] [-d|--data] [--icon=<icon>]
    u2deb.sh -b|build|make [-Z=<method>]
    u2deb.sh -c|clean
 
