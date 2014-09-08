@@ -5,7 +5,7 @@ u2deb \- create Debian packages of Unity Engine games
 .SH SYNOPSIS
 .B u2deb \fR\-h|help
 .br
-.B u2deb \fR\-p|prepare <path> [\-Z=<method>] [\-d|\-\-data]
+.B u2deb \fR\-p|prepare <path> [\-Z=<method>] [\-d|\-\-data] [\-\-icon=<icon>]
 .br
 .B u2deb \fR\-b|build|make [\-Z=<method>]
 .br
