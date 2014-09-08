@@ -71,6 +71,12 @@ endif
 override_dh_makeshlibs:
 	# Unity engine games load their own libraries as plugins
 
+#override_dh_shlibdeps:
+#	# remove unnecessary dependencies that a binary was errerously linked against
+#	# by deleting their DT_NEEDED entries from the ELF header
+#	patchelfmod --remove-needed libxyz.so.0,libabc.so.1 binaryfile
+#	dh_shlibdeps
+
 override_dh_gencontrol:
 	dh_gencontrol
 	# prevents Lintian warning virtual-package-depends-without-real-package-depends
