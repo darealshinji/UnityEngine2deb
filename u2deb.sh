@@ -42,6 +42,13 @@ else
   exit 1
 fi
 
+if [ ! -z $(which patchelfmod) ] ; then
+  patchelf=$(which patchelfmod)
+else
+  patchelf=$(which patchelf)
+fi
+
+
 help() {
 cat << EOF
 
@@ -321,6 +328,7 @@ CPU = x86_64
 xCPU = x86
 DATAPACKAGE = $DATAPACKAGE
 Z = $Z
+PATCHELF = $patchelf
 EOF
   fi
   cat >> "$debian/confflags" << EOF
@@ -330,6 +338,7 @@ CPU = x86
 xCPU = x86_64
 DATAPACKAGE = $DATAPACKAGE
 Z = $Z
+PATCHELF = $patchelf
 EOF
 
   [ $X86 = "no" ] && rm -rf "$topsrc/build/x86"

@@ -18,15 +18,6 @@ else
 	LINKS = $(NAME).links
 endif
 
-BIGGESTICON = \
-  for d in 512 256 128 96 64 48 32 24 16 ; do \
-    dir="$(ICONDEST)/icons/hicolor/$${d}x$${d}"; \
-    if [ -d $$dir ]; then \
-      sed -i "s/@BIGGESTICON@/$$(basename $$dir)/;" debian/$(LINKS) ; \
-      exit 0; \
-    fi; \
-  done
-
 
 %:
 	dh ${@}
@@ -66,18 +57,31 @@ ifeq ($(DATAPACKAGE), yes)
 endif
 	echo '/usr/share/icons/hicolor/@BIGGESTICON@/apps/$(NAME).png $(ICONPREFIX)$(NAME)/$(NAME)_Data/Resources/UnityPlayer.png' \
 		> $(CURDIR)/debian/$(LINKS)
-	$(BIGGESTICON)
+	for d in 512 256 128 96 64 48 32 24 16 ; do \
+	  dir="$(ICONDEST)/icons/hicolor/$${d}x$${d}"; \
+	  if [ -d $$dir ]; then \
+	    sed -i "s/@BIGGESTICON@/$$(basename $$dir)/;" debian/$(LINKS) ; \
+	    exit 0; \
+	  fi; \
+	done
 
 override_dh_makeshlibs:
 	# Unity engine games load their own libraries as plugins
 
-#override_dh_shlibdeps:
+override_dh_shlibdeps:
+ifneq ($(PATCHELF), )
 	# remove unnecessary dependencies that a binary was errerously linked against
 	# by deleting their DT_NEEDED entries from the ELF header
-#	patchelfmod --remove-needed \
-#	libpangoft2-1.0.so.0,libpango-1.0.so.0,libcairo.so.2 \
-#	debian/a-game/usr/lib/a-game/a-game_Data/Plugins/x86/ScreenSelector.so
-#	dh_shlibdeps
+	rm -rf uselessdeps.log
+	(dh_shlibdeps -- --warnings=2 2>&1 | tee uselessdeps.log) > /dev/null
+	lines=$$(wc -l uselessdeps.log | cut -d' ' -f1); \
+	for n in $$(seq 1 $$lines) ; do \
+	  dep=$$(cut -d' ' -f15 uselessdeps.log | sed -n $${n}p); \
+	  bin=$$(cut -d' ' -f10 uselessdeps.log | sed -n $${n}p); \
+	  $(PATCHELF) --debug --remove-needed $$dep $$bin 2>&1 | grep -v -e 'keeping' ; \
+	done;
+endif
+	dh_shlibdeps
 
 override_dh_gencontrol:
 	dh_gencontrol
