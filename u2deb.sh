@@ -24,7 +24,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="14.09.07.1"
+appversion="14.09.09.1"
 
 appname=$(basename "$0")
 topsrc=$(pwd)
@@ -42,11 +42,7 @@ else
   exit 1
 fi
 
-if [ "$1" = "-V" ] || [ "$1" = "--version" ] ; then
-  echo $appversion
-  exit 0
-fi
-if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "help" ] ; then
+help() {
 cat << EOF
 
  Create Debian packages of Unity Engine games
@@ -73,12 +69,21 @@ cat << EOF
    --icon=<icon>        use this icon for the desktop entry
 
 EOF
-exit 1
+}
+
+if [ "$1" = "-V" ] || [ "$1" = "--version" ] ; then
+  echo $appversion
+  exit 0
+fi
+if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "help" ] ; then
+  help
+  exit 0
 fi
 
 
 DATAPACKAGE="no"
 ICON=""
+mode="empty"
 for opt; do
   optarg="${opt#*=}"
   case "$opt" in
@@ -110,6 +115,11 @@ for opt; do
   esac
 done
 
+if [ $mode = "empty" ] ; then
+  help
+  exit 1
+fi
+
 
 ################# prepare #################
 if [ $mode = "prepare" ] ; then
@@ -134,8 +144,10 @@ if [ $mode = "prepare" ] ; then
   rm -rf $cleanfiles
 
   # copy source files
+  echo -n "copy source files... "
   mkdir "$topsrc/source"
   cp -r "$path"/* "$topsrc/source"
+  echo "done"
 
   # get the application name
   UPSTREAMNAME=$(basename "$(find source -type d -name *_Data)" | head -c-6)
@@ -177,7 +189,7 @@ if [ $mode = "prepare" ] ; then
     cp "$templates/description" "$topsrc"
     echo ""
     echo "Please add a more detailed description about the game in the text file"
-    echo "$templates/description"
+    echo "$topsrc/description"
     echo "and press any key to continue."
     read -p "" -n1 -s
   fi
@@ -186,7 +198,8 @@ if [ $mode = "prepare" ] ; then
   read -p "and mustn't contain and spaces or underscores: " VERSION
   echo ""
   echo "Enter the package maintainer information."
-  read -p "Use the following pattern: John Doe <nick@domain.org> " MAINTAINER
+  echo "Use the following pattern: John Doe <nick@domain.org>"
+  read -p " " MAINTAINER
   echo ""
   read -p "What's the game's homepage? " HOMEPAGE
   echo ""
@@ -322,12 +335,12 @@ EOF
   [ $X86 = "no" ] && rm -rf "$topsrc/build/x86"
   [ $X86_64 = "no" ] && rm -rf "$topsrc/build/x86_64"
   if [ -d "$topsrc/build/x86" ] ; then
-    echo -n "copy source files to build/x86... "
+    echo -n "copy files to build/x86... "
     cp -r source "$topsrc/build/x86"
     echo "done"
   fi
   if [ -d "$topsrc/build/x86_64" ] ; then
-    echo -n "copy source files to build/x86_64..."
+    echo -n "copy files to build/x86_64..."
     cp -r source "$topsrc/build/x86_64"
     echo "done"
   fi
@@ -354,14 +367,12 @@ if [ $mode = "build" ] ; then
   fi
 
   if [ -d "$topsrc/build/x86" ] ; then
-    cp -r "$topsrc/source" "$topsrc/build/x86"
     cd "$topsrc/build/x86"
     chmod a+x debian/rules
     dpkg-buildpackage -b -us -uc 2>&1 | tee "$topsrc/build/x86-build.log"
   fi
 
   if [ -d "$topsrc/build/x86_64" ] ; then
-    cp -r source "$topsrc/build/x86_64"
     cd "$topsrc/build/x86_64"
     chmod a+x debian/rules
     dpkg-buildpackage -b -us -uc 2>&1 | tee "$topsrc/build/x86_64-build.log"

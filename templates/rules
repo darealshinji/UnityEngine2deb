@@ -35,7 +35,7 @@ override_dh_auto_build:
 	rm -rf source/$(NAME).$(xCPU) \
 		source/$(NAME)_Data/Mono/$(xCPU) \
 		source/$(NAME)_Data/Plugins/$(xCPU)
-	mv source/$(NAME).$(CPU) source/$(NAME)
+	[ -f source/$(NAME) ] || mv source/$(NAME).$(CPU) source/$(NAME)
 	find source -type f -exec chmod a-x '{}' \;
 	find source -name libmono.so -exec execstack -c '{}' \;
 	chmod a+x source/$(NAME)
@@ -72,9 +72,11 @@ override_dh_makeshlibs:
 	# Unity engine games load their own libraries as plugins
 
 #override_dh_shlibdeps:
-#	# remove unnecessary dependencies that a binary was errerously linked against
-#	# by deleting their DT_NEEDED entries from the ELF header
-#	patchelfmod --remove-needed libxyz.so.0,libabc.so.1 binaryfile
+	# remove unnecessary dependencies that a binary was errerously linked against
+	# by deleting their DT_NEEDED entries from the ELF header
+#	patchelfmod --remove-needed \
+#	libpangoft2-1.0.so.0,libpango-1.0.so.0,libcairo.so.2 \
+#	debian/a-game/usr/lib/a-game/a-game_Data/Plugins/x86/ScreenSelector.so
 #	dh_shlibdeps
 
 override_dh_gencontrol:
@@ -84,16 +86,16 @@ override_dh_gencontrol:
 
 # fix architecture when packaging i386 (amd64 only)
 ifeq ($(CPU), x86)
-	ifeq ($(DEB_HOST_GNU_CPU), x86_64)
-		sed -i 's/Architecture: amd64/Architecture: i386/g' debian/$(NAME)/DEBIAN/control
-	endif
+ifeq ($(DEB_HOST_GNU_CPU), x86_64)
+	sed -i 's/Architecture: amd64/Architecture: i386/g' debian/$(NAME)/DEBIAN/control
+endif
 endif
 
 # fix architecture when packaging amd64 (i386 only)
 ifeq ($(CPU), x86_64)
-	ifneq (, $(filter i386 i486 i586 i686 pentium,$(DEB_HOST_GNU_CPU)))
-		sed -i 's/Architecture: i386/Architecture: amd64/g' debian/$(NAME)/DEBIAN/control
-	endif
+ifneq (, $(filter i386 i486 i586 i686 pentium,$(DEB_HOST_GNU_CPU)))
+	sed -i 's/Architecture: i386/Architecture: amd64/g' debian/$(NAME)/DEBIAN/control
+endif
 endif
 
 override_dh_builddeb:
