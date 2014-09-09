@@ -34,7 +34,5 @@ Example:
 
 Minimum dependencies: `debhelper librsvg2-bin imagemagick execstack`
 
-Recommended dependencies to link binaries:<br>
-`libgtk2.0-0 libgtk2.0-0:i386 libglu1-mesa libglu1-mesa:i386`
-
-Suggested tools to modify binaries: `patchelfmod` [<sup>[1]</sup>](https://github.com/darealshinji/patchelfmod)
+Recommended dependencies:<br>
+`libgtk2.0-0 libgtk2.0-0:i386 libglu1-mesa libglu1-mesa:i386 patchelfmod` [<sup>[1]</sup>](https://github.com/darealshinji/patchelfmod)
