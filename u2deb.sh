@@ -24,7 +24,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="14.09.09.1"
+appversion="14.09.11.1"
 
 appname=$(basename "$0")
 topsrc=$(pwd)
@@ -151,9 +151,9 @@ if [ $mode = "prepare" ] ; then
   rm -rf $cleanfiles
 
   # copy source files
-  echo -n "copy source files... "
+  echo "copy source files... "
   mkdir "$topsrc/source"
-  cp -r "$path"/* "$topsrc/source"
+  cp -vr "$path"/* "$topsrc/source"
   echo "done"
 
   # get the application name
@@ -344,13 +344,13 @@ EOF
   [ $X86 = "no" ] && rm -rf "$topsrc/build/x86"
   [ $X86_64 = "no" ] && rm -rf "$topsrc/build/x86_64"
   if [ -d "$topsrc/build/x86" ] ; then
-    echo -n "copy files to build/x86... "
-    cp -r source "$topsrc/build/x86"
+    echo "copy files to build/x86... "
+    cp -vr source "$topsrc/build/x86"
     echo "done"
   fi
   if [ -d "$topsrc/build/x86_64" ] ; then
-    echo -n "copy files to build/x86_64..."
-    cp -r source "$topsrc/build/x86_64"
+    echo "copy files to build/x86_64..."
+    cp -vr source "$topsrc/build/x86_64"
     echo "done"
   fi
   echo ""
@@ -388,17 +388,19 @@ if [ $mode = "build" ] ; then
   fi
 
   cd "$topsrc/build"
-  for f in *.deb ; do
-    echo "$f:"
-    dpkg-deb -I $f
-    lintian $f
-    echo ""
-  done 2>&1 | tee "$topsrc/build/packages.log"
-  for f in *.deb ; do
-    echo "$f:"
-    dpkg-deb -c $f
-    echo ""
-  done 2>&1 | tee -a "$topsrc/build/packages.log"
+  if [ ! -z "$(find . -maxdepth 1 -name *.deb)" ] ; then
+    for f in *.deb ; do
+      echo "$f:"
+      dpkg-deb -I $f
+      lintian $f
+      echo ""
+    done 2>&1 | tee "$topsrc/build/packages.log"
+    for f in *.deb ; do
+      echo "$f:"
+      dpkg-deb -c $f
+      echo ""
+    done 2>&1 | tee -a "$topsrc/build/packages.log"
+  fi
 fi
 
 exit 0
