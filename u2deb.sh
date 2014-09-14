@@ -388,7 +388,8 @@ if [ $mode = "build" ] ; then
   fi
 
   cd "$topsrc/build"
-#  if [ ! -z "$(find . -maxdepth 1 -name *.deb)" ] ; then
+  ls *.deb >/dev/null
+  if [ $(echo $?) = 0 ] ; then
     for f in *.deb ; do
       echo "$f:"
       dpkg-deb -I $f
@@ -400,7 +401,7 @@ if [ $mode = "build" ] ; then
       dpkg-deb -c $f
       echo ""
     done 2>&1 | tee -a "$topsrc/build/packages.log"
-#  fi
+  fi
 fi
 
 exit 0
