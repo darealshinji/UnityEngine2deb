@@ -24,7 +24,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="14.09.11.1"
+appversion="14.09.14.1"
 
 appname=$(basename "$0")
 topsrc=$(pwd)
@@ -388,7 +388,7 @@ if [ $mode = "build" ] ; then
   fi
 
   cd "$topsrc/build"
-  if [ ! -z "$(find . -maxdepth 1 -name *.deb)" ] ; then
+#  if [ ! -z "$(find . -maxdepth 1 -name *.deb)" ] ; then
     for f in *.deb ; do
       echo "$f:"
       dpkg-deb -I $f
@@ -400,7 +400,7 @@ if [ $mode = "build" ] ; then
       dpkg-deb -c $f
       echo ""
     done 2>&1 | tee -a "$topsrc/build/packages.log"
-  fi
+#  fi
 fi
 
 exit 0
