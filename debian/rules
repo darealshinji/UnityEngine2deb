@@ -1,9 +1,28 @@
 #!/usr/bin/make -f
 
-VERSION = $(shell dpkg-parsechangelog -SVersion | cut -d'~' -f1)
+DISTRIBUTION  = $(shell dpkg-parsechangelog | grep -e "Distribution:" | cut -d' ' -f2)
+VERSION       = $(shell dpkg-parsechangelog | grep -e "Version:" | cut -d' ' -f2 | cut -d~ -f1)
+DEB_HOST_ARCH = $(shell dpkg-architecture -qDEB_HOST_ARCH)
+
+ifeq ($(DISTRIBUTION), precise)
+ifeq ($(DEB_HOST_ARCH), amd64)
+U2DEB_I386 = , u2deb-i386-deps
+endif
+else
+GLU1_I386 =  libglu1-mesa:i386,
+GTK2_I386 =  libgtk2.0-0:i386,
+endif
+
 
 %:
 	dh ${@}
+
+override_dh_auto_configure:
+	sed -e 's/@U2DEB_I386@/$(U2DEB_I386)/; s/@GLU1_I386@/$(GLU1_I386)/; s/@GTK2_I386@/$(GTK2_I386)/;' \
+		debian/control.in > debian/control
+ifeq ($(DISTRIBUTION), precise)
+	cat debian/u2deb-i386-deps.in >> debian/control
+endif
 
 override_dh_install:
 	dh_install
@@ -15,3 +34,6 @@ override_dh_install:
 override_dh_installman:
 	sed -e 's/@VERSION@/$(VERSION)/;' debian/u2deb.1.in > debian/u2deb.1
 	dh_installman debian/u2deb.1
+
+override_dh_builddeb:
+	dh_builddeb -- -Zxz -z9
