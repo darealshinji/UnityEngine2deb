@@ -1,3 +1,15 @@
+u2deb (14.10.09.1~precise1) precise; urgency=low
+
+  * New version
+
+ -- Marshall Banana <djcj@gmx.de>  Thu, 09 Oct 2014 00:27:55 +0200
+
+u2deb (14.09.14.1~precise2) precise; urgency=low
+
+  * Upload to PPA
+
+ -- Marshall Banana <djcj@gmx.de>  Sun, 14 Sep 2014 20:01:35 +0200
+
 u2deb (14.09.07.1~1) unstable; urgency=low
 
   * Initial release

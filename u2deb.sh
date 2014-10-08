@@ -24,10 +24,10 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="14.09.14.1"
+appversion="14.10.09.1"
 
 appname=$(basename "$0")
-topsrc=$(pwd)
+topsrc="$(pwd)"
 debian="$topsrc/build/x86/debian"
 cleanfiles="build icon source"
 
