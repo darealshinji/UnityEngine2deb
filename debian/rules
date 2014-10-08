@@ -18,6 +18,7 @@ endif
 	dh ${@}
 
 override_dh_auto_configure:
+	sed -e 's/@VERSION@/$(VERSION)/;' debian/u2deb.1.in > debian/u2deb.1
 	sed -e 's/@U2DEB_I386@/$(U2DEB_I386)/; s/@GLU1_I386@/$(GLU1_I386)/; s/@GTK2_I386@/$(GTK2_I386)/;' \
 		debian/control.in > debian/control
 ifeq ($(DISTRIBUTION), precise)
@@ -30,10 +31,6 @@ override_dh_install:
 
 	# actually not necessary, but Lintian complains
 	cd $(CURDIR)/debian/u2deb/usr/share/u2deb && chmod a+x make-icons.sh rules
-
-override_dh_installman:
-	sed -e 's/@VERSION@/$(VERSION)/;' debian/u2deb.1.in > debian/u2deb.1
-	dh_installman debian/u2deb.1
 
 override_dh_builddeb:
 	dh_builddeb -- -Zxz -z9
