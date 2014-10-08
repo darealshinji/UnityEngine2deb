@@ -57,7 +57,7 @@ ifeq ($(DATAPACKAGE), yes)
 endif
 	echo '/usr/share/icons/hicolor/@BIGGESTICON@/apps/$(NAME).png $(ICONPREFIX)$(NAME)/$(NAME)_Data/Resources/UnityPlayer.png' \
 		> $(CURDIR)/debian/$(LINKS)
-	for d in 512 256 128 96 64 48 32 24 16 ; do \
+	for d in 512 256 128 96 64 48 32 24 22 16 ; do \
 	  dir="$(ICONDEST)/icons/hicolor/$${d}x$${d}"; \
 	  if [ -d $$dir ]; then \
 	    sed -i "s/@BIGGESTICON@/$$(basename $$dir)/;" debian/$(LINKS) ; \
