@@ -10,22 +10,19 @@ plugindir = source/$(NAME)_Data/Plugins
 
 ifeq ($(DATAPACKAGE), yes)
 	ICONPREFIX = usr/share/games/
-	ICONDEST = $(CURDIR)/debian/$(NAME)-data/usr/share
-	LINKS = $(NAME)-data.links
+	ICONPKG = $(NAME)-data
 else
 	ICONPREFIX = usr/lib/
-	ICONDEST = $(CURDIR)/debian/$(NAME)/usr/share
-	LINKS = $(NAME).links
+	ICONPKG = $(NAME)
 endif
+ICONDEST = $(CURDIR)/debian/$(ICONPKG)/usr/share
 
 
 %:
 	dh ${@}
 
 override_dh_auto_build:
-	rm -rf source/$(NAME).$(xCPU) \
-		source/$(NAME)_Data/Mono/$(xCPU) \
-		source/$(NAME)_Data/Plugins/$(xCPU)
+	rm -rf source/$(NAME).$(xCPU) source/$(NAME)_Data/Mono/$(xCPU) source/$(NAME)_Data/Plugins/$(xCPU)
 	[ -f source/$(NAME) ] || mv source/$(NAME).$(CPU) source/$(NAME)
 	find source -type f -exec chmod a-x '{}' \;
 	find source -name libmono.so -exec execstack -c '{}' \;
@@ -37,12 +34,12 @@ override_dh_auto_build:
 			source/steam_appid.txt source/SteamworksNative.dll
 
 override_dh_auto_install:
-	mkdir -p $(libdir) $(ICONDEST) $(CURDIR)/debian/$(NAME)/usr/games \
-		$(CURDIR)/debian/$(NAME)/usr/share/applications
+	mkdir -p $(libdir) $(ICONDEST) $(CURDIR)/debian/$(NAME)/usr/games
+	mkdir -p $(CURDIR)/debian/$(NAME)/usr/share/applications
 	debian/make-icons.sh $(ICON) $(ICONDEST)
 	cp -r source/* $(libdir)
 	install -m644 $(NAME).desktop $(CURDIR)/debian/$(NAME)/usr/share/applications
-	ln -s /usr/lib/$(NAME)/$(NAME) $(CURDIR)/debian/$(NAME)/usr/games/$(NAME)
+	dh_link -p$(NAME) usr/lib/$(NAME)/$(NAME) usr/games/$(NAME)
 
 ifeq ($(DATAPACKAGE), yes)
 	rm -rf $(libdir)$(NAME)_Data
@@ -51,19 +48,21 @@ ifeq ($(DATAPACKAGE), yes)
 	cp -r source/$(NAME)_Data/Mono $(libdir)$(NAME)_Data
 	cd $(datadir)$(NAME)_Data && rm -rf Mono Plugins
 	[ -d $(plugindir) ] && cp -r $(plugindir) $(libdir)$(NAME)_Data
-
-	# why does this not work if I add the code in here?
-	$(MAKE) -f debian/link.mk
+	for f in $$(ls $(datadir)$(NAME)_Data) ; do \
+  dh_link -p$(NAME) usr/share/games/$(NAME)/$(NAME)_Data/$$f usr/lib/$(NAME)/$(NAME)_Data/$$f ; \
+done
 endif
-	echo '/usr/share/icons/hicolor/@BIGGESTICON@/apps/$(NAME).png $(ICONPREFIX)$(NAME)/$(NAME)_Data/Resources/UnityPlayer.png' \
-		> $(CURDIR)/debian/$(LINKS)
+
+	# replace UnityPlayer.png with a symbolic link
 	for d in 512 256 128 96 64 48 32 24 22 16 ; do \
-	  dir="$(ICONDEST)/icons/hicolor/$${d}x$${d}"; \
-	  if [ -d $$dir ]; then \
-	    sed -i "s/@BIGGESTICON@/$$(basename $$dir)/;" debian/$(LINKS) ; \
-	    exit 0; \
-	  fi; \
-	done
+  dir="$(ICONDEST)/icons/hicolor/$${d}x$${d}"; \
+  if [ -d $$dir ] ; then \
+    biggesticon="$$(basename $$dir)"; \
+    dh_link -p$(ICONPKG) usr/share/icons/hicolor/$$biggesticon/apps/$(NAME).png \
+$(ICONPREFIX)$(NAME)/$(NAME)_Data/Resources/UnityPlayer.png; \
+    exit 0; \
+  fi; \
+done
 
 override_dh_makeshlibs:
 	# Unity engine games load their own libraries as plugins
@@ -75,11 +74,11 @@ ifneq ($(PATCHELF), )
 	rm -rf uselessdeps.log
 	(dh_shlibdeps -- --warnings=2 2>&1 | tee uselessdeps.log) > /dev/null
 	lines=$$(wc -l uselessdeps.log | cut -d' ' -f1); \
-	for n in $$(seq 1 $$lines) ; do \
-	  dep=$$(cut -d' ' -f15 uselessdeps.log | sed -n $${n}p); \
-	  bin=$$(cut -d' ' -f10 uselessdeps.log | sed -n $${n}p); \
-	  $(PATCHELF) --debug --remove-needed $$dep $$bin 2>&1 | grep -v -e 'keeping' ; \
-	done;
+for n in $$(seq 1 $$lines) ; do \
+  dep=$$(cut -d' ' -f15 uselessdeps.log | sed -n $${n}p); \
+  bin=$$(cut -d' ' -f10 uselessdeps.log | sed -n $${n}p); \
+  $(PATCHELF) --debug --remove-needed $$dep $$bin 2>&1 | grep -v -e 'keeping' ; \
+done;
 endif
 	dh_shlibdeps
 
