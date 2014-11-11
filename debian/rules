@@ -29,8 +29,5 @@ override_dh_install:
 	dh_install
 	install -m755 u2deb.sh $(CURDIR)/debian/u2deb/usr/bin/u2deb
 
-	# actually not necessary, but Lintian complains
-	cd $(CURDIR)/debian/u2deb/usr/share/u2deb && chmod a+x make-icons.sh rules
-
 override_dh_builddeb:
 	dh_builddeb -- -Zxz -z9

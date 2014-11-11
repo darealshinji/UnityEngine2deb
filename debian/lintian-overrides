@@ -1,0 +1,3 @@
+# the scripts aren't started from there
+u2deb binary: script-not-executable usr/share/u2deb/make-icons.sh
+u2deb binary: script-not-executable usr/share/u2deb/rules

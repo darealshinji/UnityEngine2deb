@@ -1,10 +1,10 @@
-u2deb (14.10.09.1~precise1) precise; urgency=low
+u2deb (14.10.09.1~trusty1) trusty; urgency=low
 
   * New version
 
  -- Marshall Banana <djcj@gmx.de>  Thu, 09 Oct 2014 00:27:55 +0200
 
-u2deb (14.09.14.1~precise2) precise; urgency=low
+u2deb (14.09.14.1~trusty2) trusty; urgency=low
 
   * Upload to PPA
 
