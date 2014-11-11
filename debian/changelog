@@ -1,3 +1,9 @@
+u2deb (14.10.09.1~trusty2) trusty; urgency=low
+
+  * Override Lintian warnings
+
+ -- Marshall Banana <djcj@gmx.de>  Tue, 11 Nov 2014 13:56:28 +0100
+
 u2deb (14.10.09.1~trusty1) trusty; urgency=low
 
   * New version
