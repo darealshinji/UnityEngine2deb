@@ -27,8 +27,13 @@ Create Debian packages of Unity Engine games
 
 Example:
 ```
-./u2deb.sh prepare -d -Z=bzip2 --icon=../icon.png "$HOME/.steam/steam/SteamApps/common/Floating Point"
-./u2deb.sh make -Z=xz
+wget http://superhotgame.com/SUPERHOT_Prototype_Linux.zip
+unzip SUPERHOT_Prototype_Linux.zip
+mv "Linux/SUPERHOT September 2013_Data" "Linux/SUPERHOT_Data"
+mv "Linux/SUPERHOT September 2013.x86" "Linux/SUPERHOT.x86"
+
+./u2deb.sh prepare ./Linux
+./u2deb.sh make -Z=bz2
 ./u2deb.sh clean
 ```
 
