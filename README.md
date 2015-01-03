@@ -27,12 +27,15 @@ Create Debian packages of Unity Engine games
 
 Example:
 ```
+# download a game
 wget http://superhotgame.com/SUPERHOT_Prototype_Linux.zip
+wget http://fs1.directupload.net/images/150103/8jk9r9gd.png
 unzip SUPERHOT_Prototype_Linux.zip
-mv "Linux/SUPERHOT September 2013_Data" "Linux/SUPERHOT_Data"
-mv "Linux/SUPERHOT September 2013.x86" "Linux/SUPERHOT.x86"
+mv "Linux/SUPERHOT September 2013_Data" "Linux/SUPERHOT_Prototype_Data"
+mv "Linux/SUPERHOT September 2013.x86" "Linux/SUPERHOT_Prototype.x86"
 
-./u2deb.sh prepare ./Linux
+# create package
+./u2deb.sh prepare ./Linux --icon=8jk9r9gd.png
 ./u2deb.sh make -Z=bz2
 ./u2deb.sh clean
 ```
