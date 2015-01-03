@@ -24,7 +24,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="14.10.09.1"
+appversion="14.12.29.1"
 
 appname=$(basename "$0")
 topsrc="$(pwd)"
