@@ -28,8 +28,9 @@ appversion="14.12.29.1"
 
 appname=$(basename "$0")
 topsrc="$(pwd)"
+icondir="$topsrc/build/icon"
 debian="$topsrc/build/x86/debian"
-cleanfiles="build icon source"
+cleanfiles="build source"
 
 if [ -d "$topsrc/templates" ] ; then
   templates="$topsrc/templates"
@@ -173,19 +174,19 @@ if [ $mode = "prepare" ] ; then
 
   # icon
   WITH_GPL_ICON="no"
-  mkdir "$topsrc/icon"
+  mkdir "$icondir"
   if [ -z "$ICON" ] || [ ! -f "$ICON" ] ; then
     if [ -f "$topsrc/source/${NAME}_Data/Resources/UnityPlayer.png" ] ; then
-      cp "$topsrc/source/${NAME}_Data/Resources/UnityPlayer.png" "$topsrc/icon/$NAME.png"
-      ICON="$topsrc/icon/$NAME.png"
+      cp "$topsrc/source/${NAME}_Data/Resources/UnityPlayer.png" "$icondir/$NAME.png"
+      ICON="$icondir/$NAME.png"
     else
-      cp "$templates/icon.svg" "$topsrc/icon/$NAME.svg"
-      ICON="$topsrc/icon/$NAME.svg"
+      cp "$templates/icon.svg" "$icondir/$NAME.svg"
+      ICON="$icondir/$NAME.svg"
       WITH_GPL_ICON="yes"
     fi
     else
-      cp "$ICON" "$topsrc/icon/$NAME.png"
-      ICON="$topsrc/icon/$NAME.png"
+      cp "$ICON" "$icondir/$NAME.png"
+      ICON="$icondir/$NAME.png"
   fi
 
   # enter packaging information
@@ -224,9 +225,12 @@ if [ $mode = "prepare" ] ; then
 
   # create Debian files
   mkdir -p "$debian"
-  cp -r "$templates/source" "$templates/compat" \
-	"$templates/link.mk" "$templates/lintian-overrides" \
-	"$templates/rules" "$templates/make-icons.sh" "$debian"
+  cp -r \
+  "$templates/source" \
+  "$templates/compat" \
+  "$templates/lintian-overrides" \
+  "$templates/rules" \
+  "$templates/make-icons.sh" "$debian"
   chmod a+x "$debian/rules" "$debian/make-icons.sh"
 
   cat >> "$topsrc/build/x86/${NAME}.desktop" << EOF
