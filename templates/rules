@@ -2,105 +2,143 @@
 
 include debian/confflags
 
-DEB_HOST_GNU_CPU = $(shell dpkg-architecture -qDEB_HOST_GNU_CPU)
+DEB_HOST_GNU_CPU ?= $(shell dpkg-architecture -qDEB_HOST_GNU_CPU)
 
-libdir = $(CURDIR)/debian/$(NAME)/usr/lib/$(NAME)/
-datadir = $(CURDIR)/debian/$(NAME)-data/usr/share/games/$(NAME)/
-plugindir = source/$(NAME)_Data/Plugins
-
+ICONPREFIX = usr/lib/
+ICONPKG    = $(NAME)
 ifeq ($(DATAPACKAGE), yes)
-	ICONPREFIX = usr/share/games/
-	ICONPKG = $(NAME)-data
-else
-	ICONPREFIX = usr/lib/
-	ICONPKG = $(NAME)
+ICONPREFIX = usr/share/games/
+ICONPKG    = $(NAME)-data
 endif
-ICONDEST = $(CURDIR)/debian/$(ICONPKG)/usr/share
+ICONDEST   = $(CURDIR)/debian/$(ICONPKG)/usr/share
+libdir     = $(CURDIR)/debian/$(NAME)/usr/lib/$(NAME)/
+datadir    = $(CURDIR)/debian/$(NAME)-data/usr/share/games/$(NAME)/
+plugindir  = source/$(NAME)_Data/Plugins
 
 
 %:
 	dh ${@}
 
+
 override_dh_auto_build:
-	rm -rf source/$(NAME).$(xCPU) source/$(NAME)_Data/Mono/$(xCPU) source/$(NAME)_Data/Plugins/$(xCPU)
+	rm -rf source/$(NAME)_Data/Mono/$(xCPU)
+	rm -rf source/$(NAME)_Data/Plugins/$(xCPU)
+	rm -f  source/$(NAME).$(xCPU)
+
+	# rename binary
 	[ -f source/$(NAME) ] || mv source/$(NAME).$(CPU) source/$(NAME)
+
+	# remove executable bits
 	find source -type f -exec chmod a-x '{}' \;
-	find source -name libmono.so -exec execstack -c '{}' \;
+
+	# make binary executable
 	chmod a+x source/$(NAME)
 
+	# remove executable stack
+	find source -name libmono.so -exec execstack -c '{}' \;
+
 	# delete this line if it breaks the game, but normally
-	# it should work without the Steam API things
-	rm -rf source/libsteam_api.so source/libSteamworksNative.so \
-			source/steam_appid.txt source/SteamworksNative.dll
+	# the game should work without the Steam API stuff
+	rm -f source/libsteam_api.so
+	rm -f source/libSteamworksNative.so
+	rm -f source/steam_appid.txt
+	rm -f source/SteamworksNative.dll
+
 
 override_dh_auto_install:
-	mkdir -p $(libdir) $(ICONDEST) $(CURDIR)/debian/$(NAME)/usr/games
+	mkdir -p $(libdir)
+	mkdir -p $(ICONDEST)
+	mkdir -p $(CURDIR)/debian/$(NAME)/usr/games
 	mkdir -p $(CURDIR)/debian/$(NAME)/usr/share/applications
+
+	# create icons
 	debian/make-icons.sh $(ICON) $(ICONDEST)
+
+	# install files
 	cp -r source/* $(libdir)
 	install -m644 $(NAME).desktop $(CURDIR)/debian/$(NAME)/usr/share/applications
 	dh_link -p$(NAME) usr/lib/$(NAME)/$(NAME) usr/games/$(NAME)
 
 ifeq ($(DATAPACKAGE), yes)
+	# remove data package files from /usr/lib
 	rm -rf $(libdir)$(NAME)_Data
-	mkdir -p $(datadir) $(libdir)$(NAME)_Data $(CURDIR)/debian/$(NAME)-data/usr/share
+
+	mkdir -p $(datadir)
+	mkdir -p $(libdir)$(NAME)_Data
+	mkdir -p $(CURDIR)/debian/$(NAME)-data/usr/share
+
+	# install data package files into /usr/share
 	cp -r source/$(NAME)_Data $(datadir)
 	cp -r source/$(NAME)_Data/Mono $(libdir)$(NAME)_Data
 	cd $(datadir)$(NAME)_Data && rm -rf Mono Plugins
 	[ -d $(plugindir) ] && cp -r $(plugindir) $(libdir)$(NAME)_Data
-	for f in $$(ls $(datadir)$(NAME)_Data) ; do \
-  dh_link -p$(NAME) usr/share/games/$(NAME)/$(NAME)_Data/$$f usr/lib/$(NAME)/$(NAME)_Data/$$f ; \
-done
+
+	# create symbolic links between /usr/share and /usr/lib
+	for f in $$(ls $(datadir)$(NAME)_Data) ; \
+	do \
+	    dh_link -p$(NAME) usr/share/games/$(NAME)/$(NAME)_Data/$$f usr/lib/$(NAME)/$(NAME)_Data/$$f ; \
+	done
 endif
 
 	# replace UnityPlayer.png with a symbolic link
-	for d in 512 256 128 96 64 48 32 24 22 16 ; do \
-  dir="$(ICONDEST)/icons/hicolor/$${d}x$${d}"; \
-  if [ -d $$dir ] ; then \
-    biggesticon="$$(basename $$dir)"; \
-    dh_link -p$(ICONPKG) usr/share/icons/hicolor/$$biggesticon/apps/$(NAME).png \
-$(ICONPREFIX)$(NAME)/$(NAME)_Data/Resources/UnityPlayer.png; \
-    exit 0; \
-  fi; \
-done
+	# to the biggest icon available
+	for d in 512 256 128 96 64 48 32 24 22 16 ;                                         \
+	do                                                                                  \
+	    dir="$(ICONDEST)/icons/hicolor/$${d}x$${d}" ;                                   \
+	    if [ -d $$dir ] ;                                                               \
+	    then                                                                            \
+	        biggesticon="$$(basename $$dir)" ;                                          \
+	        dh_link -p$(ICONPKG) usr/share/icons/hicolor/$$biggesticon/apps/$(NAME).png \
+	            $(ICONPREFIX)$(NAME)/$(NAME)_Data/Resources/UnityPlayer.png ;           \
+	        exit 0 ;                                                                    \
+	    fi ;                                                                            \
+	done
+
 
 override_dh_makeshlibs:
-	# Unity engine games load their own libraries as plugins
+	# Unity engine games don't provide any shared libraries
+
 
 override_dh_shlibdeps:
 ifneq ($(PATCHELF), )
 	# remove unnecessary dependencies that a binary was errerously linked against
 	# by deleting their DT_NEEDED entries from the ELF header
-	rm -rf uselessdeps.log
+
+	rm -f uselessdeps.log
 	(dh_shlibdeps -- --warnings=2 2>&1 | tee uselessdeps.log) > /dev/null
-	lines=$$(wc -l uselessdeps.log | cut -d' ' -f1); \
-for n in $$(seq 1 $$lines) ; do \
-  dep=$$(cut -d' ' -f15 uselessdeps.log | sed -n $${n}p); \
-  bin=$$(cut -d' ' -f10 uselessdeps.log | sed -n $${n}p); \
-  $(PATCHELF) --debug --remove-needed $$dep $$bin 2>&1 | grep -v -e 'keeping' ; \
-done;
+
+	lines=$$(wc -l uselessdeps.log | cut -d' ' -f1) ;                                 \
+	for n in $$(seq 1 $$lines) ;                                                      \
+	do                                                                                \
+	    dep=$$(cut -d' ' -f15 uselessdeps.log | sed -n $${n}p) ;                      \
+	    bin=$$(cut -d' ' -f10 uselessdeps.log | sed -n $${n}p) ;                      \
+	    $(PATCHELF) --debug --remove-needed $$dep $$bin 2>&1 | grep -v -e 'keeping' ; \
+	done ;
 endif
 	dh_shlibdeps
 
+
 override_dh_gencontrol:
 	dh_gencontrol
-	# prevents Lintian warning virtual-package-depends-without-real-package-depends
+
+	# prevents Lintian warning 'virtual-package-depends-without-real-package-depends'
 	sed -i 's/, libgl1,/, libgl1-mesa-glx | libgl1,/g' debian/$(NAME)/DEBIAN/control
 
-# fix architecture when packaging i386 (amd64 only)
+	# fix architecture when packaging i386 (amd64 only)
 ifeq ($(CPU), x86)
-ifeq ($(DEB_HOST_GNU_CPU), x86_64)
+	ifeq ($(DEB_HOST_GNU_CPU), x86_64)
 	sed -i 's/Architecture: amd64/Architecture: i386/g' debian/$(NAME)/DEBIAN/control
 	sed -i 's/lib32gcc1/libgcc1/; s/lib32stdc++6/libstdc++6/; s/libc6-i386/libc6/;' debian/$(NAME)/DEBIAN/control
-endif
+	endif
 endif
 
-# fix architecture when packaging amd64 (i386 only)
+	# fix architecture when packaging amd64 (i386 only)
 ifeq ($(CPU), x86_64)
-ifneq (, $(filter i386 i486 i586 i686 pentium,$(DEB_HOST_GNU_CPU)))
+	ifneq (, $(filter i386 i486 i586 i686 pentium,$(DEB_HOST_GNU_CPU)))
 	sed -i 's/Architecture: i386/Architecture: amd64/g' debian/$(NAME)/DEBIAN/control
+	endif
 endif
-endif
+
 
 override_dh_builddeb:
 	dh_builddeb -- -Z$(Z) -z9
