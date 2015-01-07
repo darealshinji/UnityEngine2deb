@@ -16,7 +16,7 @@ Create Debian packages of Unity Engine games
    -p, prepare <path>   copy files from <path> and prepare a Debian
                            source package
    -b, build, make      build binary packages
-   -c, clean            clean the working tree
+   -c, clean            delete the working tree
 
    -d, --data           build a separate package for architecture-
                            independent files

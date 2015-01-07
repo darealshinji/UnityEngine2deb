@@ -26,7 +26,7 @@ copy files from <path> and prepare a Debian source package
 build binary packages
 .TP
 \fB\-c, clean
-clean the working tree including built .deb packages
+delete the working tree
 .TP
 \fB\-d, \-\-data
 build a separate package for architecture-independent files
