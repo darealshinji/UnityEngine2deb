@@ -24,16 +24,18 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="14.12.29.1"
+appversion="15.01.07.1"
 
 appname=$(basename "$0")
-topsrc="$(pwd)"
-icondir="$topsrc/build/icon"
-debian="$topsrc/build/x86/debian"
-cleanfiles="build source"
+SCRIPTPATH="$(dirname "$(readlink -f "$0")")"
+topsrc="/tmp/UnityEngine2deb_tmp"
+builddir="$topsrc/build"
+sourcedir="$topsrc/source"
+icondir="$builddir/icon"
+debian="$builddir/x86/debian"
 
-if [ -d "$topsrc/templates" ] ; then
-  templates="$topsrc/templates"
+if [ -d "$SCRIPTPATH/templates" ] ; then
+  templates="$SCRIPTPATH/templates"
 elif [ -d "/usr/local/share/$appname" ] ; then
   templates="/usr/local/share/$appname"
 elif [ -d "/usr/share/$appname" ] ; then
@@ -68,7 +70,7 @@ cat << EOF
    -p, prepare <path>   copy files from <path> and prepare a Debian
                            source package
    -b, build, make      build binary packages
-   -c, clean            clean the working tree
+   -c, clean            delete the working tree
 
    -d, --data           build a separate package for architecture-
                            independent files
@@ -102,8 +104,8 @@ for opt; do
       mode="build"
       ;;
     "clean"|"-c")
-      rm -rf $cleanfiles description
-      echo "clean files in '$topsrc'"
+      rm -rvf "$topsrc"
+      [ ! -L "$PWD/UnityEngine2deb_working_directory" ] || rm -v "$PWD/UnityEngine2deb_working_directory"
       exit 0
       ;;
     "--data"|"-d")
@@ -151,22 +153,28 @@ if [ $mode = "prepare" ] ; then
   fi
   rm -rf $cleanfiles
 
+  # create working directory and symlink
+  [ ! -L "$PWD/UnityEngine2deb_working_directory" ] || rm "$PWD/UnityEngine2deb_working_directory"
+  rm -rf "$topsrc"
+  mkdir -p "$topsrc"
+  ln -s "$topsrc" "$PWD/UnityEngine2deb_working_directory"
+
   # copy source files
   echo "copy source files... "
-  mkdir "$topsrc/source"
-  cp -vr "$path"/* "$topsrc/source"
+  mkdir -p "$sourcedir"
+  cp -vr "$path"/* "$sourcedir"
   echo "done"
 
   # get the application name
-  UPSTREAMNAME=$(basename "$(find source -type d -name *_Data)" | head -c-6)
+  UPSTREAMNAME="$(basename "$(find "$sourcedir" -type d -name *_Data)" | head -c-6)"
   NAME=$(echo "$UPSTREAMNAME" | tr '[A-Z]' '[a-z]' | sed -e 's/\ //g; s/_//g')
-  [ "$UPSTREAMNAME" != "$NAME" ] && rename "s/$UPSTREAMNAME/$NAME/" source/*
+  [ "$UPSTREAMNAME" != "$NAME" ] && rename "s/$UPSTREAMNAME/$NAME/" "$sourcedir"/*
 
   # check for architectures
   X86="no"
   X86_64="no"
-  [ -f "$topsrc/source/$NAME".x86 ] && X86="yes"
-  [ -f "$topsrc/source/$NAME".x86_64 ] && X86_64="yes"
+  [ -f "$sourcedir/$NAME".x86 ] && X86="yes"
+  [ -f "$sourcedir/$NAME".x86_64 ] && X86_64="yes"
   if [ $X86 = "no" ] && [ $X86_64 = "no" ] ; then
     echo "neither $NAME.x86 nor $NAME.x86_64 found"
     exit 1
@@ -174,10 +182,10 @@ if [ $mode = "prepare" ] ; then
 
   # icon
   WITH_GPL_ICON="no"
-  mkdir "$icondir"
+  mkdir -p "$icondir"
   if [ -z "$ICON" ] || [ ! -f "$ICON" ] ; then
-    if [ -f "$topsrc/source/${NAME}_Data/Resources/UnityPlayer.png" ] ; then
-      cp "$topsrc/source/${NAME}_Data/Resources/UnityPlayer.png" "$icondir/$NAME.png"
+    if [ -f "$sourcedir/${NAME}_Data/Resources/UnityPlayer.png" ] ; then
+      cp "$sourcedir/${NAME}_Data/Resources/UnityPlayer.png" "$icondir/$NAME.png"
       ICON="$icondir/$NAME.png"
     else
       cp "$templates/icon.svg" "$icondir/$NAME.svg"
@@ -233,7 +241,7 @@ if [ $mode = "prepare" ] ; then
   "$templates/make-icons.sh" "$debian"
   chmod a+x "$debian/rules" "$debian/make-icons.sh"
 
-  cat >> "$topsrc/build/x86/${NAME}.desktop" << EOF
+  cat >> "$builddir/x86/${NAME}.desktop" << EOF
 [Desktop Entry]
 Name=$UPSTREAMNAME
 Comment=$SHORTDESCRIPTION
@@ -245,9 +253,9 @@ StartupNotify=true
 Icon=$NAME
 EOF
 
-  echo "debian/${NAME}.6" > "$topsrc/build/x86/debian/${NAME}.manpages"
+  echo "debian/${NAME}.6" > "$builddir/x86/debian/${NAME}.manpages"
 
-  cat >> "$topsrc/build/x86/debian/${NAME}.6" << EOF
+  cat >> "$builddir/x86/debian/${NAME}.6" << EOF
 .TH ${NAME^^} 6 "" "$(date +%d.%m.%Y)"
 .SH NAME
 $NAME \- $SHORTDESCRIPTION
@@ -257,8 +265,8 @@ $NAME \- $SHORTDESCRIPTION
 This game has no command line options.
 .SH DESCRIPTION
 EOF
-  cat "$topsrc/description" | fold -s >> "$topsrc/build/x86/debian/${NAME}.6"
-  cat >> "$topsrc/build/x86/debian/${NAME}.6" << EOF
+  cat "$topsrc/description" | fold -s >> "$builddir/x86/debian/${NAME}.6"
+  cat >> "$builddir/x86/debian/${NAME}.6" << EOF
 .SH SEE ALSO
 .I $HOMEPAGE
 .SH AUTHOR
@@ -322,14 +330,14 @@ $NAME ($VERSION) unstable; urgency=medium
 EOF
 
   if [ $X86_64 = "yes" ] ; then
-    mkdir -p "$topsrc/build/x86_64/debian"
-    cp -rf "$debian"/* "$topsrc/build/x86_64/debian"
-    cp -f "$topsrc/build/x86/${NAME}.desktop" "$topsrc/build/x86_64"
-    cat >> "$topsrc/build/x86_64/debian/confflags" << EOF
+    mkdir -p "$builddir/x86_64/debian"
+    cp -rf "$debian"/* "$builddir/x86_64/debian"
+    cp -f "$builddir/x86/${NAME}.desktop" "$builddir/x86_64"
+    cat >> "$builddir/x86_64/debian/confflags" << EOF
 NAME = $NAME
 ICON = "$ICON"
-CPU = x86_64
-xCPU = x86
+keep_CPU = x86_64
+purge_CPU = x86
 DATAPACKAGE = $DATAPACKAGE
 Z = $Z
 PATCHELF = $patchelf
@@ -338,28 +346,28 @@ EOF
   cat >> "$debian/confflags" << EOF
 NAME = $NAME
 ICON = "$ICON"
-CPU = x86
-xCPU = x86_64
+keep_CPU = x86
+purge_CPU = x86_64
 DATAPACKAGE = $DATAPACKAGE
 Z = $Z
 PATCHELF = $patchelf
 EOF
 
-  [ $X86 = "no" ] && rm -rf "$topsrc/build/x86"
-  [ $X86_64 = "no" ] && rm -rf "$topsrc/build/x86_64"
-  if [ -d "$topsrc/build/x86" ] ; then
+  [ $X86 = "no" ] && rm -rf "$builddir/x86"
+  [ $X86_64 = "no" ] && rm -rf "$builddir/x86_64"
+  if [ -d "$builddir/x86" ] ; then
     echo "copy files to build/x86... "
-    cp -vr source "$topsrc/build/x86"
+    cp -vr $sourcedir "$builddir/x86"
     echo "done"
   fi
-  if [ -d "$topsrc/build/x86_64" ] ; then
+  if [ -d "$builddir/x86_64" ] ; then
     echo "copy files to build/x86_64..."
-    cp -vr source "$topsrc/build/x86_64"
+    cp -vr $sourcedir "$builddir/x86_64"
     echo "done"
   fi
   echo ""
   echo "The files are prepared. Run '$appname build' to build Debian packages."
-  echo "Or modify the the files in build/* first"
+  echo "Or modify the the files in '$builddir' first."
 
   exit 0
 fi
@@ -373,25 +381,26 @@ if [ $mode = "build" ] ; then
     echo "Z = $Z" >> "$debian/confflags"
   fi
 
-  if [ ! -d "$topsrc/build/x86" ] && [ ! -d "$topsrc/build/x86_64" ] ; then
-    echo "no files in '$topsrc/build'!"
+  if [ ! -d "$builddir/x86" ] && [ ! -d "$builddir/x86_64" ] ; then
+    echo "no files in '$builddir'!"
     echo "run '$appname prepare <path>' first"
     exit 1
   fi
 
-  if [ -d "$topsrc/build/x86" ] ; then
-    cd "$topsrc/build/x86"
+  if [ -d "$builddir/x86" ] ; then
+    cd "$builddir/x86"
     chmod a+x debian/rules
-    dpkg-buildpackage -b -us -uc 2>&1 | tee "$topsrc/build/x86-build.log"
+    dpkg-buildpackage -b -us -uc 2>&1 | tee "$builddir/x86-build.log"
   fi
 
-  if [ -d "$topsrc/build/x86_64" ] ; then
-    cd "$topsrc/build/x86_64"
+  if [ -d "$builddir/x86_64" ] ; then
+    cd "$builddir/x86_64"
     chmod a+x debian/rules
-    dpkg-buildpackage -b -us -uc 2>&1 | tee "$topsrc/build/x86_64-build.log"
+    dpkg-buildpackage -b -us -uc 2>&1 | tee "$builddir/x86_64-build.log"
   fi
 
-  cd "$topsrc/build"
+  cd "$builddir"
+  echo ""
   ls *.deb >/dev/null
   if [ $(echo $?) = 0 ] ; then
     for f in *.deb ; do
@@ -399,13 +408,15 @@ if [ $mode = "build" ] ; then
       dpkg-deb -I $f
       lintian $f
       echo ""
-    done 2>&1 | tee "$topsrc/build/packages.log"
+    done 2>&1 | tee "$builddir/packages.log"
     for f in *.deb ; do
       echo "$f:"
       dpkg-deb -c $f
       echo ""
-    done 2>&1 | tee -a "$topsrc/build/packages.log"
+    done 2>&1 | tee -a "$builddir/packages.log"
   fi
+  cp -f *.deb "$HOME"
+  echo "Debian packages copied to '$HOME'"
 fi
 
 exit 0

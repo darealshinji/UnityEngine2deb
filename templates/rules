@@ -21,12 +21,12 @@ plugindir  = source/$(NAME)_Data/Plugins
 
 
 override_dh_auto_build:
-	rm -rf source/$(NAME)_Data/Mono/$(xCPU)
-	rm -rf source/$(NAME)_Data/Plugins/$(xCPU)
-	rm -f  source/$(NAME).$(xCPU)
+	rm -rf source/$(NAME)_Data/Mono/$(purge_CPU)
+	rm -rf source/$(NAME)_Data/Plugins/$(purge_CPU)
+	rm -f  source/$(NAME).$(purge_CPU)
 
 	# rename binary
-	[ -f source/$(NAME) ] || mv source/$(NAME).$(CPU) source/$(NAME)
+	[ -f source/$(NAME) ] || mv source/$(NAME).$(keep_CPU) source/$(NAME)
 
 	# remove executable bits
 	find source -type f -exec chmod a-x '{}' \;
@@ -124,19 +124,19 @@ override_dh_gencontrol:
 	# prevents Lintian warning 'virtual-package-depends-without-real-package-depends'
 	sed -i 's/, libgl1,/, libgl1-mesa-glx | libgl1,/g' debian/$(NAME)/DEBIAN/control
 
-	# fix architecture when packaging i386 (amd64 only)
-ifeq ($(CPU), x86)
-	ifeq ($(DEB_HOST_GNU_CPU), x86_64)
+# fix architecture when packaging i386 (amd64 only)
+ifeq ($(keep_CPU), x86)
+ifeq ($(DEB_HOST_GNU_CPU), x86_64)
 	sed -i 's/Architecture: amd64/Architecture: i386/g' debian/$(NAME)/DEBIAN/control
 	sed -i 's/lib32gcc1/libgcc1/; s/lib32stdc++6/libstdc++6/; s/libc6-i386/libc6/;' debian/$(NAME)/DEBIAN/control
-	endif
+endif
 endif
 
-	# fix architecture when packaging amd64 (i386 only)
-ifeq ($(CPU), x86_64)
-	ifneq (, $(filter i386 i486 i586 i686 pentium,$(DEB_HOST_GNU_CPU)))
+# fix architecture when packaging amd64 (i386 only)
+ifeq ($(keep_CPU), x86_64)
+ifneq (, $(filter i386 i486 i586 i686 pentium,$(DEB_HOST_GNU_CPU)))
 	sed -i 's/Architecture: i386/Architecture: amd64/g' debian/$(NAME)/DEBIAN/control
-	endif
+endif
 endif
 
 
