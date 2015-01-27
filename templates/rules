@@ -71,7 +71,7 @@ ifeq ($(DATAPACKAGE), yes)
 	cp -r source/$(NAME)_Data $(datadir)
 	cp -r source/$(NAME)_Data/Mono $(libdir)$(NAME)_Data
 	cd $(datadir)$(NAME)_Data && rm -rf Mono Plugins
-	[ -d $(plugindir) ] && cp -r $(plugindir) $(libdir)$(NAME)_Data
+	[ ! -d $(plugindir) ] || cp -r $(plugindir) $(libdir)$(NAME)_Data
 
 	# create symbolic links between /usr/share and /usr/lib
 	for f in $$(ls $(datadir)$(NAME)_Data) ; \
