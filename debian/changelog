@@ -1,3 +1,12 @@
+u2deb (15.01.27.1~trusty) trusty; urgency=low
+
+  * New version
+  * Implement a non-interactive way to enter packaging information
+    via the shell's export function
+  * Fix templates/rules to not fail if the game has no plugin directory
+
+ -- Marshall Banana <djcj@gmx.de>  Tue, 27 Jan 2015 08:26:59 +0100
+
 u2deb (15.01.07.1~trusty) trusty; urgency=low
 
   * New version
