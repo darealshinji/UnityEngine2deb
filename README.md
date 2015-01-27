@@ -18,6 +18,9 @@ Create Debian packages of Unity Engine games
    -b, build, make      build binary packages
    -c, clean            delete the working tree
 
+   -o=<path>,
+   --output=<path>      save Debian packages in <path>
+
    -d, --data           build a separate package for architecture-
                            independent files
    -Z=<method>          Specify compression method. Available are

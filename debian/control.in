@@ -20,6 +20,7 @@ Depends:
    libglu1-mesa,@GLU1_I386@
    libgtk2.0-0,@GTK2_I386@
    librsvg2-bin,
+   lintian,
    patchelfmod | patchelf@U2DEB_I386@
 Description: create Debian packages of Unity Engine games
  Games that were built on the Unity engine became quite popular these days.

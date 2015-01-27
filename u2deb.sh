@@ -74,6 +74,9 @@ cat << EOF
    -b, build, make      build binary packages
    -c, clean            delete the working tree
 
+   -o=<path>,
+   --output=<path>      save Debian packages in <path>
+
    -d, --data           build a separate package for architecture-
                            independent files
    -Z=<method>          Specify compression method. Available are
@@ -96,6 +99,7 @@ fi
 DATAPACKAGE="no"
 ICON=""
 mode="empty"
+OUTPUT="$HOME"
 for opt; do
   optarg="${opt#*=}"
   case "$opt" in
@@ -109,6 +113,9 @@ for opt; do
       rm -rvf "$topsrc"
       [ ! -L "$PWD/UnityEngine2deb_working_directory" ] || rm -v "$PWD/UnityEngine2deb_working_directory"
       exit 0
+      ;;
+    --output=*|-o=*)
+      OUTPUT="$optarg"
       ;;
     "--data"|"-d")
       DATAPACKAGE="yes"
@@ -319,7 +326,7 @@ Homepage: $HOMEPAGE
 
 Package: $NAME
 Architecture: any
-Depends: \${misc:Depends}, \${shlibs:Depends}$DATADEPENDS
+Depends: \${misc:Depends}, \${shlibs:Depends}, libpulse0$DATADEPENDS
 Description: $SHORTDESCRIPTION
 EOF
   cat "$topsrc/description" | fold -s | sed -e 's/^ *//g' -e 's/^$/./g' -e 's/^ */ /g' >> "$debian/control"
@@ -432,8 +439,8 @@ if [ $mode = "build" ] ; then
       echo ""
     done 2>&1 | tee -a "$builddir/packages.log"
   fi
-  cp -f *.deb "$HOME"
-  echo "Debian packages copied to '$HOME'"
+  cp -f *.deb "$OUTPUT"
+  echo "Debian packages copied to '$OUTPUT'"
 fi
 
 exit 0

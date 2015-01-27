@@ -1,3 +1,12 @@
+u2deb (15.01.27.2~trusty) trusty; urgency=low
+
+  * Implement --output/-o command line options
+  * Override Lintian warnings about ScreenSelector.png in inside /usr/lib
+  * Add Lintian to dependencies
+  * Make Debian packages depend on libpulse0
+
+ -- Marshall Banana <djcj@gmx.de>  Tue, 27 Jan 2015 11:23:45 +0100
+
 u2deb (15.01.27.1~trusty) trusty; urgency=low
 
   * New version
