@@ -1,6 +1,8 @@
 #!/bin/bash
 
-# Copyright (c) 2014, djcj <djcj@gmx.de>
+set -e
+
+# Copyright (c) 2014-2015, djcj <djcj@gmx.de>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="15.01.07.1"
+appversion="15.01.27.1"
 
 appname=$(basename "$0")
 SCRIPTPATH="$(dirname "$(readlink -f "$0")")"
@@ -198,10 +200,14 @@ if [ $mode = "prepare" ] ; then
   fi
 
   # enter packaging information
-  echo ""
-  echo "Please enter a brief description,"
-  read -p "i.e. 'Unity engine video game': " SHORTDESCRIPTION
-  if [ ! -f "$topsrc/description" ] ; then
+  if [ -z "$SHORTDESCRIPTION" ] ; then
+    echo ""
+    echo "Please enter a brief description,"
+    read -p "i.e. 'Unity engine video game': " SHORTDESCRIPTION
+  fi
+  if [ -f "$PWD/description" ] ; then
+    cp "$PWD/description" "$topsrc"
+  else
     cp "$templates/description" "$topsrc"
     echo ""
     echo "Please add a more detailed description about the game in the text file"
@@ -209,19 +215,30 @@ if [ $mode = "prepare" ] ; then
     echo "and press any key to continue."
     read -p "" -n1 -s
   fi
-  echo ""
-  echo "Enter the game's release version. It should begin with a number"
-  read -p "and mustn't contain and spaces or underscores: " VERSION
-  echo ""
-  echo "Enter the package maintainer information."
-  echo "Use the following pattern: John Doe <nick@domain.org>"
-  read -p " " MAINTAINER
-  echo ""
-  read -p "What's the game's homepage? " HOMEPAGE
-  echo ""
-  read -p "What year is this game from? " YEAR
-  echo ""
-  read -p "Who's holding the copyright? " RIGHTHOLDER
+  echo "" >> "$topsrc/description"  # add a new line to the end of the file
+  if [ -z "$VERSION" ] ; then
+    echo ""
+    echo "Enter the game's release version. It should begin with a number"
+    read -p "and mustn't contain and spaces or underscores: " VERSION
+  fi
+  if [ -z "$MAINTAINER" ] ; then
+    echo ""
+    echo "Enter the package maintainer information."
+    echo "Use the following pattern: John Doe <nick@domain.org>"
+    read -p " " MAINTAINER
+  fi
+  if [ -z "$HOMEPAGE" ] ; then
+    echo ""
+    read -p "What's the game's homepage? " HOMEPAGE
+  fi
+  if [ -z "$YEAR" ] ; then
+    echo ""
+    read -p "What year is this game from? " YEAR
+  fi
+  if [ -z "$RIGHTHOLDER" ] ; then
+    echo ""
+    read -p "Who's holding the copyright? " RIGHTHOLDER
+  fi
   echo ""
   echo ""
   [ -z "$SHORTDESCRIPTION" ] && SHORTDESCRIPTION="Unity engine video game"
