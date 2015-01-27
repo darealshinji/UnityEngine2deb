@@ -141,5 +141,5 @@ endif
 
 
 override_dh_builddeb:
-	dh_builddeb -- -Z$(Z) -z9
+	dh_builddeb $(arch_only) -- -Z$(Z) -z9
 

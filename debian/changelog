@@ -1,3 +1,9 @@
+u2deb (15.01.27.3~trusty) trusty; urgency=low
+
+  * Don't build arch-independend *-data packages twice
+
+ -- Marshall Banana <djcj@gmx.de>  Tue, 27 Jan 2015 17:30:40 +0100
+
 u2deb (15.01.27.2~trusty) trusty; urgency=low
 
   * Implement --output/-o command line options

@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="15.01.27.1"
+appversion="15.01.27.3"
 
 appname=$(basename "$0")
 SCRIPTPATH="$(dirname "$(readlink -f "$0")")"
@@ -388,6 +388,9 @@ EOF
     echo "copy files to build/x86_64..."
     cp -vr $sourcedir "$builddir/x86_64"
     echo "done"
+  fi
+  if [ -d "$builddir/x86" ] && [ -d "$builddir/x86_64" ] ; then
+    echo "arch_only = --arch" >> "$builddir/x86_64/debian/confflags"
   fi
   echo ""
   echo "The files are prepared. Run '$appname build' to build Debian packages."
