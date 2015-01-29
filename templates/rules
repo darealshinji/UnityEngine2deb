@@ -46,6 +46,8 @@ override_dh_auto_build:
 	rm -f source/libSteamworksNative.so
 	rm -f source/steam_appid.txt
 	rm -f source/SteamworksNative.dll
+	find source -name libCSteamworks.so -delete
+	find source -name libsteam_api.so -delete
 
 
 override_dh_auto_install:
