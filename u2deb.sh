@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="15.01.27.3"
+appversion="15.01.29.1"
 
 appname=$(basename "$0")
 SCRIPTPATH="$(dirname "$(readlink -f "$0")")"
