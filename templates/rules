@@ -37,17 +37,10 @@ override_dh_auto_build:
 	# remove executable stack
 	find source -name libmono.so -exec execstack -c '{}' \;
 
-	# remove UnityEngine debug data
-	find source -name UnityEngine.dll.mdb -delete
-
-	# delete these lines if it breaks the game, but normally
-	# the game should work without the Steam API stuff
-	rm -f source/libsteam_api.so
-	rm -f source/libSteamworksNative.so
-	rm -f source/steam_appid.txt
-	rm -f source/SteamworksNative.dll
-	find source -name libCSteamworks.so -delete
-	find source -name libsteam_api.so -delete
+	# delete unnecessary files
+	$(foreach LIB, libCSteamworks.so libsteam_api.so libSteamworksNative.so SteamworksNative.dll UnityEngine.dll.mdb,\
+	  find source -name $(LIB) -delete ;)
+	rm -f source/*.txt
 
 
 override_dh_auto_install:
