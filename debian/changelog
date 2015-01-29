@@ -1,3 +1,9 @@
+u2deb (15.01.29.1~trusty) trusty; urgency=low
+
+  * Automatically delete UnityEngine debug data
+
+ -- Marshall Banana <djcj@gmx.de>  Thu, 29 Jan 2015 13:49:27 +0100
+
 u2deb (15.01.27.3~trusty) trusty; urgency=low
 
   * Don't build arch-independend *-data packages twice
