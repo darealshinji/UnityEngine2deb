@@ -28,20 +28,8 @@ override_dh_auto_build:
 	# rename binary
 	[ -f source/$(NAME) ] || mv source/$(NAME).$(keep_CPU) source/$(NAME)
 
-	# remove executable bits
-	find source -type f -exec chmod a-x '{}' \;
-
 	# make binary executable
 	chmod a+x source/$(NAME)
-
-	# remove executable stack
-	find source -name libmono.so -exec execstack -c '{}' \;
-
-	# delete unnecessary files
-	$(foreach LIB, libCSteamworks.so libsteam_api.so libSteamworksNative.so SteamworksNative.dll UnityEngine.dll.mdb Thumbs.db,\
-	  find source -name $(LIB) -delete ;)
-	rm -f source/*.txt
-
 
 override_dh_auto_install:
 	mkdir -p $(libdir)
@@ -98,7 +86,7 @@ override_dh_makeshlibs:
 
 
 override_dh_shlibdeps:
-ifneq ($(PATCHELF), )
+ifeq ($(PATCHELF),yes)
 	# remove unnecessary dependencies that a binary was errerously linked against
 	# by deleting their DT_NEEDED entries from the ELF header
 
@@ -110,7 +98,7 @@ ifneq ($(PATCHELF), )
 	do                                                                                \
 	    dep=$$(cut -d' ' -f15 uselessdeps.log | sed -n $${n}p) ;                      \
 	    bin=$$(cut -d' ' -f10 uselessdeps.log | sed -n $${n}p) ;                      \
-	    $(PATCHELF) --debug --remove-needed $$dep $$bin 2>&1 | grep -v -e 'keeping' ; \
+	    patchelfmod --debug --remove-needed $$dep $$bin 2>&1 | grep -v -e 'keeping' ; \
 	done ;
 endif
 	dh_shlibdeps

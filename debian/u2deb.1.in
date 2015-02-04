@@ -11,6 +11,11 @@ u2deb \- create Debian packages of Unity Engine games
 .br
 .B u2deb \fR\-c|clean
 
+.SH DESCRIPTION
+Games that were built on the Unity engine became quite popular these days.
+Those games can be built to run natively on GNU/Linux systems.
+This Bash script helps you to almost automatically create Debian packages of such games.
+
 .SH OPTIONS
 .TP
 \fB\-h, \-\-help
@@ -38,11 +43,32 @@ Default: xz
 \fB\-\-icon=\fR<icon>
 use this icon for the desktop entry
 
-.SH DESCRIPTION
-Games that were built on the Unity engine became quite popular these days.
-Those games can be built to run natively on GNU/Linux systems.
-
-This Bash script helps you to almost automatically create proper Debian packages of such games.
+.SH "Environment variables"
+.TP
+\fBUPSTREAMNAME
+the original name of the game, including special chars or spaces
+.TP
+\fBFILENAME
+specify a name for the executable and the package
+.TP
+\fBSHORTDESCRIPTION
+a brief game description for the package and menu entry
+.TP
+\fBVERSION
+the game's upstream version
+.TP
+\fBMAINTAINER
+The package maintainer.
+Make sure to use the following pattern: John Doe <nick@domain.org>
+.TP
+\fBHOMEPAGE
+homepage of the game or the developer
+.TP
+\fBYEAR
+the year when the game was released
+.TP
+\fBRIGHTHOLDER
+Who's holding the copyright?
 
 .SH SEE ALSO
 .I https://github.com/darealshinji/UnityEngine2deb

@@ -26,6 +26,18 @@ Create Debian packages of Unity Engine games
    -Z=<method>          Specify compression method. Available are
                            gzip/gz, bzip2/bz2 and xz.  Default: xz
    --icon=<icon>        use this icon for the desktop entry
+
+ Environment variables:
+   UPSTREAMNAME         the original name of the game, including special chars
+                           or spaces
+   FILENAME             specify a name for the executable and the package
+   SHORTDESCRIPTION     a brief game description for the package and menu entry
+   VERSION              the game's upstream version
+   MAINTAINER           The package maintainer. Make sure to use the following
+                           pattern: John Doe <nick@domain.org>
+   HOMEPAGE             homepage of the game or the developer
+   YEAR                 the year when the game was released
+   RIGHTHOLDER          Who's holding the copyright?
 ```
 
 Example:

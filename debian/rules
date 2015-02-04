@@ -26,12 +26,10 @@ endif
 	dh_auto_clean
 	rm -f debian/u2deb.1
 
-override_dh_auto_configure:
+override_dh_auto_build:
 	sed -e 's/@VERSION@/$(VERSION)/;' debian/u2deb.1.in > debian/u2deb.1
 
 override_dh_install:
 	dh_install
 	install -m755 u2deb.sh $(CURDIR)/debian/u2deb/usr/bin/u2deb
 
-override_dh_builddeb:
-	dh_builddeb -- -Zxz -z9

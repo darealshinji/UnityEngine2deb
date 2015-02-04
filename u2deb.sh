@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="15.01.29.1"
+appversion="15.02.04.1"
 
 appname=$(basename "$0")
 SCRIPTPATH="$(dirname "$(readlink -f "$0")")"
@@ -47,11 +47,7 @@ else
   exit 1
 fi
 
-if [ ! -z $(which patchelfmod) ] ; then
-  patchelf=$(which patchelfmod)
-else
-  patchelf=$(which patchelf)
-fi
+[ -z $(which patchelfmod) ] && patchelf=no || patchelf=yes
 
 
 help() {
@@ -65,7 +61,7 @@ cat << EOF
    $appname -b|build|make [-Z=<method>]
    $appname -c|clean
 
- options:
+ Options:
    -h, --help           print this message
    -V, --version        display version info and quit
 
@@ -82,6 +78,18 @@ cat << EOF
    -Z=<method>          Specify compression method. Available are
                            gzip/gz, bzip2/bz2 and xz.  Default: xz
    --icon=<icon>        use this icon for the desktop entry
+
+ Environment variables:
+   UPSTREAMNAME         the original name of the game, including special chars
+                           or spaces
+   FILENAME             specify a name for the executable and the package
+   SHORTDESCRIPTION     a brief game description for the package and menu entry
+   VERSION              the game's upstream version
+   MAINTAINER           The package maintainer. Make sure to use the following
+                           pattern: John Doe <nick@domain.org>
+   HOMEPAGE             homepage of the game or the developer
+   YEAR                 the year when the game was released
+   RIGHTHOLDER          Who's holding the copyright?
 
 EOF
 }
@@ -174,10 +182,26 @@ if [ $mode = "prepare" ] ; then
   cp -vr "$path"/* "$sourcedir"
   echo "done"
 
+  # remove executable bits
+  find "$sourcedir" -type f -exec chmod a-x '{}' \;
+
+  # remove executable stack
+  find "$sourcedir" -name libmono.so -exec execstack -c '{}' \;
+
+  # delete unnecessary files
+  for f in libCSteamworks.so libsteam_api.so libSteamworksNative.so SteamworksNative.dll \
+           UnityEngine.dll.mdb Thumbs.db .DS_Store ;
+  do
+    find "$sourcedir" -name $f -delete
+  done
+  rm -f "$sourcedir"/*.txt
+
   # get the application name
-  UPSTREAMNAME="$(basename "$(find "$sourcedir" -type d -name *_Data)" | head -c-6)"
-  NAME=$(echo "$UPSTREAMNAME" | tr '[A-Z]' '[a-z]' | sed -e 's/\ //g; s/_//g')
-  [ "$UPSTREAMNAME" != "$NAME" ] && rename "s/$UPSTREAMNAME/$NAME/" "$sourcedir"/*
+  FILENAME_REAL="$(basename "$(find "$sourcedir" -type d -name *_Data)" | head -c-6)"
+  [ -z "$FILENAME" ] && NAME="$FILENAME_REAL" || NAME="$FILENAME"
+  NAME=$(echo "$NAME" | tr '[A-Z]' '[a-z]' | sed -e 's/\ /-/g; s/_/-/g')
+  [ "$FILENAME_REAL" != "$NAME" ] && rename "s/$FILENAME_REAL/$NAME/" "$sourcedir"/*
+  [ -z "$UPSTREAMNAME" ] && UPSTREAMNAME="$NAME"
 
   # check for architectures
   X86="no"
@@ -304,7 +328,7 @@ Source: $HOMEPAGE
 
 Files: *
 Copyright: $YEAR $RIGHTHOLDER
-License: other-1
+License:
  Copyright (c) $YEAR, $RIGHTHOLDER
  All Rights Reserved.
 
@@ -312,9 +336,7 @@ EOF
   cat "$templates/debian-copyright" >> "$debian/copyright"
   [ $WITH_GPL_ICON = "yes" ] && (cat "$templates/icon-copyright" >> "$debian/copyright")
 
-  if [ $DATAPACKAGE = "yes" ] ; then
-    DATADEPENDS=", ${NAME}-data (= \${binary:Version})"
-  fi
+  [ $DATAPACKAGE = "yes" ] && DATADEPENDS=", ${NAME}-data (= \${binary:Version})"
   cat >> "$debian/control" << EOF
 Source: $NAME
 Section: games

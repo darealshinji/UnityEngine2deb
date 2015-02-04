@@ -1,3 +1,16 @@
+u2deb (15.02.04.1~trusty) trusty; urgency=low
+
+  * Delete .DS_Store and Thumbs.db files
+  * Use PatchELFmod only
+  * Add UPSTREAMNAME and FILENAME to environment variables
+  * Move the following actions from debian/rules to the shell script:
+    * remove executable bits
+    * remove executable stack
+    * delete unnecessary files
+  * Remove Lintian overrides
+
+ -- Marshall Banana <djcj@gmx.de>  Wed, 04 Feb 2015 16:00:34 +0100
+
 u2deb (15.01.29.1~trusty) trusty; urgency=low
 
   * Automatically delete UnityEngine debug data
