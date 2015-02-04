@@ -38,7 +38,7 @@ override_dh_auto_build:
 	find source -name libmono.so -exec execstack -c '{}' \;
 
 	# delete unnecessary files
-	$(foreach LIB, libCSteamworks.so libsteam_api.so libSteamworksNative.so SteamworksNative.dll UnityEngine.dll.mdb,\
+	$(foreach LIB, libCSteamworks.so libsteam_api.so libSteamworksNative.so SteamworksNative.dll UnityEngine.dll.mdb Thumbs.db,\
 	  find source -name $(LIB) -delete ;)
 	rm -f source/*.txt
 
