@@ -1,6 +1,7 @@
 u2deb (15.02.04.1~trusty) trusty; urgency=low
 
   * Delete .DS_Store and Thumbs.db files
+  * Delete __MACOSX directories
   * Use PatchELFmod only
   * Add UPSTREAMNAME and FILENAME to environment variables
   * Move the following actions from debian/rules to the shell script:

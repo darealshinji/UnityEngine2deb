@@ -195,13 +195,19 @@ if [ $mode = "prepare" ] ; then
     find "$sourcedir" -name $f -delete
   done
   rm -f "$sourcedir"/*.txt
+  rm -rf `find "$sourcedir" -type d -name __MACOSX`
 
   # get the application name
   FILENAME_REAL="$(basename "$(find "$sourcedir" -type d -name *_Data)" | head -c-6)"
-  [ -z "$FILENAME" ] && NAME="$FILENAME_REAL" || NAME="$FILENAME"
-  NAME=$(echo "$NAME" | tr '[A-Z]' '[a-z]' | sed -e 's/\ /-/g; s/_/-/g')
+  if [ -z "$FILENAME" ] ; then
+    NAME="$FILENAME_REAL"
+    FILENAME="$FILENAME_REAL"
+  else
+    NAME="$FILENAME"
+  fi
+  NAME=$(echo "$NAME" | tr '[A-Z]' '[a-z]' | sed -e 's/\ -\ /-/g; s/\ /-/g; s/_/-/g')
   [ "$FILENAME_REAL" != "$NAME" ] && rename "s/$FILENAME_REAL/$NAME/" "$sourcedir"/*
-  [ -z "$UPSTREAMNAME" ] && UPSTREAMNAME="$NAME"
+  [ -z "$UPSTREAMNAME" ] && UPSTREAMNAME="$FILENAME"
 
   # check for architectures
   X86="no"
