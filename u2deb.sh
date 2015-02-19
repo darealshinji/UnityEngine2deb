@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="15.02.04.1"
+appversion="15.02.19.1"
 
 appname=$(basename "$0")
 SCRIPTPATH="$(dirname "$(readlink -f "$0")")"
@@ -357,7 +357,7 @@ Architecture: any
 Depends: \${misc:Depends}, \${shlibs:Depends}, libpulse0$DATADEPENDS
 Description: $SHORTDESCRIPTION
 EOF
-  cat "$topsrc/description" | fold -s | sed -e 's/^ *//g' -e 's/^$/./g' -e 's/^ */ /g' >> "$debian/control"
+  cat "$topsrc/description" | fold -s -w 78 | sed 's/^/ /g; s/^ $/ ./g; s/ $//g' >> "$debian/control"
 
   if [ $DATAPACKAGE = "yes" ] ; then
     cat >> "$debian/control" << EOF
@@ -368,7 +368,7 @@ Depends: \${misc:Depends}
 Recommends: $NAME
 Description: $SHORTDESCRIPTION - game data
 EOF
-    cat "$topsrc/description" | fold -s | sed -e 's/^ *//g' -e 's/^$/./g' -e 's/^ */ /g' >> "$debian/control"
+    cat "$topsrc/description" | fold -s -w 78 | sed 's/^/ /g; s/^ $/ ./g; s/ $//g' >> "$debian/control"
     echo " ." >> "$debian/control"
     echo " This package installs the $NAME game data." >> "$debian/control"
   fi
