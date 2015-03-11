@@ -71,6 +71,8 @@ cat << EOF
    -Z=<method>          Specify compression method. Available are
                            gzip/gz, bzip2/bz2 and xz.  Default: xz
    --icon=<icon>        use this icon for the desktop entry
+   --no-x86             don't build an i386 package
+   --no-x86_64          don't build an amd64 package
 
  Environment variables:
    UPSTREAMNAME         the original name of the game, including special chars
@@ -113,6 +115,8 @@ DATAPACKAGE="no"
 ICON=""
 mode="empty"
 OUTPUT="$HOME"
+DISABLE_X86="no"
+DISABLE_X86_64="no"
 for opt; do
   optarg="${opt#*=}"
   case "$opt" in
@@ -139,6 +143,12 @@ for opt; do
     --icon=*)
       ICON="$optarg"
       ;;
+    "--no-x86")
+      DISABLE_X86="yes"
+      ;;
+    "--no-x86_64")
+      DISABLE_X86_64="yes"
+      ;;
     "help"|"-h"|"--version"|"-V")
       ;;
     *)
@@ -146,6 +156,10 @@ for opt; do
       ;;
   esac
 done
+
+if [ $DISABLE_X86 = "yes" ] && [ $DISABLE_X86_64 = "yes" ] ; then
+  errorExit "you can't use \`--no-x86' together with \`--no-x86_64'"
+fi
 
 if [ $mode = "empty" ] ; then
   help
@@ -205,6 +219,11 @@ if [ $mode = "prepare" ] ; then
     else
       errorExit "couldn't find '$FILENAME_REAL' either"
     fi
+  fi
+  if [ $DISABLE_X86 = "yes" ] && [ $X86_64 = "no" ] ; then
+    errorExit "x86 disabled but no x86_64 binary found"
+  elif [ $DISABLE_X86_64 = "yes" ] && [ $X86 = "no" ] ; then
+    errorExit "x86_64 disabled but no x86 binary found"
   fi
 
   # create working directory and symlink
@@ -434,8 +453,8 @@ Z = $Z
 PATCHELF = $patchelf
 EOF
 
-  [ $X86 = "no" ] && rm -rf "$builddir/x86"
-  [ $X86_64 = "no" ] && rm -rf "$builddir/x86_64"
+  [ $DISABLE_X86 = "yes" ] && rm -rf "$builddir/x86"
+  [ $DISABLE_X86_64 = "yes" ] && rm -rf "$builddir/x86_64"
   if [ -d "$builddir/x86" ] ; then
     echo "copy files to build/x86... "
     cp -vr $sourcedir "$builddir/x86"

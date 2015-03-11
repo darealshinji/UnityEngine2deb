@@ -26,6 +26,8 @@ Create Debian packages of Unity Engine games
    -Z=<method>          Specify compression method. Available are
                            gzip/gz, bzip2/bz2 and xz.  Default: xz
    --icon=<icon>        use this icon for the desktop entry
+   --no-x86             don't build an i386 package
+   --no-x86_64          don't build an amd64 package
 
  Environment variables:
    UPSTREAMNAME         the original name of the game, including special chars
@@ -44,13 +46,12 @@ Example:
 ```
 # download a game
 wget http://superhotgame.com/SUPERHOT_Prototype_Linux.zip
-wget http://fs1.directupload.net/images/150103/8jk9r9gd.png
+wget -O sh-icon.png http://fs1.directupload.net/images/150103/8jk9r9gd.png
 unzip SUPERHOT_Prototype_Linux.zip
-mv "Linux/SUPERHOT September 2013_Data" "Linux/SUPERHOT_Prototype_Data"
-mv "Linux/SUPERHOT September 2013.x86" "Linux/SUPERHOT_Prototype.x86"
 
 # create package
-./u2deb.sh prepare ./Linux --icon=8jk9r9gd.png
+export UPSTREAMNAME="SUPERHOT Prototype"
+./u2deb.sh prepare ./Linux --icon=sh-icon.png
 ./u2deb.sh make -Z=bz2
 ./u2deb.sh clean
 ```

@@ -42,6 +42,12 @@ Default: xz
 .TP
 \fB\-\-icon=\fR<icon>
 use this icon for the desktop entry
+.TP
+\fB\-\-no\-x86
+don't build an i386 package
+.TP
+\fB\-\-no\-x86_64
+don't build an amd64 package
 
 .SH "Environment variables"
 .TP
