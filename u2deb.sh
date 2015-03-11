@@ -172,6 +172,25 @@ if [ $mode = "prepare" ] ; then
   fi
   rm -rf $cleanfiles
 
+  # get the application name
+  FILENAME_REAL="$(basename "$(find "$path" -type d -name *_Data)" | head -c-6)"
+  if [ -z "$FILENAME" ] ; then
+    NAME="$FILENAME_REAL"
+    FILENAME="$FILENAME_REAL"
+  else
+    NAME="$FILENAME"
+  fi
+
+  # check for architectures
+  X86="no"
+  X86_64="no"
+  [ -f "$path/$NAME".x86 ] && X86="yes"
+  [ -f "$path/$NAME".x86_64 ] && X86_64="yes"
+  if [ $X86 = "no" ] && [ $X86_64 = "no" ] ; then
+    echo "neither $NAME.x86 nor $NAME.x86_64 found"
+    exit 1
+  fi
+
   # create working directory and symlink
   [ ! -L "$PWD/UnityEngine2deb_working_directory" ] || rm "$PWD/UnityEngine2deb_working_directory"
   rm -rf "$topsrc"
@@ -199,27 +218,10 @@ if [ $mode = "prepare" ] ; then
   rm -f "$sourcedir"/*.txt
   rm -rf `find "$sourcedir" -type d -name __MACOSX`
 
-  # get the application name
-  FILENAME_REAL="$(basename "$(find "$sourcedir" -type d -name *_Data)" | head -c-6)"
-  if [ -z "$FILENAME" ] ; then
-    NAME="$FILENAME_REAL"
-    FILENAME="$FILENAME_REAL"
-  else
-    NAME="$FILENAME"
-  fi
+  # rename application
   NAME=$(echo "$NAME" | tr '[A-Z]' '[a-z]' | sed -e 's/\ -\ /-/g; s/\ /-/g; s/_/-/g')
   [ "$FILENAME_REAL" != "$NAME" ] && rename "s/$FILENAME_REAL/$NAME/" "$sourcedir"/*
   [ -z "$UPSTREAMNAME" ] && UPSTREAMNAME="$FILENAME"
-
-  # check for architectures
-  X86="no"
-  X86_64="no"
-  [ -f "$sourcedir/$NAME".x86 ] && X86="yes"
-  [ -f "$sourcedir/$NAME".x86_64 ] && X86_64="yes"
-  if [ $X86 = "no" ] && [ $X86_64 = "no" ] ; then
-    echo "neither $NAME.x86 nor $NAME.x86_64 found"
-    exit 1
-  fi
 
   # icon
   WITH_GPL_ICON="no"
