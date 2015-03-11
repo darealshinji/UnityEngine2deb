@@ -235,7 +235,7 @@ if [ $mode = "prepare" ] ; then
   rm -rf `find "$sourcedir" -type d -name __MACOSX`
 
   # rename application
-  NAME=$(echo "$NAME" | tr '[A-Z]' '[a-z]' | sed -e 's/\ -\ /-/g; s/\ /-/g; s/_/-/g')
+  NAME=$(echo "$NAME" | sed -e 's/\(.*\)/\L\1/; s/\ -\ /-/g; s/\ /-/g; s/_/-/g')
   [ "$FILENAME_REAL" != "$NAME" ] && rename "s/$FILENAME_REAL/$NAME/" "$sourcedir"/*
   [ -z "$UPSTREAMNAME" ] && UPSTREAMNAME="$FILENAME"
   if [ "$RENAME_TO_X86" = "yes" ] && [ -f "$sourcedir/$NAME" ] ; then
