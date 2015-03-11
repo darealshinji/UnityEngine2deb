@@ -142,7 +142,7 @@ for opt; do
     "help"|"-h"|"--version"|"-V")
       ;;
     *)
-      path="$optarg"
+      origpath="$optarg"
       ;;
   esac
 done
@@ -161,19 +161,19 @@ if [ $mode = "prepare" ] ; then
     Z="xz"
   fi
 
-  if [ -z "$path" ] ; then
+  if [ -z "$origpath" ] ; then
     errorExit "no path specified"
-  elif [ ! -e "$path" ] ; then
-    errorExit "path to '$path' doesn't exist"
-  elif [ ! -d "$path" ] ; then
-    errorExit "'$path' is not a directory"
+  elif [ ! -e "$origpath" ] ; then
+    errorExit "path to '$origpath' doesn't exist"
+  elif [ ! -d "$origpath" ] ; then
+    errorExit "'$origpath' is not a directory"
   else
-    path="$( cd "$path" && pwd )"
+    path="$( cd "$origpath" && pwd )"
   fi
   rm -rf $cleanfiles
 
   # get the application name
-  FILENAME_REAL="$(basename "$(find "$path" -type d -name *_Data)" | head -c-6)"
+  FILENAME_REAL="$(basename "$(find "$origpath" -type d -name *_Data)" | head -c-6)"
   if [ -z "$FILENAME" ] ; then
     NAME="$FILENAME_REAL"
     FILENAME="$FILENAME_REAL"
@@ -186,16 +186,16 @@ if [ $mode = "prepare" ] ; then
   X86_64="no"
   RENAME_TO_X86="no"
   RENAME_TO_X86_64="no"
-  [ -f "$path/$FILENAME_REAL".x86 ] && X86="yes"
-  [ -f "$path/$FILENAME_REAL".x86_64 ] && X86_64="yes"
+  [ -f "$origpath/$FILENAME_REAL".x86 ] && X86="yes"
+  [ -f "$origpath/$FILENAME_REAL".x86_64 ] && X86_64="yes"
   if [ $X86 = "no" ] && [ $X86_64 = "no" ] ; then
     echo "neither '$FILENAME_REAL.x86' nor '$FILENAME_REAL.x86_64' found"
-    if [ -f "$path/$FILENAME_REAL" ] ; then
-      if [ "$(file "$path/$FILENAME_REAL" | grep 'ELF 32-bit')" ]; then
+    if [ -f "$origpath/$FILENAME_REAL" ] ; then
+      if [ "$(file "$origpath/$FILENAME_REAL" | grep 'ELF 32-bit')" ]; then
         echo "'$FILENAME_REAL' (x86) found"
         X86="yes"
         RENAME_TO_X86="yes"
-      elif [ "$(file "$path/$FILENAME_REAL" | grep 'ELF 64-bit')" ]; then
+      elif [ "$(file "$origpath/$FILENAME_REAL" | grep 'ELF 64-bit')" ]; then
         echo "'$FILENAME_REAL' (x86_64) found"
         X86_64="yes"
         RENAME_TO_X86_64="yes"
@@ -216,7 +216,7 @@ if [ $mode = "prepare" ] ; then
   # copy source files
   echo "copy source files... "
   mkdir -p "$sourcedir"
-  cp -vr "$path"/* "$sourcedir"
+  cp -vr "$origpath"/* "$sourcedir"
   echo "done"
 
   # remove executable bits
@@ -229,7 +229,7 @@ if [ $mode = "prepare" ] ; then
   for f in libCSteamworks.so libsteam_api.so libSteamworksNative.so SteamworksNative.dll \
            UnityEngine.dll.mdb Thumbs.db .DS_Store ;
   do
-    find "$sourcedir" -name $f -delete
+    find "$sourcedir" -name "$f" -delete
   done
   rm -f "$sourcedir"/*.txt
   rm -rf `find "$sourcedir" -type d -name __MACOSX`
@@ -239,10 +239,10 @@ if [ $mode = "prepare" ] ; then
   [ "$FILENAME_REAL" != "$NAME" ] && rename "s/$FILENAME_REAL/$NAME/" "$sourcedir"/*
   [ -z "$UPSTREAMNAME" ] && UPSTREAMNAME="$FILENAME"
   if [ "$RENAME_TO_X86" = "yes" ] && [ -f "$sourcedir/$NAME" ] ; then
-    mv "$sourcedir/$NAME" "$sourcedir/$NAME".x86
+    mv "$sourcedir/$NAME" "$sourcedir/${NAME}.x86"
     echo "application was renamed to ${NAME}.x86"
   elif [ "$RENAME_TO_X86_64" = "yes" ] && [ -f "$sourcedir/$NAME" ] ; then
-    mv "$sourcedir/$NAME" "$sourcedir/$NAME".x86_64
+    mv "$sourcedir/$NAME" "$sourcedir/${NAME}.x86_64"
     echo "application was renamed to ${NAME}.x86_64"
   fi
 
