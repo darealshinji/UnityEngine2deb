@@ -94,10 +94,8 @@ fi
 
 if [ -d "$SCRIPTPATH/templates" ] ; then
   templates="$SCRIPTPATH/templates"
-elif [ -d "/usr/local/share/$appname" ] ; then
-  templates="/usr/local/share/$appname"
-elif [ -d "/usr/share/$appname" ] ; then
-  templates="/usr/share/$appname"
+elif [ -d "$SCRIPTPATH/../share/$appname" ] ; then
+  templates="$SCRIPTPATH/../share/$appname"
 else
   echo "Can't find the templates!"
   exit 1
