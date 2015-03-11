@@ -436,8 +436,7 @@ EOF
     cat >> "$builddir/x86_64/debian/confflags" << EOF
 NAME = $NAME
 ICON = "$ICON"
-keep_CPU = x86_64
-purge_CPU = x86
+ARCH = x86_64
 DATAPACKAGE = $DATAPACKAGE
 Z = $Z
 PATCHELF = $patchelf
@@ -446,8 +445,7 @@ EOF
   cat >> "$debian/confflags" << EOF
 NAME = $NAME
 ICON = "$ICON"
-keep_CPU = x86
-purge_CPU = x86_64
+ARCH = x86
 DATAPACKAGE = $DATAPACKAGE
 Z = $Z
 PATCHELF = $patchelf
@@ -477,6 +475,19 @@ fi
 
 
 ################## build ##################
+buildpackage () {
+  arch=${1}
+  name="$(grep 'NAME = ' $builddir/$arch/debian/confflags | sed -e 's/NAME = //')"
+  if [ -d "$builddir/${arch}" ] ; then
+    cd "$builddir/${arch}"
+    chmod a+x debian/rules source/${name}.${arch}
+    mv source/${name}.${arch} source/${name}
+    test ${arch} = "x86" && purge=x86_64 || purge=x86
+    rm -rf source/${name}_Data/Mono/${purge} source/${name}_Data/Plugins/${purge} source/${name}.${purge}
+    dpkg-buildpackage -b -us -uc 2>&1 | tee "$builddir/${arch}-build.log"
+  fi
+}
+
 if [ $mode = "build" ] ; then
   if [ ! -z "$Z" ] ; then
     [ "$Z" = "gz" ] && Z="gzip"
@@ -489,17 +500,8 @@ if [ $mode = "build" ] ; then
     errorExit "run '$appname prepare <path>' first"
   fi
 
-  if [ -d "$builddir/x86" ] ; then
-    cd "$builddir/x86"
-    chmod a+x debian/rules
-    dpkg-buildpackage -b -us -uc 2>&1 | tee "$builddir/x86-build.log"
-  fi
-
-  if [ -d "$builddir/x86_64" ] ; then
-    cd "$builddir/x86_64"
-    chmod a+x debian/rules
-    dpkg-buildpackage -b -us -uc 2>&1 | tee "$builddir/x86_64-build.log"
-  fi
+  buildpackage x86
+  buildpackage x86_64
 
   cd "$builddir"
   echo ""
