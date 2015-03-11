@@ -223,7 +223,9 @@ if [ $mode = "prepare" ] ; then
   find "$sourcedir" -type f -exec chmod a-x '{}' \;
 
   # remove executable stack
-  find "$sourcedir" -name libmono.so -exec execstack -c '{}' \;
+  if [ $(which execstack) ]; then
+    find "$sourcedir" -name libmono.so -exec execstack -c '{}' \;
+  fi
 
   # delete unnecessary files
   for f in libCSteamworks.so libsteam_api.so libSteamworksNative.so SteamworksNative.dll \
