@@ -38,6 +38,10 @@ debian="$builddir/x86/debian"
 
 [ -z $(which patchelfmod) ] && patchelf=no || patchelf=yes
 
+errorExit() {
+  echo "error: $1"
+  exit 1
+}
 
 help() {
 cat << EOF
@@ -101,8 +105,7 @@ elif [ -d "/usr/local/share/$appname" ] ; then
 elif [ -d "/usr/share/$appname" ] ; then
   templates="/usr/share/$appname"
 else
-  echo "Can't find the templates!"
-  exit 1
+  errorExit "Can't find the templates!"
 fi
 
 
@@ -159,14 +162,11 @@ if [ $mode = "prepare" ] ; then
   fi
 
   if [ -z "$path" ] ; then
-    echo "no path specified"
-    exit 1
+    errorExit "no path specified"
   elif [ ! -e "$path" ] ; then
-    echo "path to '$path' doesn't exist"
-    exit 1
+    errorExit "path to '$path' doesn't exist"
   elif [ ! -d "$path" ] ; then
-    echo "'$path' is not a directory"
-    exit 1
+    errorExit "'$path' is not a directory"
   else
     path="$( cd "$path" && pwd )"
   fi
@@ -186,25 +186,24 @@ if [ $mode = "prepare" ] ; then
   X86_64="no"
   RENAME_TO_X86="no"
   RENAME_TO_X86_64="no"
-  [ -f "$path/$NAME".x86 ] && X86="yes"
-  [ -f "$path/$NAME".x86_64 ] && X86_64="yes"
+  [ -f "$path/$FILENAME_REAL".x86 ] && X86="yes"
+  [ -f "$path/$FILENAME_REAL".x86_64 ] && X86_64="yes"
   if [ $X86 = "no" ] && [ $X86_64 = "no" ] ; then
-    echo "neither '$NAME.x86' nor '$NAME.x86_64' found"
-    if [ -f "$path/$NAME" ] ; then
-      if [ "$(file "$path/$NAME" | grep 'ELF 32-bit')" ]; then
-        echo "'$NAME' (x86) found"
+    echo "neither '$FILENAME_REAL.x86' nor '$FILENAME_REAL.x86_64' found"
+    if [ -f "$path/$FILENAME_REAL" ] ; then
+      if [ "$(file "$path/$FILENAME_REAL" | grep 'ELF 32-bit')" ]; then
+        echo "'$FILENAME_REAL' (x86) found"
         X86="yes"
         RENAME_TO_X86="yes"
-      elif [ "$(file "$path/$NAME" | grep 'ELF 64-bit')" ]; then
-        echo "'$NAME' (x86_64) found"
+      elif [ "$(file "$path/$FILENAME_REAL" | grep 'ELF 64-bit')" ]; then
+        echo "'$FILENAME_REAL' (x86_64) found"
         X86_64="yes"
         RENAME_TO_X86_64="yes"
       else
-        echo "'$NAME' was found but is not a valid ELF binary"
-        exit 1
+        errorExit "'$FILENAME_REAL' was found but is not a valid ELF binary"
       fi
     else
-      exit 1
+      errorExit "couldn't find '$FILENAME_REAL' either"
     fi
   fi
 
@@ -466,8 +465,7 @@ if [ $mode = "build" ] ; then
 
   if [ ! -d "$builddir/x86" ] && [ ! -d "$builddir/x86_64" ] ; then
     echo "no files in '$builddir'!"
-    echo "run '$appname prepare <path>' first"
-    exit 1
+    errorExit "run '$appname prepare <path>' first"
   fi
 
   if [ -d "$builddir/x86" ] ; then
