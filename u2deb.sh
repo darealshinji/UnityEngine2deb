@@ -184,11 +184,28 @@ if [ $mode = "prepare" ] ; then
   # check for architectures
   X86="no"
   X86_64="no"
+  RENAME_TO_X86="no"
+  RENAME_TO_X86_64="no"
   [ -f "$path/$NAME".x86 ] && X86="yes"
   [ -f "$path/$NAME".x86_64 ] && X86_64="yes"
   if [ $X86 = "no" ] && [ $X86_64 = "no" ] ; then
-    echo "neither $NAME.x86 nor $NAME.x86_64 found"
-    exit 1
+    echo "neither '$NAME.x86' nor '$NAME.x86_64' found"
+    if [ -f "$path/$NAME" ] ; then
+      if [ "$(file "$path/$NAME" | grep 'ELF 32-bit')" ]; then
+        echo "'$NAME' (x86) found"
+        X86="yes"
+        RENAME_TO_X86="yes"
+      elif [ "$(file "$path/$NAME" | grep 'ELF 64-bit')" ]; then
+        echo "'$NAME' (x86_64) found"
+        X86_64="yes"
+        RENAME_TO_X86_64="yes"
+      else
+        echo "'$NAME' was found but is not a valid ELF binary"
+        exit 1
+      fi
+    else
+      exit 1
+    fi
   fi
 
   # create working directory and symlink
@@ -222,6 +239,13 @@ if [ $mode = "prepare" ] ; then
   NAME=$(echo "$NAME" | tr '[A-Z]' '[a-z]' | sed -e 's/\ -\ /-/g; s/\ /-/g; s/_/-/g')
   [ "$FILENAME_REAL" != "$NAME" ] && rename "s/$FILENAME_REAL/$NAME/" "$sourcedir"/*
   [ -z "$UPSTREAMNAME" ] && UPSTREAMNAME="$FILENAME"
+  if [ "$RENAME_TO_X86" = "yes" ] && [ -f "$sourcedir/$NAME" ] ; then
+    mv "$sourcedir/$NAME" "$sourcedir/$NAME".x86
+    echo "application was renamed to ${NAME}.x86"
+  elif [ "$RENAME_TO_X86_64" = "yes" ] && [ -f "$sourcedir/$NAME" ] ; then
+    mv "$sourcedir/$NAME" "$sourcedir/$NAME".x86_64
+    echo "application was renamed to ${NAME}.x86_64"
+  fi
 
   # icon
   WITH_GPL_ICON="no"
