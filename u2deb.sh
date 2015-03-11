@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="15.02.19.1"
+appversion="15.03.11.1"
 
 appname=$(basename "$0")
 SCRIPTPATH="$(dirname "$(readlink -f "$0")")"
@@ -319,7 +319,7 @@ $NAME \- $SHORTDESCRIPTION
 This game has no command line options.
 .SH DESCRIPTION
 EOF
-  cat "$topsrc/description" | fold -s >> "$builddir/x86/debian/${NAME}.6"
+  fold -s "$topsrc/description" >> "$builddir/x86/debian/${NAME}.6"
   cat >> "$builddir/x86/debian/${NAME}.6" << EOF
 .SH SEE ALSO
 .I $HOMEPAGE
@@ -357,7 +357,7 @@ Architecture: any
 Depends: \${misc:Depends}, \${shlibs:Depends}, libpulse0$DATADEPENDS
 Description: $SHORTDESCRIPTION
 EOF
-  cat "$topsrc/description" | fold -s -w 78 | sed 's/^/ /g; s/^ $/ ./g; s/ $//g' >> "$debian/control"
+  fold -s -w 79 "$topsrc/description" | sed 's/^/ /g; s/^ $/ ./g; s/ $//g' >> "$debian/control"
 
   if [ $DATAPACKAGE = "yes" ] ; then
     cat >> "$debian/control" << EOF
@@ -368,7 +368,7 @@ Depends: \${misc:Depends}
 Recommends: $NAME
 Description: $SHORTDESCRIPTION - game data
 EOF
-    cat "$topsrc/description" | fold -s -w 78 | sed 's/^/ /g; s/^ $/ ./g; s/ $//g' >> "$debian/control"
+    fold -s -w 79 "$topsrc/description" | sed 's/^/ /g; s/^ $/ ./g; s/ $//g' >> "$debian/control"
     echo " ." >> "$debian/control"
     echo " This package installs the $NAME game data." >> "$debian/control"
   fi
