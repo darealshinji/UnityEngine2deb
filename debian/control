@@ -2,8 +2,7 @@ Source: u2deb
 Section: devel
 Priority: optional
 Maintainer: Marshall Banana <djcj@gmx.de>
-Build-Depends:
-   debhelper (>= 9)
+Build-Depends: debhelper (>= 9)
 Standards-Version: 3.9.5
 Homepage: https://github.com/darealshinji/UnityEngine2deb
 Vcs-Git: https://github.com/darealshinji/UnityEngine2deb.git
@@ -11,17 +10,16 @@ Vcs-Browser: https://github.com/darealshinji/UnityEngine2deb
 
 Package: u2deb
 Architecture: amd64 i386
-Depends:
-   ${misc:Depends},
-   debhelper (>= 9),
-   make | build-essential | dpkg-dev,
-   execstack,
-   imagemagick,
-   libglu1-mesa, libglu1-mesa:i386,
-   libgtk2.0-0, libgtk2.0-0:i386,
-   librsvg2-bin,
-   lintian,
-   patchelfmod
+Depends: ${misc:Depends},
+         debhelper (>= 9),
+         make | build-essential | dpkg-dev,
+         execstack,
+         imagemagick,
+         libglu1-mesa, libglu1-mesa:i386,
+         libgtk2.0-0, libgtk2.0-0:i386,
+         librsvg2-bin,
+         lintian,
+         patchelfmod
 Description: create Debian packages of Unity Engine games
  Games that were built on the Unity engine became quite popular these days.
  Those games can be built to run natively on GNU/Linux systems.
