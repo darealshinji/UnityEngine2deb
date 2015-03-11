@@ -36,17 +36,6 @@ sourcedir="$topsrc/source"
 icondir="$builddir/icon"
 debian="$builddir/x86/debian"
 
-if [ -d "$SCRIPTPATH/templates" ] ; then
-  templates="$SCRIPTPATH/templates"
-elif [ -d "/usr/local/share/$appname" ] ; then
-  templates="/usr/local/share/$appname"
-elif [ -d "/usr/share/$appname" ] ; then
-  templates="/usr/share/$appname"
-else
-  echo "Can't find the templates!"
-  exit 1
-fi
-
 [ -z $(which patchelfmod) ] && patchelf=no || patchelf=yes
 
 
@@ -101,6 +90,17 @@ fi
 if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "help" ] ; then
   help
   exit 0
+fi
+
+if [ -d "$SCRIPTPATH/templates" ] ; then
+  templates="$SCRIPTPATH/templates"
+elif [ -d "/usr/local/share/$appname" ] ; then
+  templates="/usr/local/share/$appname"
+elif [ -d "/usr/share/$appname" ] ; then
+  templates="/usr/share/$appname"
+else
+  echo "Can't find the templates!"
+  exit 1
 fi
 
 
