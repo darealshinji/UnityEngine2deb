@@ -54,7 +54,7 @@ don't build an amd64 package
 \fBUPSTREAMNAME
 the original name of the game, including special chars or spaces
 .TP
-\fBFILENAME
+\fBPKGNAME
 specify a name for the executable and the package
 .TP
 \fBSHORTDESCRIPTION
@@ -73,12 +73,12 @@ homepage of the game or the developer
 \fBYEAR
 the year when the game was released
 .TP
-\fBRIGHTHOLDER
+\fBCOPYRIGHT
 Who's holding the copyright?
-.TP
-\fBTMP
-Path to store temporary files (working directory).
-Default: /tmp/UnityEngine2deb_tmp
+.\" .TP
+.\" \fBTMP
+.\" Path to store temporary files (working directory).
+.\" Default: /tmp/UnityEngine2deb_tmp
 
 .SH SEE ALSO
 .I https://github.com/darealshinji/UnityEngine2deb
