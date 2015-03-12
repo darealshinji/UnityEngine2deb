@@ -31,13 +31,7 @@ appversion="15.03.12.1"
 appname=$(basename "$0")
 scriptpath="$(dirname "$(readlink -f "$0")")"
 linkname="UnityEngine2deb_working_directory"
-# ATM overriding the temp dir will break the build phase
-#[ -z "$TMP" ] && topsrc="/tmp/UnityEngine2deb_tmp" || topsrc="$TMP"
-topsrc="/tmp/UnityEngine2deb_tmp"
-builddir="$topsrc/build"
-sourcedir="$topsrc/source"
-icondir="$builddir/icon"
-debian="$builddir/x86/debian"
+defaultwd="/tmp/UnityEngine2deb_tmp"
 
 [ -z $(which patchelfmod) ] && patchelf=no || patchelf=yes
 
@@ -53,9 +47,9 @@ cat << EOF
 
  Usage:
    $appname -h|--help|-V|--version
-   $appname -p|prepare <path> [-Z=<method>] [-d|--data] [--icon=<icon>]
-   $appname -b|build|make [-Z=<method>]
-   $appname -c|clean
+   $appname -p|prepare <path> [OPTIONS]
+   $appname -b|build|make [OPTIONS]
+   $appname -c|clean [OPTIONS]
 
  Options:
    -h, --help           print this message
@@ -68,6 +62,8 @@ cat << EOF
 
    -o=<path>,
    --output=<path>      save Debian packages in <path>
+   --working-dir=<path> Working directory where the temporary files are stored.
+                           Default: $defaultwd
 
    -d, --data           build a separate package for architecture-
                            independent files
@@ -87,7 +83,7 @@ cat << EOF
                            pattern: John Doe <nick@domain.org>
    HOMEPAGE             homepage of the game or the developer
    YEAR                 the year when the game was released
-   COPYRIGHT          Who's holding the copyright?
+   COPYRIGHT            Who's holding the copyright?
 
 EOF
 }
@@ -120,6 +116,7 @@ mode="empty"
 output="$HOME"
 disable_x86="no"
 disable_x86_64="no"
+wd=""
 for opt; do
   optarg="${opt#*=}"
   case "$opt" in
@@ -130,12 +127,13 @@ for opt; do
       mode="build"
       ;;
     "clean"|"-c")
-      rm -rvf "$topsrc"
-      [ ! -L "$PWD/$linkname" ] || rm -v "$PWD/$linkname"
-      exit 0
+      mode="clean"
       ;;
     --output=*|-o=*)
       output="$optarg"
+      ;;
+    --working-dir=*)
+      wd="$optarg"
       ;;
     "--data"|"-d")
       datapackage="yes"
@@ -167,6 +165,24 @@ fi
 if [ $mode = "empty" ] ; then
   help
   exit 1
+fi
+
+if ([ $mode = "build" ] || [ $mode = "clean" ]) && [ -L "$PWD/$linkname" ] && [ -z "$wd" ] ; then
+  wd="$(readlink "$PWD/$linkname")"
+fi
+[ -n "$wd" ] && topsrc="$wd" || topsrc="$defaultwd"
+builddir="$topsrc/build"
+sourcedir="$topsrc/source"
+icondir="$builddir/icon"
+debian="$builddir/x86/debian"
+
+
+
+################## clean ##################
+if [ $mode = "clean" ] ; then
+  rm -rvf "$topsrc"
+  [ ! -L "$PWD/$linkname" ] || rm -v "$PWD/$linkname"
+  exit 0
 fi
 
 

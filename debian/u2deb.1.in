@@ -5,11 +5,11 @@ u2deb \- create Debian packages of Unity Engine games
 .SH SYNOPSIS
 .B u2deb \fR\-h|help
 .br
-.B u2deb \fR\-p|prepare <path> [\-Z=<method>] [\-d|\-\-data] [\-\-icon=<icon>]
+.B u2deb \fR\-p|prepare <path> [OPTIONS]
 .br
-.B u2deb \fR\-b|build|make [\-Z=<method>]
+.B u2deb \fR\-b|build|make [OPTIONS]
 .br
-.B u2deb \fR\-c|clean
+.B u2deb \fR\-c|clean [OPTIONS]
 
 .SH DESCRIPTION
 Games that were built on the Unity engine became quite popular these days.
@@ -33,11 +33,19 @@ build binary packages
 \fB\-c, clean
 delete the working tree
 .TP
+\fB\-o=\fR<path>,\fB\-\-output\fR=<path>
+save Debian packages in <path>
+.TP
+\fB\-\-working-dir\fR=<path>
+Working directory where the temporary files are stored.
+Default: /tmp/UnityEngine2deb_tmp
+.TP
 \fB\-d, \-\-data
 build a separate package for architecture-independent files
 .TP
 \fB\-Z=\fR<method>
-Specify compression method. Available are gzip/gz, bzip2/bz2 and xz.
+Specify compression method.
+Available are gzip/gz, bzip2/bz2 and xz.
 Default: xz
 .TP
 \fB\-\-icon=\fR<icon>
@@ -75,10 +83,6 @@ the year when the game was released
 .TP
 \fBCOPYRIGHT
 Who's holding the copyright?
-.\" .TP
-.\" \fBTMP
-.\" Path to store temporary files (working directory).
-.\" Default: /tmp/UnityEngine2deb_tmp
 
 .SH SEE ALSO
 .I https://github.com/darealshinji/UnityEngine2deb

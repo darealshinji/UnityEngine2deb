@@ -5,11 +5,11 @@ Create Debian packages of Unity Engine games
 ```
  Usage:
    u2deb.sh -h|--help|-V|--version
-   u2deb.sh -p|prepare <path> [-Z=<method>] [-d|--data] [--icon=<icon>]
-   u2deb.sh -b|build|make [-Z=<method>]
-   u2deb.sh -c|clean
+   u2deb.sh -p|prepare <path> [OPTIONS]
+   u2deb.sh -b|build|make [OPTIONS]
+   u2deb.sh -c|clean [OPTIONS]
 
- options:
+ Options:
    -h, --help           print this message
    -V, --version        display version info and quit
 
@@ -20,6 +20,8 @@ Create Debian packages of Unity Engine games
 
    -o=<path>,
    --output=<path>      save Debian packages in <path>
+   --working-dir=<path> Working directory where the temporary files are stored.
+                           Default: /tmp/UnityEngine2deb_tmp
 
    -d, --data           build a separate package for architecture-
                            independent files
@@ -32,7 +34,7 @@ Create Debian packages of Unity Engine games
  Environment variables:
    UPSTREAMNAME         the original name of the game, including special chars
                            or spaces
-   FILENAME             specify a name for the executable and the package
+   PKGNAME              specify a name for the executable and the package
    SHORTDESCRIPTION     a brief game description for the package and menu entry
    VERSION              the game's upstream version
    MAINTAINER           The package maintainer. Make sure to use the following
