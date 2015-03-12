@@ -1,3 +1,14 @@
+u2deb (15.03.12.1~trusty) trusty; urgency=low
+
+  * Enable -V and -h commands even if templates weren't found
+  * Run execstack only if the command is available
+  * Implement --no-x86 and --no-x86_64 commands to disable the build of
+    i386 or amd64 packages
+  * With --working-dir=<path> the temporary files can now be stored in
+    a different location
+
+ -- Marshall Banana <djcj@gmx.de>  Thu, 12 Mar 2015 20:20:45 +0100
+
 u2deb (15.02.04.1~trusty) trusty; urgency=low
 
   * Delete .DS_Store and Thumbs.db files
