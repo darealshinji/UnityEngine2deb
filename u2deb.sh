@@ -31,7 +31,9 @@ appversion="15.03.12.1"
 appname=$(basename "$0")
 scriptpath="$(dirname "$(readlink -f "$0")")"
 linkname="UnityEngine2deb_working_directory"
-[ -z "$TMP" ] && topsrc="/tmp/UnityEngine2deb_tmp" || topsrc="$TMP"
+# ATM overriding the temp dir will break the build phase
+#[ -z "$TMP" ] && topsrc="/tmp/UnityEngine2deb_tmp" || topsrc="$TMP"
+topsrc="/tmp/UnityEngine2deb_tmp"
 builddir="$topsrc/build"
 sourcedir="$topsrc/source"
 icondir="$builddir/icon"
@@ -86,8 +88,6 @@ cat << EOF
    HOMEPAGE             homepage of the game or the developer
    YEAR                 the year when the game was released
    RIGHTHOLDER          Who's holding the copyright?
-   TMP                  Path to store temporary files (working directory).
-                           Default: /tmp/UnityEngine2deb_tmp
 
 EOF
 }
