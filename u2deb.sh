@@ -29,7 +29,8 @@ LC_ALL=C
 appversion="15.03.12.1"
 
 appname=$(basename "$0")
-SCRIPTPATH="$(dirname "$(readlink -f "$0")")"
+scriptpath="$(dirname "$(readlink -f "$0")")"
+linkname="UnityEngine2deb_working_directory"
 [ -z "$TMP" ] && topsrc="/tmp/UnityEngine2deb_tmp" || topsrc="$TMP"
 builddir="$topsrc/build"
 sourcedir="$topsrc/source"
@@ -100,10 +101,10 @@ if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "help" ] ; then
   exit 0
 fi
 
-if [ -d "$SCRIPTPATH/templates" ] ; then
-  templates="$SCRIPTPATH/templates"
-elif [ -d "$SCRIPTPATH/../share/$appname" ] ; then
-  templates="$SCRIPTPATH/../share/$appname"
+if [ -d "$scriptpath/templates" ] ; then
+  templates="$scriptpath/templates"
+elif [ -d "$scriptpath/../share/$appname" ] ; then
+  templates="$scriptpath/../share/$appname"
 elif [ -d "/usr/local/share/$appname" ] ; then
   templates="/usr/local/share/$appname"
 elif [ -d "/usr/share/$appname" ] ; then
@@ -113,12 +114,12 @@ else
 fi
 
 
-DATAPACKAGE="no"
-ICON=""
+datapackage="no"
+icon=""
 mode="empty"
-OUTPUT="$HOME"
-DISABLE_X86="no"
-DISABLE_X86_64="no"
+output="$HOME"
+disable_x86="no"
+disable_x86_64="no"
 for opt; do
   optarg="${opt#*=}"
   case "$opt" in
@@ -130,26 +131,26 @@ for opt; do
       ;;
     "clean"|"-c")
       rm -rvf "$topsrc"
-      [ ! -L "$PWD/UnityEngine2deb_working_directory" ] || rm -v "$PWD/UnityEngine2deb_working_directory"
+      [ ! -L "$PWD/$linkname" ] || rm -v "$PWD/$linkname"
       exit 0
       ;;
     --output=*|-o=*)
-      OUTPUT="$optarg"
+      output="$optarg"
       ;;
     "--data"|"-d")
-      DATAPACKAGE="yes"
+      datapackage="yes"
       ;;
     -Z=*)
-      Z="$optarg"
+      compression="$optarg"
       ;;
     --icon=*)
-      ICON="$optarg"
+      icon="$optarg"
       ;;
     "--no-x86")
-      DISABLE_X86="yes"
+      disable_x86="yes"
       ;;
     "--no-x86_64")
-      DISABLE_X86_64="yes"
+      disable_x86_64="yes"
       ;;
     "help"|"-h"|"--version"|"-V")
       ;;
@@ -159,7 +160,7 @@ for opt; do
   esac
 done
 
-if [ $DISABLE_X86 = "yes" ] && [ $DISABLE_X86_64 = "yes" ] ; then
+if [ $disable_x86 = "yes" ] && [ $disable_x86_64 = "yes" ] ; then
   errorExit "you can't use \`--no-x86' together with \`--no-x86_64'"
 fi
 
@@ -171,10 +172,10 @@ fi
 
 ################# prepare #################
 if [ $mode = "prepare" ] ; then
-  [ "$Z" = "gz" ] && Z="gzip"
-  [ "$Z" = "bz2" ] && Z="bzip2"
-  if [ "$Z" != "gzip" ] && [ "$Z" != "bzip2" ] && [ "$Z" != "xz" ] ; then
-    Z="xz"
+  [ "$compression" = "gz" ] && compression="gzip"
+  [ "$compression" = "bz2" ] && compression="bzip2"
+  if [ "$compression" != "gzip" ] && [ "$compression" != "bzip2" ] && [ "$compression" != "xz" ] ; then
+    compression="xz"
   fi
 
   if [ -z "$origpath" ] ; then
@@ -189,41 +190,41 @@ if [ $mode = "prepare" ] ; then
   rm -rf $cleanfiles
 
   # get the application name
-  FILENAME="$(basename "$(find "$origpath" -type d -name *_Data)" | head -c-6)"
-  [ -z "$PKGNAME" ] && NAME="$FILENAME" || NAME="$PKGNAME"
-  [ -z "$UPSTREAMNAME" ] && UPSTREAMNAME="$NAME"
+  filename="$(basename "$(find "$origpath" -type d -name *_Data)" | head -c-6)"
+  [ -z "$PKGNAME" ] && name="$filename" || name="$PKGNAME"
+  [ -z "$UPSTREAMNAME" ] && UPSTREAMNAME="$name"
   if [ -n "$UPSTREAMNAME" ] && [ -n "$PKGNAME" ] ; then
-    NAME="$PKGNAME"
+    name="$PKGNAME"
   fi
 
   # check for architectures
-  X86="no"
-  X86_64="no"
-  RENAME_TO_X86="no"
-  RENAME_TO_X86_64="no"
-  [ -f "$origpath/$FILENAME".x86 ] && X86="yes"
-  [ -f "$origpath/$FILENAME".x86_64 ] && X86_64="yes"
-  if [ $X86 = "no" ] && [ $X86_64 = "no" ] ; then
-    echo "neither '$FILENAME.x86' nor '$FILENAME.x86_64' found"
-    if [ -f "$origpath/$FILENAME" ] ; then
-      if [ "$(file "$origpath/$FILENAME" | grep 'ELF 32-bit')" ]; then
-        echo "'$FILENAME' (x86) found"
-        X86="yes"
-        RENAME_TO_X86="yes"
-      elif [ "$(file "$origpath/$FILENAME" | grep 'ELF 64-bit')" ]; then
-        echo "'$FILENAME' (x86_64) found"
-        X86_64="yes"
-        RENAME_TO_X86_64="yes"
+  x86="no"
+  x86_64="no"
+  rename_to_x86="no"
+  rename_to_x86_64="no"
+  [ -f "$origpath/$filename".x86 ] && x86="yes"
+  [ -f "$origpath/$filename".x86_64 ] && x86_64="yes"
+  if [ $x86 = "no" ] && [ $x86_64 = "no" ] ; then
+    echo "neither '$filename.x86' nor '$filename.x86_64' found"
+    if [ -f "$origpath/$filename" ] ; then
+      if [ "$(file "$origpath/$filename" | grep 'ELF 32-bit')" ]; then
+        echo "'$filename' (x86) found"
+        x86="yes"
+        rename_to_x86="yes"
+      elif [ "$(file "$origpath/$filename" | grep 'ELF 64-bit')" ]; then
+        echo "'$filename' (x86_64) found"
+        x86_64="yes"
+        rename_to_x86_64="yes"
       else
-        errorExit "'$FILENAME' was found but is not a valid ELF binary"
+        errorExit "'$filename' was found but is not a valid ELF binary"
       fi
     else
-      errorExit "couldn't find '$FILENAME' either"
+      errorExit "couldn't find '$filename' either"
     fi
   fi
-  if [ $DISABLE_X86 = "yes" ] && [ $X86_64 = "no" ] ; then
+  if [ $disable_x86 = "yes" ] && [ $x86_64 = "no" ] ; then
     errorExit "x86 disabled but no x86_64 binary found"
-  elif [ $DISABLE_X86_64 = "yes" ] && [ $X86 = "no" ] ; then
+  elif [ $disable_x86_64 = "yes" ] && [ $x86 = "no" ] ; then
     errorExit "x86_64 disabled but no x86 binary found"
   fi
 
@@ -257,37 +258,37 @@ if [ $mode = "prepare" ] ; then
   rm -rf `find "$sourcedir" -type d -name __MACOSX`
 
   # rename application
-  NAME=$(echo "$NAME" | sed -e 's/\(.*\)/\L\1/; s/\ -\ /-/g; s/\ /-/g; s/_/-/g')
-  [ "$FILENAME" != "$NAME" ] && rename "s/$FILENAME/$NAME/" "$sourcedir"/*
-  if [ "$RENAME_TO_X86" = "yes" ] && [ -f "$sourcedir/$NAME" ] ; then
-    mv "$sourcedir/$NAME" "$sourcedir/${NAME}.x86"
-    echo "application was renamed to ${NAME}.x86"
-  elif [ "$RENAME_TO_X86_64" = "yes" ] && [ -f "$sourcedir/$NAME" ] ; then
-    mv "$sourcedir/$NAME" "$sourcedir/${NAME}.x86_64"
-    echo "application was renamed to ${NAME}.x86_64"
+  name=$(echo "$name" | sed -e 's/\(.*\)/\L\1/; s/\ -\ /-/g; s/\ /-/g; s/_/-/g')
+  [ "$filename" != "$name" ] && rename "s/$filename/$name/" "$sourcedir"/*
+  if [ "$rename_to_x86" = "yes" ] && [ -f "$sourcedir/$name" ] ; then
+    mv "$sourcedir/$name" "$sourcedir/${name}.x86"
+    echo "application was renamed to ${name}.x86"
+  elif [ "$rename_to_x86_64" = "yes" ] && [ -f "$sourcedir/$name" ] ; then
+    mv "$sourcedir/$name" "$sourcedir/${name}.x86_64"
+    echo "application was renamed to ${name}.x86_64"
   fi
 
   # icon
-  WITH_GPL_ICON="no"
+  with_gpl_icon="no"
   mkdir -p "$icondir"
-  if [ -z "$ICON" ] || [ ! -f "$ICON" ] ; then
-    if [ -f "$sourcedir/${NAME}_Data/Resources/UnityPlayer.png" ] ; then
-      cp "$sourcedir/${NAME}_Data/Resources/UnityPlayer.png" "$icondir/$NAME.png"
-      ICON="$icondir/$NAME.png"
+  if [ -z "$icon" ] || [ ! -f "$icon" ] ; then
+    if [ -f "$sourcedir/${name}_Data/Resources/UnityPlayer.png" ] ; then
+      cp "$sourcedir/${name}_Data/Resources/UnityPlayer.png" "$icondir/$name.png"
+      icon="$icondir/$name.png"
     else
-      cp "$templates/icon.svg" "$icondir/$NAME.svg"
-      ICON="$icondir/$NAME.svg"
-      WITH_GPL_ICON="yes"
+      cp "$templates/icon.svg" "$icondir/$name.svg"
+      icon="$icondir/$name.svg"
+      with_gpl_icon="yes"
     fi
     else
-      cp "$ICON" "$icondir/$NAME.png"
-      ICON="$icondir/$NAME.png"
+      cp "$icon" "$icondir/$name.png"
+      icon="$icondir/$name.png"
   fi
 
   # enter packaging information
   echo ""
   echo "name: $UPSTREAMNAME"
-  echo "application/package name: $NAME"
+  echo "application/package name: $name"
   if [ -z "$SHORTDESCRIPTION" ] ; then
     echo ""
     echo "Please enter a brief description,"
@@ -346,7 +347,7 @@ if [ $mode = "prepare" ] ; then
   [ -z "$MAINTAINER" ] && MAINTAINER="John Doe <nick@domain.org>"
   [ -z "$HOMEPAGE" ] && HOMEPAGE="http://www.unity3d.com/"
   [ -z "$YEAR" ] && YEAR=$(date +%Y)
-  [ -z "$RIGHTHOLDER" ] && RIGHTHOLDER="the creator of '$NAME'"
+  [ -z "$RIGHTHOLDER" ] && RIGHTHOLDER="the creator of '$name'"
 
   # create Debian files
   mkdir -p "$debian"
@@ -358,32 +359,32 @@ if [ $mode = "prepare" ] ; then
   "$templates/make-icons.sh" "$debian"
   chmod a+x "$debian/rules" "$debian/make-icons.sh"
 
-  cat >> "$builddir/x86/${NAME}.desktop" << EOF
+  cat >> "$builddir/x86/${name}.desktop" << EOF
 [Desktop Entry]
 Name=$UPSTREAMNAME
 Comment=$SHORTDESCRIPTION
-TryExec=/usr/lib/$NAME/$NAME
-Exec=$NAME
+TryExec=/usr/lib/$name/$name
+Exec=$name
 Type=Application
 Categories=Game;
 StartupNotify=true
-Icon=$NAME
+Icon=$name
 EOF
 
-  echo "debian/${NAME}.6" > "$builddir/x86/debian/${NAME}.manpages"
+  echo "debian/${name}.6" > "$builddir/x86/debian/${name}.manpages"
 
-  cat >> "$builddir/x86/debian/${NAME}.6" << EOF
-.TH ${NAME^^} 6 "" "$(date +%d.%m.%Y)"
+  cat >> "$builddir/x86/debian/${name}.6" << EOF
+.TH ${name^^} 6 "" "$(date +%d.%m.%Y)"
 .SH NAME
-$NAME \- $SHORTDESCRIPTION
+$name \- $SHORTDESCRIPTION
 .SH SYNOPSIS
-.B $NAME
+.B $name
 .SH OPTIONS
 This game has no command line options.
 .SH DESCRIPTION
 EOF
-  fold -s "$topsrc/description" >> "$builddir/x86/debian/${NAME}.6"
-  cat >> "$builddir/x86/debian/${NAME}.6" << EOF
+  fold -s "$topsrc/description" >> "$builddir/x86/debian/${name}.6"
+  cat >> "$builddir/x86/debian/${name}.6" << EOF
 .SH SEE ALSO
 .I $HOMEPAGE
 .SH AUTHOR
@@ -403,11 +404,11 @@ License:
 
 EOF
   cat "$templates/debian-copyright" >> "$debian/copyright"
-  [ $WITH_GPL_ICON = "yes" ] && (cat "$templates/icon-copyright" >> "$debian/copyright")
+  [ $with_gpl_icon = "yes" ] && (cat "$templates/icon-copyright" >> "$debian/copyright")
 
-  [ $DATAPACKAGE = "yes" ] && DATADEPENDS=", ${NAME}-data (= \${binary:Version})"
+  [ $datapackage = "yes" ] && datadeps=", ${name}-data (= \${binary:Version})"
   cat >> "$debian/control" << EOF
-Source: $NAME
+Source: $name
 Section: games
 Priority: optional
 Maintainer: $MAINTAINER
@@ -415,59 +416,59 @@ Build-Depends: debhelper (>= 9)
 Standards-Version: 3.9.5
 Homepage: $HOMEPAGE
 
-Package: $NAME
+Package: $name
 Architecture: any
-Depends: \${misc:Depends}, \${shlibs:Depends}, libpulse0$DATADEPENDS
+Depends: \${misc:Depends}, \${shlibs:Depends}, libpulse0$datadeps
 Description: $SHORTDESCRIPTION
 EOF
   fold -s -w 79 "$topsrc/description" | sed 's/^/ /g; s/^ $/ ./g; s/ $//g' >> "$debian/control"
 
-  if [ $DATAPACKAGE = "yes" ] ; then
+  if [ $datapackage = "yes" ] ; then
     cat >> "$debian/control" << EOF
 
-Package: ${NAME}-data
+Package: ${name}-data
 Architecture: all
 Depends: \${misc:Depends}
-Recommends: $NAME
+Recommends: $name
 Description: $SHORTDESCRIPTION - game data
 EOF
     fold -s -w 79 "$topsrc/description" | sed 's/^/ /g; s/^ $/ ./g; s/ $//g' >> "$debian/control"
     echo " ." >> "$debian/control"
-    echo " This package installs the $NAME game data." >> "$debian/control"
+    echo " This package installs the $name game data." >> "$debian/control"
   fi
 
   cat >> "$debian/changelog" << EOF
-$NAME ($VERSION) unstable; urgency=medium
+$name ($VERSION) unstable; urgency=medium
 
   * Initial release
  
  -- $MAINTAINER  $(date -R)
 EOF
 
-  if [ $X86_64 = "yes" ] ; then
+  if [ $x86_64 = "yes" ] ; then
     mkdir -p "$builddir/x86_64/debian"
     cp -rf "$debian"/* "$builddir/x86_64/debian"
-    cp -f "$builddir/x86/${NAME}.desktop" "$builddir/x86_64"
+    cp -f "$builddir/x86/${name}.desktop" "$builddir/x86_64"
     cat >> "$builddir/x86_64/debian/confflags" << EOF
-NAME = $NAME
-ICON = "$ICON"
+NAME = $name
+ICON = "$icon"
 ARCH = x86_64
-DATAPACKAGE = $DATAPACKAGE
-Z = $Z
+DATAPACKAGE = $datapackage
+Z = $compression
 PATCHELF = $patchelf
 EOF
   fi
   cat >> "$debian/confflags" << EOF
-NAME = $NAME
-ICON = "$ICON"
+NAME = $name
+ICON = "$icon"
 ARCH = x86
-DATAPACKAGE = $DATAPACKAGE
-Z = $Z
+DATAPACKAGE = $datapackage
+Z = $compression
 PATCHELF = $patchelf
 EOF
 
-  [ $DISABLE_X86 = "yes" ] && rm -rf "$builddir/x86"
-  [ $DISABLE_X86_64 = "yes" ] && rm -rf "$builddir/x86_64"
+  [ $disable_x86 = "yes" ] && rm -rf "$builddir/x86"
+  [ $disable_x86_64 = "yes" ] && rm -rf "$builddir/x86_64"
   if [ -d "$builddir/x86" ] ; then
     echo "copy files to build/x86... "
     cp -vr $sourcedir "$builddir/x86"
@@ -504,10 +505,10 @@ buildpackage () {
 }
 
 if [ $mode = "build" ] ; then
-  if [ ! -z "$Z" ] ; then
-    [ "$Z" = "gz" ] && Z="gzip"
-    [ "$Z" = "bz2" ] && Z="bzip2"
-    echo "Z = $Z" >> "$debian/confflags"
+  if [ ! -z "$compression" ] ; then
+    [ "$compression" = "gz" ] && compression="gzip"
+    [ "$compression" = "bz2" ] && compression="bzip2"
+    echo "Z = $compression" >> "$builddir/x86/debian/confflags"
   fi
 
   if [ ! -d "$builddir/x86" ] && [ ! -d "$builddir/x86_64" ] ; then
@@ -534,8 +535,8 @@ if [ $mode = "build" ] ; then
       echo ""
     done 2>&1 | tee -a "$builddir/packages.log"
   fi
-  cp -f *.deb "$OUTPUT"
-  echo "Debian packages copied to '$OUTPUT'"
+  cp -f *.deb "$output"
+  echo "Debian packages copied to '$output'"
 fi
 
 exit 0
