@@ -56,7 +56,7 @@ if [ "${input##*.}" = "svg" ] || [ "${input##*.}" = "SVG" ] ; then
     svgdir="$destdir/icons/hicolor/scalable/apps"
     echo "install SVG"
 
-	# install SVG into hicolor/scalable/apps
+    # install SVG into hicolor/scalable/apps
     install -c -D -m644 "$input" "$svgdir/$output1"
 
     # Create temporary input PNG file
