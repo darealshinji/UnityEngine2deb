@@ -33,7 +33,7 @@ scriptpath="$(dirname "$(readlink -f "$0")")"
 linkname="UnityEngine2deb_working_directory"
 defaultwd="/tmp/UnityEngine2deb_tmp"
 
-[ -z $(which patchelfmod) ] && patchelf=no || patchelf=yes
+[ -z $(which patchelfmod) ] && patchelfmod=no || patchelfmod=yes
 
 errorExit() {
   echo "error: $1"
@@ -471,7 +471,7 @@ ICON = "$icon"
 ARCH = x86_64
 DATAPACKAGE = $datapackage
 Z = $compression
-PATCHELF = $patchelf
+PATCHELFMOD = $patchelfmod
 EOF
   fi
   cat >> "$debian/confflags" << EOF
@@ -480,7 +480,7 @@ ICON = "$icon"
 ARCH = x86
 DATAPACKAGE = $datapackage
 Z = $compression
-PATCHELF = $patchelf
+PATCHELFMOD = $patchelfmod
 EOF
 
   [ $disable_x86 = "yes" ] && rm -rf "$builddir/x86"

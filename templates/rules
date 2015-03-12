@@ -90,12 +90,12 @@ endif
 	done
 
 
+# Unity engine games don't provide any shared libraries
 override_dh_makeshlibs:
-	# Unity engine games don't provide any shared libraries
 
 
 override_dh_shlibdeps:
-ifeq ($(PATCHELF),yes)
+ifeq ($(PATCHELFMOD),yes)
 	# remove unnecessary dependencies that a binary was errerously linked against
 	# by deleting their DT_NEEDED entries from the ELF header
 
