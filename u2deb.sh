@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="15.03.11.1"
+appversion="15.03.12.1"
 
 appname=$(basename "$0")
 SCRIPTPATH="$(dirname "$(readlink -f "$0")")"
@@ -77,7 +77,7 @@ cat << EOF
  Environment variables:
    UPSTREAMNAME         the original name of the game, including special chars
                            or spaces
-   FILENAME             specify a name for the executable and the package
+   PKGNAME              specify a name for the executable and the package
    SHORTDESCRIPTION     a brief game description for the package and menu entry
    VERSION              the game's upstream version
    MAINTAINER           The package maintainer. Make sure to use the following
@@ -187,12 +187,11 @@ if [ $mode = "prepare" ] ; then
   rm -rf $cleanfiles
 
   # get the application name
-  FILENAME_REAL="$(basename "$(find "$origpath" -type d -name *_Data)" | head -c-6)"
-  if [ -z "$FILENAME" ] ; then
-    NAME="$FILENAME_REAL"
-    FILENAME="$FILENAME_REAL"
-  else
-    NAME="$FILENAME"
+  FILENAME="$(basename "$(find "$origpath" -type d -name *_Data)" | head -c-6)"
+  [ -z "$PKGNAME" ] && NAME="$FILENAME" || NAME="$PKGNAME"
+  [ -z "$UPSTREAMNAME" ] && UPSTREAMNAME="$NAME"
+  if [ -n "$UPSTREAMNAME" ] && [ -n "$PKGNAME" ] ; then
+    NAME="$PKGNAME"
   fi
 
   # check for architectures
@@ -200,24 +199,24 @@ if [ $mode = "prepare" ] ; then
   X86_64="no"
   RENAME_TO_X86="no"
   RENAME_TO_X86_64="no"
-  [ -f "$origpath/$FILENAME_REAL".x86 ] && X86="yes"
-  [ -f "$origpath/$FILENAME_REAL".x86_64 ] && X86_64="yes"
+  [ -f "$origpath/$FILENAME".x86 ] && X86="yes"
+  [ -f "$origpath/$FILENAME".x86_64 ] && X86_64="yes"
   if [ $X86 = "no" ] && [ $X86_64 = "no" ] ; then
-    echo "neither '$FILENAME_REAL.x86' nor '$FILENAME_REAL.x86_64' found"
-    if [ -f "$origpath/$FILENAME_REAL" ] ; then
-      if [ "$(file "$origpath/$FILENAME_REAL" | grep 'ELF 32-bit')" ]; then
-        echo "'$FILENAME_REAL' (x86) found"
+    echo "neither '$FILENAME.x86' nor '$FILENAME.x86_64' found"
+    if [ -f "$origpath/$FILENAME" ] ; then
+      if [ "$(file "$origpath/$FILENAME" | grep 'ELF 32-bit')" ]; then
+        echo "'$FILENAME' (x86) found"
         X86="yes"
         RENAME_TO_X86="yes"
-      elif [ "$(file "$origpath/$FILENAME_REAL" | grep 'ELF 64-bit')" ]; then
-        echo "'$FILENAME_REAL' (x86_64) found"
+      elif [ "$(file "$origpath/$FILENAME" | grep 'ELF 64-bit')" ]; then
+        echo "'$FILENAME' (x86_64) found"
         X86_64="yes"
         RENAME_TO_X86_64="yes"
       else
-        errorExit "'$FILENAME_REAL' was found but is not a valid ELF binary"
+        errorExit "'$FILENAME' was found but is not a valid ELF binary"
       fi
     else
-      errorExit "couldn't find '$FILENAME_REAL' either"
+      errorExit "couldn't find '$FILENAME' either"
     fi
   fi
   if [ $DISABLE_X86 = "yes" ] && [ $X86_64 = "no" ] ; then
@@ -257,8 +256,7 @@ if [ $mode = "prepare" ] ; then
 
   # rename application
   NAME=$(echo "$NAME" | sed -e 's/\(.*\)/\L\1/; s/\ -\ /-/g; s/\ /-/g; s/_/-/g')
-  [ "$FILENAME_REAL" != "$NAME" ] && rename "s/$FILENAME_REAL/$NAME/" "$sourcedir"/*
-  [ -z "$UPSTREAMNAME" ] && UPSTREAMNAME="$FILENAME"
+  [ "$FILENAME" != "$NAME" ] && rename "s/$FILENAME/$NAME/" "$sourcedir"/*
   if [ "$RENAME_TO_X86" = "yes" ] && [ -f "$sourcedir/$NAME" ] ; then
     mv "$sourcedir/$NAME" "$sourcedir/${NAME}.x86"
     echo "application was renamed to ${NAME}.x86"
@@ -285,10 +283,15 @@ if [ $mode = "prepare" ] ; then
   fi
 
   # enter packaging information
+  echo ""
+  echo "name: $UPSTREAMNAME"
+  echo "application/package name: $NAME"
   if [ -z "$SHORTDESCRIPTION" ] ; then
     echo ""
     echo "Please enter a brief description,"
     read -p "i.e. 'Unity engine video game': " SHORTDESCRIPTION
+  else
+    echo "description: $SHORTDESCRIPTION"
   fi
   if [ -f "$PWD/description" ] ; then
     cp "$PWD/description" "$topsrc"
@@ -305,24 +308,34 @@ if [ $mode = "prepare" ] ; then
     echo ""
     echo "Enter the game's release version. It should begin with a number"
     read -p "and mustn't contain and spaces or underscores: " VERSION
+  else
+    echo "package version: $VERSION"
   fi
   if [ -z "$MAINTAINER" ] ; then
     echo ""
     echo "Enter the package maintainer information."
     echo "Use the following pattern: John Doe <nick@domain.org>"
     read -p " " MAINTAINER
+  else
+    echo "package maintainer: $MAINTAINER"
   fi
   if [ -z "$HOMEPAGE" ] ; then
     echo ""
     read -p "What's the game's homepage? " HOMEPAGE
+  else
+    echo "homepage: $HOMEPAGE"
   fi
   if [ -z "$YEAR" ] ; then
     echo ""
     read -p "What year is this game from? " YEAR
+  else
+    echo "year: $YEAR"
   fi
   if [ -z "$RIGHTHOLDER" ] ; then
     echo ""
     read -p "Who's holding the copyright? " RIGHTHOLDER
+  else
+    echo "copyright: $RIGHTHOLDER"
   fi
   echo ""
   echo ""
