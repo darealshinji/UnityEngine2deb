@@ -1,6 +1,10 @@
 /debian/u2deb.1
 *.log
 
+# link to temporary files
+/UnityEngine2deb_working_directory
+
+# example files suggested in README.md
 /Linux/
 *.zip
 
