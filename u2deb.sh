@@ -30,7 +30,7 @@ appversion="15.03.12.1"
 
 appname=$(basename "$0")
 SCRIPTPATH="$(dirname "$(readlink -f "$0")")"
-topsrc="/tmp/UnityEngine2deb_tmp"
+[ -z "$TMP" ] && topsrc="/tmp/UnityEngine2deb_tmp" || topsrc="$TMP"
 builddir="$topsrc/build"
 sourcedir="$topsrc/source"
 icondir="$builddir/icon"
@@ -85,6 +85,8 @@ cat << EOF
    HOMEPAGE             homepage of the game or the developer
    YEAR                 the year when the game was released
    RIGHTHOLDER          Who's holding the copyright?
+   TMP                  Path to store temporary files (working directory).
+                           Default: /tmp/UnityEngine2deb_tmp
 
 EOF
 }

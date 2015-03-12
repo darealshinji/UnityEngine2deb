@@ -75,6 +75,10 @@ the year when the game was released
 .TP
 \fBRIGHTHOLDER
 Who's holding the copyright?
+.TP
+\fBTMP
+Path to store temporary files (working directory).
+Default: /tmp/UnityEngine2deb_tmp
 
 .SH SEE ALSO
 .I https://github.com/darealshinji/UnityEngine2deb
