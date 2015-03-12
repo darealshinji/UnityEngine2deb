@@ -87,7 +87,7 @@ cat << EOF
                            pattern: John Doe <nick@domain.org>
    HOMEPAGE             homepage of the game or the developer
    YEAR                 the year when the game was released
-   RIGHTHOLDER          Who's holding the copyright?
+   COPYRIGHT          Who's holding the copyright?
 
 EOF
 }
@@ -334,11 +334,11 @@ if [ $mode = "prepare" ] ; then
   else
     echo "year: $YEAR"
   fi
-  if [ -z "$RIGHTHOLDER" ] ; then
+  if [ -z "$COPYRIGHT" ] ; then
     echo ""
-    read -p "Who's holding the copyright? " RIGHTHOLDER
+    read -p "Who's holding the copyright? " COPYRIGHT
   else
-    echo "copyright: $RIGHTHOLDER"
+    echo "copyright: $COPYRIGHT"
   fi
   echo ""
   echo ""
@@ -347,7 +347,7 @@ if [ $mode = "prepare" ] ; then
   [ -z "$MAINTAINER" ] && MAINTAINER="John Doe <nick@domain.org>"
   [ -z "$HOMEPAGE" ] && HOMEPAGE="http://www.unity3d.com/"
   [ -z "$YEAR" ] && YEAR=$(date +%Y)
-  [ -z "$RIGHTHOLDER" ] && RIGHTHOLDER="the creator of '$name'"
+  [ -z "$COPYRIGHT" ] && COPYRIGHT="the creator of '$name'"
 
   # create Debian files
   mkdir -p "$debian"
@@ -388,7 +388,7 @@ EOF
 .SH SEE ALSO
 .I $HOMEPAGE
 .SH AUTHOR
-$RIGHTHOLDER
+$COPYRIGHT
 EOF
 
   cat >> "$debian/copyright" << EOF
@@ -397,9 +397,9 @@ Upstream-Name: $UPSTREAMNAME
 Source: $HOMEPAGE
 
 Files: *
-Copyright: $YEAR $RIGHTHOLDER
+Copyright: $YEAR $COPYRIGHT
 License:
- Copyright (c) $YEAR, $RIGHTHOLDER
+ Copyright (c) $YEAR, $COPYRIGHT
  All Rights Reserved.
 
 EOF

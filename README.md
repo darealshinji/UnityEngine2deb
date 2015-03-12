@@ -39,7 +39,7 @@ Create Debian packages of Unity Engine games
                            pattern: John Doe <nick@domain.org>
    HOMEPAGE             homepage of the game or the developer
    YEAR                 the year when the game was released
-   RIGHTHOLDER          Who's holding the copyright?
+   COPYRIGHT            Who's holding the copyright?
 ```
 
 Example:
