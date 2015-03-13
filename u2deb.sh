@@ -516,8 +516,8 @@ fi
 ################## build ##################
 buildpackage () {
   arch=${1}
-  name="$(grep 'NAME = ' $builddir/$arch/debian/confflags | sed -e 's/NAME = //')"
   if [ -d "$builddir/${arch}" ] ; then
+    name="$(grep 'NAME = ' $builddir/${arch}/debian/confflags | sed -e 's/NAME = //')"
     cd "$builddir/${arch}"
     chmod a+x debian/rules source/${name}.${arch}
     mv source/${name}.${arch} source/${name}
