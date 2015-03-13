@@ -58,7 +58,7 @@ don't build an i386 package
 don't build an amd64 package
 .TP
 \fB\-\-no\-patchelf
-don't patch ELF binary headers
+don't remove unused DT_NEEDED entries from ELF binary file headers
 
 .SH "Environment variables"
 .TP

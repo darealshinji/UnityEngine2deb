@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="15.03.12.1"
+appversion="15.03.13.1"
 
 appname=$(basename "$0")
 scriptpath="$(dirname "$(readlink -f "$0")")"
@@ -72,7 +72,8 @@ cat << EOF
    --icon=<icon>        use this icon for the desktop entry
    --no-x86             don't build an i386 package
    --no-x86_64          don't build an amd64 package
-   --no-patchelf        don't patch ELF binary headers
+   --no-patchelf        don't remove unused DT_NEEDED entries from ELF binary
+                           file headers
 
  Environment variables:
    UPSTREAMNAME         the original name of the game, including special chars

@@ -8,10 +8,10 @@ VERSION = $(shell dpkg-parsechangelog | grep -e "Version:" | cut -d' ' -f2 | cut
 
 override_dh_auto_clean:
 	dh_auto_clean
-	rm -f debian/u2deb.1
+	rm -f u2deb.1
 
 override_dh_auto_build:
-	sed -e 's/@VERSION@/$(VERSION)/;' debian/u2deb.1.in > debian/u2deb.1
+	sed -e 's/@VERSION@/$(VERSION)/;' u2deb.1.in > u2deb.1
 
 override_dh_install:
 	dh_install
