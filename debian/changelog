@@ -1,3 +1,12 @@
+u2deb (15.03.13.1~trusty) trusty; urgency=low
+
+  * Removing unused DT_NEEDED entries from ELF file headers can now be turned
+    off with --no-patchelf
+  * i386 packages created on amd64 architectures do no longer have a double
+    libc6 dependency entry in their control file
+
+ -- Marshall Banana <djcj@gmx.de>  Fri, 13 Mar 2015 13:07:37 +0100
+
 u2deb (15.03.12.1~trusty) trusty; urgency=low
 
   * Enable -V and -h commands even if templates weren't found
