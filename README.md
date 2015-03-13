@@ -30,6 +30,7 @@ Create Debian packages of Unity Engine games
    --icon=<icon>        use this icon for the desktop entry
    --no-x86             don't build an i386 package
    --no-x86_64          don't build an amd64 package
+   --no-patchelf        don't patch ELF binary headers
 
  Environment variables:
    UPSTREAMNAME         the original name of the game, including special chars
@@ -53,6 +54,7 @@ unzip SUPERHOT_Prototype_Linux.zip
 
 # create package
 export UPSTREAMNAME="SUPERHOT Prototype"
+export PKGNAME="superhot-prototype"
 ./u2deb.sh prepare ./Linux --icon=sh-icon.png
 ./u2deb.sh make -Z=bz2
 ./u2deb.sh clean

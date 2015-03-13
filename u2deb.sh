@@ -72,6 +72,7 @@ cat << EOF
    --icon=<icon>        use this icon for the desktop entry
    --no-x86             don't build an i386 package
    --no-x86_64          don't build an amd64 package
+   --no-patchelf        don't patch ELF binary headers
 
  Environment variables:
    UPSTREAMNAME         the original name of the game, including special chars
@@ -116,6 +117,7 @@ mode="empty"
 output="$HOME"
 disable_x86="no"
 disable_x86_64="no"
+force_no_patchelfmod="no"
 wd=""
 for opt; do
   optarg="${opt#*=}"
@@ -149,6 +151,10 @@ for opt; do
       ;;
     "--no-x86_64")
       disable_x86_64="yes"
+      ;;
+    "--no-patchelf")
+      patchelfmod="no"
+      force_no_patchelfmod="yes"
       ;;
     "help"|"-h"|"--version"|"-V")
       ;;
@@ -521,15 +527,21 @@ buildpackage () {
 }
 
 if [ $mode = "build" ] ; then
-  if [ ! -z "$compression" ] ; then
-    [ "$compression" = "gz" ] && compression="gzip"
-    [ "$compression" = "bz2" ] && compression="bzip2"
-    echo "Z = $compression" >> "$builddir/x86/debian/confflags"
-  fi
-
   if [ ! -d "$builddir/x86" ] && [ ! -d "$builddir/x86_64" ] ; then
     echo "no files in '$builddir'!"
     errorExit "run '$appname prepare <path>' first"
+  fi
+
+  if [ ! -z "$compression" ] ; then
+    [ "$compression" = "gz" ] && compression="gzip"
+    [ "$compression" = "bz2" ] && compression="bzip2"
+    [ -f "$builddir/x86/debian/confflags" ] && echo "Z = $compression" >> "$builddir/x86/debian/confflags"
+    [ -f "$builddir/x86_64/debian/confflags" ] && echo "Z = $compression" >> "$builddir/x86_64/debian/confflags"
+  fi
+
+  if [ $force_no_patchelfmod = "yes" ] ; then
+    [ -f "$builddir/x86/debian/confflags" ] && echo "PATCHELFMOD = no" >> "$builddir/x86/debian/confflags"
+    [ -f "$builddir/x86_64/debian/confflags" ] && echo "PATCHELFMOD = no" >> "$builddir/x86_64/debian/confflags"
   fi
 
   buildpackage x86
