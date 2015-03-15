@@ -292,7 +292,7 @@ if [ $mode = "prepare" ] ; then
   fi
 
   # icon
-  with_gpl_icon="no"
+  default_icon="no"
   mkdir -p "$icondir"
   if [ -z "$icon" ] || [ ! -f "$icon" ] ; then
     if [ -f "$sourcedir/${name}_Data/Resources/UnityPlayer.png" ] ; then
@@ -301,7 +301,7 @@ if [ $mode = "prepare" ] ; then
     else
       cp "$templates/icon.svg" "$icondir/$name.svg"
       icon="$icondir/$name.svg"
-      with_gpl_icon="yes"
+      default_icon="yes"
     fi
     else
       cp "$icon" "$icondir/$name.png"
@@ -427,7 +427,7 @@ License:
 
 EOF
   cat "$templates/debian-copyright" >> "$debian/copyright"
-  [ $with_gpl_icon = "yes" ] && (cat "$templates/icon-copyright" >> "$debian/copyright")
+  # [ $default_icon = "yes" ] && (cat "$templates/icon-copyright" >> "$debian/copyright")
 
   [ $datapackage = "yes" ] && datadeps=", ${name}-data (= \${binary:Version})"
   cat >> "$debian/control" << EOF
