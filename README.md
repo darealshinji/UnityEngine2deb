@@ -49,15 +49,14 @@ Create Debian packages of Unity Engine games
 Example:
 ```
 # download a game
-wget http://superhotgame.com/SUPERHOT_Prototype_Linux.zip
-wget -O sh-icon.png http://fs1.directupload.net/images/150103/8jk9r9gd.png
-unzip SUPERHOT_Prototype_Linux.zip
+wget -O env.zip http://www.moddb.com/downloads/mirror/64567/100/dfda248f3f6f8dc9c4f9ef92b9abe1aa
+unzip env.zip -d env-game
 
 # create package
-export UPSTREAMNAME="SUPERHOT Prototype"
-export PKGNAME="superhot-prototype"
-./u2deb.sh prepare ./Linux --icon=sh-icon.png
-./u2deb.sh make -Z=bz2
+export PKGNAME=env-game   # don't conflict with the /usr/bin/env command
+export UPSTREAMNAME=Env
+./u2deb.sh prepare env-game --data
+./u2deb.sh make
 ./u2deb.sh clean
 ```
 
