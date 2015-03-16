@@ -280,6 +280,12 @@ if [ $mode = "prepare" ] ; then
   rm -f "$sourcedir"/*.txt
   rm -rf `find "$sourcedir" -type d -name __MACOSX`
 
+  # add a ScreenSelector.png if required
+  if [ -f "`find "$sourcedir" -name ScreenSelector.so | head -n1`" ] && \
+     [ ! -f "$sourcedir/${name}_Data/ScreenSelector.png" ] ; then
+    cp "$templates/ScreenSelector.png" "$sourcedir/${name}_Data"
+  fi
+
   # rename application
   name=$(echo "$name" | sed -e 's/\(.*\)/\L\1/; s/\ -\ /-/g; s/\ /-/g; s/_/-/g')
   [ "$filename" != "$name" ] && rename "s/$filename/$name/" "$sourcedir"/*
