@@ -267,17 +267,16 @@ if [ $mode = "prepare" ] ; then
   find "$sourcedir" -type f -exec chmod a-x '{}' \;
 
   # remove executable stack
-  if [ $(which execstack) ]; then
+  if [ "$(which execstack)" ]; then
     find "$sourcedir" -name libmono.so -exec execstack -c '{}' \;
   fi
 
   # delete unnecessary files
   for f in libCSteamworks.so libsteam_api.so libSteamworksNative.so SteamworksNative.dll \
-           UnityEngine.dll.mdb Thumbs.db .DS_Store ;
+           \*.dll.mdb Thumbs.db .DS_Store ;
   do
     find "$sourcedir" -name "$f" -delete
   done
-  rm -f "$sourcedir"/*.txt
   rm -rf `find "$sourcedir" -type d -name __MACOSX`
 
   # rename application
@@ -500,12 +499,14 @@ EOF
   [ $disable_x86_64 = "yes" ] && rm -rf "$builddir/x86_64"
   if [ -d "$builddir/x86" ] ; then
     echo "copy files to build/x86... "
-    cp -vr $sourcedir "$builddir/x86"
+    mkdir -p "$builddir/x86/source"
+    cp -vr "$sourcedir/${name}_Data" "$sourcedir/${name}.x86" "$builddir/x86/source"
     echo "done"
   fi
   if [ -d "$builddir/x86_64" ] ; then
     echo "copy files to build/x86_64..."
-    cp -vr $sourcedir "$builddir/x86_64"
+    mkdir -p "$builddir/x86_64/source"
+    cp -vr "$sourcedir/${name}_Data" "$sourcedir/${name}.x86_64" "$builddir/x86_64/source"
     echo "done"
   fi
   if [ -d "$builddir/x86" ] && [ -d "$builddir/x86_64" ] ; then
