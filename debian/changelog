@@ -1,3 +1,10 @@
+u2deb (15.03.26.1~trusty) trusty; urgency=low
+
+  * Copy only game_Data and game.x86*
+  * Delete any *.dll.mdb file
+
+ -- Marshall Banana <djcj@gmx.de>  Thu, 26 Mar 2015 17:31:33 +0100
+
 u2deb (15.03.16.1~trusty) trusty; urgency=low
 
   * Add missing ScreenSelector.png icon if required
