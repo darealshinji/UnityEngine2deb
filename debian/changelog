@@ -1,3 +1,11 @@
+u2deb (15.04.23.1~trusty) trusty; urgency=low
+
+  * Don't fail package building if there's a 64 bit binary but no 32 bit one
+  * Ship with a copy of PatchELFmod so we don't have to rely on it as a
+    third-party dependency
+
+ -- Marshall Banana <djcj@gmx.de>  Thu, 23 Apr 2015 19:16:42 +0200
+
 u2deb (15.03.26.1~trusty) trusty; urgency=low
 
   * Copy only game_Data and game.x86*
