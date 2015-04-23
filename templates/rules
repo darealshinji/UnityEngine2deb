@@ -99,6 +99,8 @@ ifeq ($(PATCHELFMOD),yes)
 	# remove unnecessary dependencies that a binary was errerously linked against
 	# by deleting their DT_NEEDED entries from the ELF header
 
+	$(MAKE) -C $(CURDIR)/debian/patchelfmod
+
 	rm -f uselessdeps.log
 	(dh_shlibdeps -- --warnings=2 2>&1 | tee uselessdeps.log) > /dev/null
 
@@ -107,7 +109,7 @@ ifeq ($(PATCHELFMOD),yes)
 	do                                                                                \
 	    dep=$$(cut -d' ' -f15 uselessdeps.log | sed -n $${n}p) ;                      \
 	    bin=$$(cut -d' ' -f10 uselessdeps.log | sed -n $${n}p) ;                      \
-	    patchelfmod --debug --remove-needed $$dep $$bin 2>&1 | grep -v -e 'keeping' ; \
+	    $(CURDIR)/debian/patchelfmod/patchelfmod --debug --remove-needed $$dep $$bin 2>&1 | grep -v -e 'keeping' ; \
 	done ;
 endif
 	dh_shlibdeps

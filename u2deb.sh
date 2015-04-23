@@ -33,8 +33,6 @@ scriptpath="$(dirname "$(readlink -f "$0")")"
 linkname="UnityEngine2deb_working_directory"
 defaultwd="/tmp/UnityEngine2deb_tmp"
 
-[ -z $(which patchelfmod) ] && patchelfmod=no || patchelfmod=yes
-
 errorExit() {
   echo "error: $1"
   exit 1
@@ -118,7 +116,7 @@ mode="empty"
 output="$HOME"
 disable_x86="no"
 disable_x86_64="no"
-force_no_patchelfmod="no"
+patchelfmod="yes"
 wd=""
 for opt; do
   optarg="${opt#*=}"
@@ -155,7 +153,6 @@ for opt; do
       ;;
     "--no-patchelf")
       patchelfmod="no"
-      force_no_patchelfmod="yes"
       ;;
     "help"|"-h"|"--version"|"-V")
       ;;
@@ -387,7 +384,8 @@ if [ $mode = "prepare" ] ; then
   "$templates/compat" \
   "$templates/lintian-overrides" \
   "$templates/rules" \
-  "$templates/make-icons.sh" "$debian"
+  "$templates/make-icons.sh" \
+  "$templates/patchelfmod" "$debian"
   chmod a+x "$debian/rules" "$debian/make-icons.sh"
 
   cat >> "$builddir/x86/${name}.desktop" << EOF
@@ -547,11 +545,6 @@ if [ $mode = "build" ] ; then
     [ "$compression" = "bz2" ] && compression="bzip2"
     [ -f "$builddir/x86/debian/confflags" ] && echo "Z = $compression" >> "$builddir/x86/debian/confflags"
     [ -f "$builddir/x86_64/debian/confflags" ] && echo "Z = $compression" >> "$builddir/x86_64/debian/confflags"
-  fi
-
-  if [ $force_no_patchelfmod = "yes" ] ; then
-    [ -f "$builddir/x86/debian/confflags" ] && echo "PATCHELFMOD = no" >> "$builddir/x86/debian/confflags"
-    [ -f "$builddir/x86_64/debian/confflags" ] && echo "PATCHELFMOD = no" >> "$builddir/x86_64/debian/confflags"
   fi
 
   buildpackage x86
