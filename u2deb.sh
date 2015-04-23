@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="15.03.26.1"
+appversion="15.04.23.1"
 
 appname=$(basename "$0")
 scriptpath="$(dirname "$(readlink -f "$0")")"
@@ -245,6 +245,9 @@ if [ $mode = "prepare" ] ; then
       errorExit "couldn't find '$filename' either"
     fi
   fi
+  if [ $x86_64 = "yes" ] && [ $x86 = "no" ]; then
+    disable_x86="yes"
+  fi
   if [ $disable_x86 = "yes" ] && [ $x86_64 = "no" ] ; then
     errorExit "x86 disabled but no x86_64 binary found"
   elif [ $disable_x86_64 = "yes" ] && [ $x86 = "no" ] ; then
@@ -432,7 +435,6 @@ License:
 
 EOF
   cat "$templates/debian-copyright" >> "$debian/copyright"
-  # [ $default_icon = "yes" ] && (cat "$templates/icon-copyright" >> "$debian/copyright")
 
   [ $datapackage = "yes" ] && datadeps=", ${name}-data (= \${binary:Version})"
   cat >> "$debian/control" << EOF
