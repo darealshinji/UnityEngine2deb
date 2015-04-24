@@ -25,14 +25,15 @@ include debian/confflags
 
 DEB_HOST_GNU_CPU ?= $(shell dpkg-architecture -qDEB_HOST_GNU_CPU)
 
-ICONPREFIX = usr/lib/
+LIBPREFIX  = usr/lib/games
+ICONPREFIX = $(LIBPREFIX)/
 ICONPKG    = $(NAME)
 ifeq ($(DATAPACKAGE), yes)
 ICONPREFIX = usr/share/games/
 ICONPKG    = $(NAME)-data
 endif
 ICONDEST   = $(CURDIR)/debian/$(ICONPKG)/usr/share
-libdir     = $(CURDIR)/debian/$(NAME)/usr/lib/$(NAME)/
+libdir     = $(CURDIR)/debian/$(NAME)/$(LIBPREFIX)/$(NAME)/
 datadir    = $(CURDIR)/debian/$(NAME)-data/usr/share/games/$(NAME)/
 plugindir  = source/$(NAME)_Data/Plugins
 
@@ -52,10 +53,10 @@ override_dh_auto_install:
 	# install files
 	cp -r source/* $(libdir)
 	install -m644 $(NAME).desktop $(CURDIR)/debian/$(NAME)/usr/share/applications
-	dh_link -p$(NAME) usr/lib/$(NAME)/$(NAME) usr/games/$(NAME)
+	dh_link -p$(NAME) $(LIBPREFIX)/$(NAME)/$(NAME) usr/games/$(NAME)
 
 ifeq ($(DATAPACKAGE), yes)
-	# remove data package files from /usr/lib
+	# remove data package files from /$(LIBPREFIX)
 	rm -rf $(libdir)$(NAME)_Data
 
 	mkdir -p $(datadir)
@@ -71,7 +72,7 @@ ifeq ($(DATAPACKAGE), yes)
 	# create symbolic links between /usr/share and /usr/lib
 	for f in $$(ls $(datadir)$(NAME)_Data) ; \
 	do \
-	    dh_link -p$(NAME) usr/share/games/$(NAME)/$(NAME)_Data/$$f usr/lib/$(NAME)/$(NAME)_Data/$$f ; \
+	    dh_link -p$(NAME) usr/share/games/$(NAME)/$(NAME)_Data/$$f $(LIBPREFIX)/$(NAME)/$(NAME)_Data/$$f ; \
 	done
 endif
 
