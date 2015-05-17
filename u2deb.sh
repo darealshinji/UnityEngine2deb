@@ -267,8 +267,10 @@ if [ $mode = "prepare" ] ; then
   find "$sourcedir" -type f -exec chmod a-x '{}' \;
 
   # remove executable stack
-  which execstack 2>/dev/null >/dev/null
-  if [ "$(echo $?)" = 0 ]; then
+  export PATH="/usr/local/sbin:/usr/sbin:/sbin:${PATH}"  # on Debian /sbin isn't in PATH by default
+  set +e; which execstack 2>/dev/null >/dev/null; set -e
+  exitCode=$(echo $?)
+  if [ $exitCode = 0 ]; then
     find "$sourcedir" -name libmono.so -exec execstack -c '{}' \;
   fi
 
@@ -568,7 +570,7 @@ if [ $mode = "build" ] ; then
     done 2>&1 | tee -a "$builddir/packages.log"
   fi
   cp -f *.deb "$output"
-  echo "Debian packages copied to '$output'"
+  echo "Debian packages have been copied to '$output'"
 fi
 
 exit 0
