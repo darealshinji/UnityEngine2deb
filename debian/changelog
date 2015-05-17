@@ -5,7 +5,7 @@ u2deb (15.04.24.1~trusty) trusty; urgency=low
     third-party dependency
   * Install files into /usr/lib/games
 
- -- Marshall Banana <djcj@gmx.de>  Thu, 24 Apr 2015 16:00:00 +0200
+ -- Marshall Banana <djcj@gmx.de>  Fri, 24 Apr 2015 16:00:00 +0200
 
 u2deb (15.03.26.1~trusty) trusty; urgency=low
 
