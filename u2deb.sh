@@ -267,7 +267,8 @@ if [ $mode = "prepare" ] ; then
   find "$sourcedir" -type f -exec chmod a-x '{}' \;
 
   # remove executable stack
-  if [ "$(which execstack)" ]; then
+  which execstack 2>/dev/null >/dev/null
+  if [ "$(echo $?)" = 0 ]; then
     find "$sourcedir" -name libmono.so -exec execstack -c '{}' \;
   fi
 
