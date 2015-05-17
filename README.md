@@ -60,6 +60,6 @@ export UPSTREAMNAME=Env
 ./u2deb.sh clean
 ```
 
-Minimum dependencies: `debhelper librsvg2-bin imagemagick execstack`
+Minimum dependencies: `debhelper librsvg2-bin imagemagick`
 
-Recommended dependencies: `libgtk2.0-0 libgtk2.0-0:i386 libglu1-mesa libglu1-mesa:i386`
+Recommended dependencies: `execstack libgtk2.0-0 libgtk2.0-0:i386 libglu1-mesa libglu1-mesa:i386`
