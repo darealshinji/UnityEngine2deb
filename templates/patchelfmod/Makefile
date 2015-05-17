@@ -8,5 +8,5 @@ clean:
 distclean: clean
 
 $(BIN):
-	g++ -s -Wall -I. -o $@ patchelfmod.cpp
+	g++ -s -I. -o $@ patchelfmod.cpp
 
