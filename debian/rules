@@ -14,6 +14,6 @@ override_dh_auto_build:
 	sed -e 's/@VERSION@/$(VERSION)/;' u2deb.1.in > u2deb.1
 
 override_dh_install:
-	dh_install
+	dh_install -XCOPYING
 	install -m755 u2deb.sh $(CURDIR)/debian/u2deb/usr/bin/u2deb
 
