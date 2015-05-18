@@ -1,5 +1,4 @@
-Enter a long package description here.
+This game was built on the Unity engine (http://unity3d.com) and has been exported to GNU/Linux.
 
-Example:
-OpenArena is an open-source content package for ioQuake3 licensed under the GPL, effectively creating a free stand-alone game.
-Though OpenArena is a free replacement for id Software Inc.'s Quake 3 Arena, it is NOT compatible with the proprietary game!
+It was packaged for Debian-based systems with the help of UnityEngine2deb (https://github.com/darealshinji/UnityEngine2deb).
+

@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="15.05.17.1"
+appversion="15.05.18.1"
 
 appname=$(basename "$0")
 scriptpath="$(dirname "$(readlink -f "$0")")"
@@ -437,7 +437,7 @@ EOF
   cat "$templates/debian-copyright" >> "$debian/copyright"
 
   [ $datapackage = "yes" ] && datadeps=", ${name}-data (= \${binary:Version})"
-  cat >> "$debian/control" << EOF
+  cat >> "$debian/control.in" << EOF
 Source: $name
 Section: games
 Priority: optional
@@ -451,10 +451,10 @@ Architecture: any
 Depends: \${misc:Depends}, \${shlibs:Depends}, libpulse0$datadeps
 Description: $SHORTDESCRIPTION
 EOF
-  fold -s -w 79 "$topsrc/description" | sed 's/^/ /g; s/^ $/ ./g; s/ $//g' >> "$debian/control"
+  printf '%s\n' "`cat "$topsrc/description"`" | fold -s -w 79 | sed 's/^/ /g; s/^ $/ ./g; s/ $//g' >> "$debian/control.in"
 
   if [ $datapackage = "yes" ] ; then
-    cat >> "$debian/control" << EOF
+    cat >> "$debian/control.in" << EOF
 
 Package: ${name}-data
 Architecture: all
@@ -462,10 +462,12 @@ Depends: \${misc:Depends}
 Recommends: $name
 Description: $SHORTDESCRIPTION - game data
 EOF
-    fold -s -w 79 "$topsrc/description" | sed 's/^/ /g; s/^ $/ ./g; s/ $//g' >> "$debian/control"
-    echo " ." >> "$debian/control"
-    echo " This package installs the $name game data." >> "$debian/control"
+    printf '%s\n' "`cat "$topsrc/description"`" | fold -s -w 79 | sed 's/^/ /g; s/^ $/ ./g; s/ $//g' >> "$debian/control.in"
+    echo " ." >> "$debian/control.in"
+    echo " This package installs the $name game data." >> "$debian/control.in"
   fi
+
+  uniq "$debian/control.in" "$debian/control"
 
   cat >> "$debian/changelog" << EOF
 $name ($VERSION) unstable; urgency=medium
