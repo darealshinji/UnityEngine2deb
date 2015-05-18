@@ -500,15 +500,15 @@ EOF
   [ $disable_x86 = "yes" ] && rm -rf "$builddir/x86"
   [ $disable_x86_64 = "yes" ] && rm -rf "$builddir/x86_64"
   if [ -d "$builddir/x86" ] ; then
-    echo "copy files to build/x86... "
+    echo "hard link files to build/x86... "
     mkdir -p "$builddir/x86/source"
-    cp -vr "$sourcedir/${name}_Data" "$sourcedir/${name}.x86" "$builddir/x86/source"
+    cp -vrl "$sourcedir/${name}_Data" "$sourcedir/${name}.x86" "$builddir/x86/source"
     echo "done"
   fi
   if [ -d "$builddir/x86_64" ] ; then
-    echo "copy files to build/x86_64..."
+    echo "hard link files to build/x86_64..."
     mkdir -p "$builddir/x86_64/source"
-    cp -vr "$sourcedir/${name}_Data" "$sourcedir/${name}.x86_64" "$builddir/x86_64/source"
+    cp -vrl "$sourcedir/${name}_Data" "$sourcedir/${name}.x86_64" "$builddir/x86_64/source"
     echo "done"
   fi
   if [ -d "$builddir/x86" ] && [ -d "$builddir/x86_64" ] ; then
