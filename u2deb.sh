@@ -395,7 +395,6 @@ if [ $mode = "prepare" ] ; then
 [Desktop Entry]
 Name=$UPSTREAMNAME
 Comment=$SHORTDESCRIPTION
-TryExec=/usr/lib/$name/$name
 Exec=$name
 Type=Application
 Categories=Game;
