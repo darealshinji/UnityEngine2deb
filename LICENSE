@@ -43,5 +43,10 @@ SOFTWARE.
 
 
 
-The file templates/icon.svg was created by djcj <djcj@gmx.de> from scratch using Inkscape.
-It shows the Unity logo which is a trademark of Unity Technologies (http://unity3d.com).
+The files templates/icon.* were created by djcj <djcj@gmx.de> from scratch using Inkscape.
+They show the Unity logo which is a trademark of Unity Technologies (http://unity3d.com).
+
+
+The files templates/icon-alt.* were taken from the Tango icon theme (http://tango-project.org)
+and have been released into the Public Pomain.
+

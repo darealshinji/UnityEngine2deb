@@ -48,3 +48,9 @@ License: GPL-3+
  On Debian systems, the complete text of the GNU General
  Public License version 3 can be found in "/usr/share/common-licenses/GPL-3".
 
+Files: templates/icon-alt.*
+Copyright: none
+License: public-domain
+ The icons in this repository are herefore released into the Public Domain.
+Comment: http://tango-project.org
+
