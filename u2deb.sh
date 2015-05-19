@@ -307,8 +307,8 @@ if [ $mode = "prepare" ] ; then
       cp "$sourcedir/${name}_Data/Resources/UnityPlayer.png" "$icondir/$name.png"
       icon="$icondir/$name.png"
     else
-      cp "$templates/icon.svg" "$icondir/$name.svg"
-      icon="$icondir/$name.svg"
+      cp "$templates/icon.png" "$icondir/$name.png"
+      icon="$icondir/$name.png"
       default_icon="yes"
     fi
     else
