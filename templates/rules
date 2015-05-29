@@ -113,14 +113,14 @@ ifeq ($(PATCHELFMOD),yes)
 	    $(CURDIR)/debian/patchelfmod/patchelfmod --debug --remove-needed $$dep $$bin 2>&1 | grep -v -e 'keeping' ; \
 	done ;
 endif
-	dh_shlibdeps
-
+ifeq ($(ARCH), x86)
+	dh_shlibdeps -l/usr/lib/i386-linux-gnu/mesa/
+else
+	dh_shlibdeps -l/usr/lib/x86_64-linux-gnu/mesa/
+endif
 
 override_dh_gencontrol:
 	dh_gencontrol
-
-	# prevents Lintian warning 'virtual-package-depends-without-real-package-depends'
-	sed -i 's/, libgl1,/, libgl1-mesa-glx | libgl1,/g' debian/$(NAME)/DEBIAN/control
 
 # fix architecture when packaging i386 (amd64 only)
 ifeq ($(ARCH), x86)
