@@ -114,9 +114,9 @@ ifeq ($(PATCHELFMOD),yes)
 	done ;
 endif
 ifeq ($(ARCH), x86)
-	dh_shlibdeps -l/usr/lib/i386-linux-gnu/mesa/:/usr/lib/i386-linux-gnu
+	dh_shlibdeps -l/usr/lib/i386-linux-gnu/mesa/:/lib/i386-linux-gnu:/usr/lib/i386-linux-gnu
 else
-	dh_shlibdeps -l/usr/lib/x86_64-linux-gnu/mesa/:/usr/lib/x86_64-linux-gnu
+	dh_shlibdeps -l/usr/lib/x86_64-linux-gnu/mesa/:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu
 endif
 
 override_dh_gencontrol:
