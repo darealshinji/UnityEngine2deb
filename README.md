@@ -25,8 +25,8 @@ Create Debian packages of Unity Engine games
 
    -d, --data           build a separate package for architecture-
                            independent files
-   -Z=<method>          Specify compression method. Available are
-                           gzip/gz, bzip2/bz2 and xz.  Default: xz
+   --gzip               use gzip instead of xz compression (faster compression
+                           at the cost of bigger packages)
    --icon=<icon>        use this icon for the desktop entry
    --no-x86             don't build an i386 package
    --no-x86_64          don't build an amd64 package

@@ -43,10 +43,8 @@ Default: /tmp/UnityEngine2deb_tmp
 \fB\-d, \-\-data
 build a separate package for architecture-independent files
 .TP
-\fB\-Z=\fR<method>
-Specify compression method.
-Available are gzip/gz, bzip2/bz2 and xz.
-Default: xz
+\fB\-\-gzip
+use gzip instead of xz compression (faster compression at the cost of bigger packages)
 .TP
 \fB\-\-icon=\fR<icon>
 use this icon for the desktop entry

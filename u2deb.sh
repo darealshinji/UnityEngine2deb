@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="15.05.18.1"
+appversion="15.06.23.1"
 
 appname=$(basename "$0")
 scriptpath="$(dirname "$(readlink -f "$0")")"
@@ -65,8 +65,8 @@ cat << EOF
 
    -d, --data           build a separate package for architecture-
                            independent files
-   -Z=<method>          Specify compression method. Available are
-                           gzip/gz, bzip2/bz2 and xz.  Default: xz
+   --gzip               use gzip instead of xz compression (faster compression
+                           at the cost of bigger packages)
    --icon=<icon>        use this icon for the desktop entry
    --no-x86             don't build an i386 package
    --no-x86_64          don't build an amd64 package
@@ -114,6 +114,7 @@ datapackage="no"
 icon=""
 mode="empty"
 output="$HOME"
+compression="xz"
 disable_x86="no"
 disable_x86_64="no"
 patchelfmod="yes"
@@ -139,8 +140,8 @@ for opt; do
     "--data"|"-d")
       datapackage="yes"
       ;;
-    -Z=*)
-      compression="$optarg"
+    --gzip)
+      compression="gzip"
       ;;
     --icon=*)
       icon="$optarg"
@@ -192,12 +193,6 @@ fi
 
 ################# prepare #################
 if [ $mode = "prepare" ] ; then
-  [ "$compression" = "gz" ] && compression="gzip"
-  [ "$compression" = "bz2" ] && compression="bzip2"
-  if [ "$compression" != "gzip" ] && [ "$compression" != "bzip2" ] && [ "$compression" != "xz" ] ; then
-    compression="xz"
-  fi
-
   if [ -z "$origpath" ] ; then
     errorExit "no path specified"
   elif [ ! -e "$origpath" ] ; then
@@ -542,13 +537,6 @@ if [ $mode = "build" ] ; then
   if [ ! -d "$builddir/x86" ] && [ ! -d "$builddir/x86_64" ] ; then
     echo "no files in '$builddir'!"
     errorExit "run '$appname prepare <path>' first"
-  fi
-
-  if [ ! -z "$compression" ] ; then
-    [ "$compression" = "gz" ] && compression="gzip"
-    [ "$compression" = "bz2" ] && compression="bzip2"
-    [ -f "$builddir/x86/debian/confflags" ] && echo "Z = $compression" >> "$builddir/x86/debian/confflags"
-    [ -f "$builddir/x86_64/debian/confflags" ] && echo "Z = $compression" >> "$builddir/x86_64/debian/confflags"
   fi
 
   buildpackage x86
