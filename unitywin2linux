@@ -1,0 +1,103 @@
+#!/bin/bash
+
+set -e
+
+# Copyright (c) 2015, djcj <djcj@gmx.de>
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+
+LANG=C
+LANGUAGE=C
+LC_ALL=C
+
+appname=$(basename "$0")
+
+errorExit() {
+	echo "error: $1"
+	exit 1
+}
+
+if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] ; then
+cat << EOF
+
+ Install Linux binaries into a Windows-only Unity engine game.
+
+ Usage:
+   $appname -k|--keep <Unity-game-dir>
+   $appname -p|--print <Unity-game-dir>
+   $appname -h|--help
+
+ Options:
+   -h, --help           print this message
+   -k, --keep           don't delete Windows binaries
+
+EOF
+exit 0
+fi
+
+keep="no"
+print="no"
+origpath="$1"
+if [ "$1" = "-k" ] || [ "$1" = "--keep" ] ; then
+	keep="yes"
+	origpath="$2"
+fi
+if [ "$1" = "-p" ] || [ "$1" = "--print" ] ; then
+	print="yes"
+	origpath="$2"
+fi
+
+if [ -z "$origpath" ] ; then
+	errorExit "no path specified"
+elif [ ! -e "$origpath" ] ; then
+	errorExit "path to '$origpath' doesn't exist"
+elif [ ! -d "$origpath" ] ; then
+	errorExit "'$origpath' is not a directory"
+fi
+
+scriptpath="$(dirname "$(readlink -f "$0")")"
+export PATH="$scriptpath:$PATH"
+
+datadir="$(find "$origpath" -type d -name \*_Data | head -n1)"
+game="$(basename "$datadir" | sed 's/_Data$//')"
+version="$(head -c 30 "$datadir/mainData" | strings | head -c5)"
+txz="$HOME/.local/share/UnityEngine2deb/Engines/$version.tar.xz"
+
+if [ "$print" = "yes" ]; then
+	echo "Used Unity engine: version $version"
+	exit 0
+fi
+
+if [ ! -f "$txz" ]; then
+	getunityengine $version
+fi
+
+cd "$origpath"
+if [ "$keep" = "no" ]; then
+	rm -rvf ${game}.exe ${game}_Data/Mono/mono.dll ${game}_Data/Plugins
+fi
+tar xvf "$txz"
+mkdir -p ${game}_Data/Plugins
+mv $version/Plugins/* ${game}_Data/Plugins
+mv $version/Mono/* ${game}_Data/Mono
+mv $version/x86 ${game}.x86
+mv $version/x86_64 ${game}.x86_64
+chmod a+x ${game}.x86 ${game}.x86_64
+rm -rf $version
+
