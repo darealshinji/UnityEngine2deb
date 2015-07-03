@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="15.06.23.1"
+appversion="15.07.03.1"
 
 appname=$(basename "$0")
 scriptpath="$(dirname "$(readlink -f "$0")")"
@@ -253,12 +253,6 @@ if [ $mode = "prepare" ] ; then
   elif [ $disable_x86_64 = "yes" ] && [ $x86 = "no" ] ; then
     errorExit "x86_64 disabled but no x86 binary found"
   fi
-
-  # create working directory and symlink
-  #[ ! -L "$PWD/UnityEngine2deb_working_directory" ] || rm "$PWD/UnityEngine2deb_working_directory"
-  #rm -rf "$topsrc"
-  #mkdir -p "$topsrc"
-  #ln -s "$topsrc" "$PWD/UnityEngine2deb_working_directory"
 
   # copy source files
   echo "copy source files... "
