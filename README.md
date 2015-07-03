@@ -4,10 +4,10 @@ UnityEngine2deb
 Create Debian packages of Unity Engine games
 ```
  Usage:
-   u2deb.sh -h|--help|-V|--version
-   u2deb.sh -p|prepare <path> [OPTIONS]
-   u2deb.sh -b|build|make [OPTIONS]
-   u2deb.sh -c|clean [OPTIONS]
+   u2deb -h|--help|-V|--version
+   u2deb -p|prepare <path> [OPTIONS]
+   u2deb -b|build|make [OPTIONS]
+   u2deb -c|clean [OPTIONS]
 
  Options:
    -h, --help           print this message
@@ -55,9 +55,9 @@ unzip env.zip -d env-game
 # create package
 export PKGNAME=env-game   # don't conflict with the /usr/bin/env command
 export UPSTREAMNAME=Env
-./u2deb.sh prepare env-game --data
-./u2deb.sh make
-./u2deb.sh clean
+./u2deb prepare env-game --data
+./u2deb make
+./u2deb clean
 ```
 
 Minimum dependencies: `debhelper imagemagick`

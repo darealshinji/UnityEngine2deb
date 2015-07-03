@@ -30,8 +30,7 @@ appversion="15.06.23.1"
 
 appname=$(basename "$0")
 scriptpath="$(dirname "$(readlink -f "$0")")"
-linkname="UnityEngine2deb_working_directory"
-defaultwd="/tmp/UnityEngine2deb_tmp"
+wdconf="$HOME/.config/UnityEngie2deb/workingdir"
 
 errorExit() {
   echo "error: $1"
@@ -61,7 +60,6 @@ cat << EOF
    -o=<path>,
    --output=<path>      save Debian packages in <path>
    --working-dir=<path> Working directory where the temporary files are stored.
-                           Default: $defaultwd
 
    -d, --data           build a separate package for architecture-
                            independent files
@@ -86,6 +84,13 @@ cat << EOF
    COPYRIGHT            Who's holding the copyright?
 
 EOF
+
+if [ -f "$wdconf" ]; then
+  lastwd="$(cat "$wdconf")"
+  if [ -d "$lastwd" ]; then
+    echo "Current working directory is \`$lastwd'"
+  fi
+fi
 }
 
 if [ "$1" = "-V" ] || [ "$1" = "--version" ] ; then
@@ -172,10 +177,14 @@ if [ $mode = "empty" ] ; then
   exit 1
 fi
 
-if ([ $mode = "build" ] || [ $mode = "clean" ]) && [ -L "$PWD/$linkname" ] && [ -z "$wd" ] ; then
-  wd="$(readlink "$PWD/$linkname")"
+mkdir -p "$(dirname "$wdconf")"
+touch "$wdconf"
+lastwd="$(cat "$wdconf")"
+if ([ $mode = "build" ] || [ $mode = "clean" ]) && [ -d "$lastwd" ] && [ -z "$wd" ] ; then
+  wd="$lastwd"
 fi
-[ -n "$wd" ] && topsrc="$wd" || topsrc="$defaultwd"
+[ -n "$wd" ] && topsrc="$wd" || topsrc="`mktemp -d /tmp/UnityEngine2deb_tmpXXXXXXXXXX`"
+echo "$topsrc" > "$wdconf"
 builddir="$topsrc/build"
 sourcedir="$topsrc/source"
 icondir="$builddir/icon"
@@ -185,8 +194,7 @@ debian="$builddir/x86/debian"
 
 ################## clean ##################
 if [ $mode = "clean" ] ; then
-  rm -rvf "$topsrc"
-  [ ! -L "$PWD/$linkname" ] || rm -v "$PWD/$linkname"
+  rm -rvf "$topsrc" "$wdconf"
   exit 0
 fi
 
@@ -247,10 +255,10 @@ if [ $mode = "prepare" ] ; then
   fi
 
   # create working directory and symlink
-  [ ! -L "$PWD/UnityEngine2deb_working_directory" ] || rm "$PWD/UnityEngine2deb_working_directory"
-  rm -rf "$topsrc"
-  mkdir -p "$topsrc"
-  ln -s "$topsrc" "$PWD/UnityEngine2deb_working_directory"
+  #[ ! -L "$PWD/UnityEngine2deb_working_directory" ] || rm "$PWD/UnityEngine2deb_working_directory"
+  #rm -rf "$topsrc"
+  #mkdir -p "$topsrc"
+  #ln -s "$topsrc" "$PWD/UnityEngine2deb_working_directory"
 
   # copy source files
   echo "copy source files... "
