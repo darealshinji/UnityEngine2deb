@@ -1,19 +1,8 @@
 #!/usr/bin/make -f
 
-VERSION = $(shell dpkg-parsechangelog | grep -e "Version:" | cut -d' ' -f2 | cut -d~ -f1)
-
-
 %:
 	dh ${@}
 
-override_dh_auto_clean:
-	dh_auto_clean
-	rm -f u2deb.1
-
-override_dh_auto_build:
-	sed -e 's/@VERSION@/$(VERSION)/;' u2deb.1.in > u2deb.1
-
 override_dh_install:
 	dh_install -XCOPYING
-	install -m755 u2deb.sh $(CURDIR)/debian/u2deb/usr/bin/u2deb
 
