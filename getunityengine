@@ -120,6 +120,8 @@ if [ -z $dldata ]; then
 	done
 	find $files -type d -name linux*_withgfx_development* -exec mv '{}' "$files" 2>/dev/null \;
 	find $files -type d -name linux*_headless_development* -exec mv '{}' "$files" 2>/dev/null \;
+	find $files -type d -name linux*headlessstandaloneplayer -exec mv '{}' "$files" 2>/dev/null \;
+	find $files -type d -name linux*developmentstandaloneplayer -exec mv '{}' "$files" 2>/dev/null \;
 	set -e
 
 	echo ""
@@ -128,16 +130,39 @@ if [ -z $dldata ]; then
 	mkdir -vp $files/$version/Mono/x86_64
 	mkdir -vp $files/$version/Plugins/x86
 	mkdir -vp $files/$version/Plugins/x86_64
-	mv -v $files/linux32_withgfx_development*/LinuxPlayer $files/$version/x86
-	mv -v $files/linux64_withgfx_development*/LinuxPlayer $files/$version/x86_64
-	mv -v $files/linux32_withgfx_development*/Data/Plugins/x86/ScreenSelector.so $files/$version/Plugins/x86
-	mv -v $files/linux64_withgfx_development*/Data/Plugins/x86_64/ScreenSelector.so $files/$version/Plugins/x86_64
-	mv -v $files/linux32_headless_development*/Data/Mono/x86/libmono.so $files/$version/Mono/x86
-	mv -v $files/linux64_headless_development*/Data/Mono/x86_64/libmono.so $files/$version/Mono/x86_64
+
+	if [ -d $files/linux32headlessstandaloneplayer ]; then
+		mv -v $files/linuxdevelopmentstandaloneplayer/LinuxPlayer $files/$version/x86
+		mv -v $files/linux64developmentstandaloneplayer/LinuxPlayer $files/$version/x86_64
+		mv -v $files/linux32headlessstandaloneplayer/Data/Mono/libmono.so $files/$version/Mono/x86
+		mv -v $files/linux64developmentstandaloneplayer/Data/Mono/libmono.so $files/$version/Mono/x86_64
+		if [ -d $files/linuxdevelopmentstandaloneplayer/Data/Plugins ]; then
+			mv -v $files/linuxdevelopmentstandaloneplayer/Data/Plugins/ScreenSelector.so $files/$version/Plugins/x86
+			mv -v $files/linux64developmentstandaloneplayer/Data/Plugins/ScreenSelector.so $files/$version/Plugins/x86_64
+		else
+			rm -r $files/$version/Plugins
+		fi
+	elif [ -f $files/linuxdevelopmentstandaloneplayer/Data/Mono/libmono.so ]; then
+		mv -v $files/linuxdevelopmentstandaloneplayer/LinuxPlayer $files/$version/x86
+		mv -v $files/linux64developmentstandaloneplayer/LinuxPlayer $files/$version/x86_64
+		mv -v $files/linuxdevelopmentstandaloneplayer/Data/Mono/libmono.so $files/$version/Mono/x86
+		mv -v $files/linux64developmentstandaloneplayer/Data/Mono/libmono.so $files/$version/Mono/x86_64
+		rm -r $files/$version/Plugins
+	else
+		mv -v $files/linux32_withgfx_development*/LinuxPlayer $files/$version/x86
+		mv -v $files/linux64_withgfx_development*/LinuxPlayer $files/$version/x86_64
+		mv -v $files/linux32_withgfx_development*/Data/Plugins/x86/ScreenSelector.so $files/$version/Plugins/x86
+		mv -v $files/linux64_withgfx_development*/Data/Plugins/x86_64/ScreenSelector.so $files/$version/Plugins/x86_64
+		mv -v $files/linux32_headless_development*/Data/Mono/x86/libmono.so $files/$version/Mono/x86
+		mv -v $files/linux64_headless_development*/Data/Mono/x86_64/libmono.so $files/$version/Mono/x86_64
+	fi
 
 	echo ""
 	echo "-- strip engine binaries"
-	strip -v $files/$version/x86* $files/$version/Mono/x86*/* $files/$version/Plugins/x86*/*
+	strip -v $files/$version/x86* $files/$version/Mono/x86*/*
+	if [ -d $files/$version/Plugins ]; then
+		strip -v $files/$version/Plugins/x86*/*
+	fi
 
 	echo ""
 	echo "-- create archive"
