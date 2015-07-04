@@ -36,16 +36,23 @@ errorExit() {
 if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] ; then
 cat << EOF
 
- Install Linux binaries into a Windows-only Unity engine game.
+ Install Linux binaries into a Unity engine game and delete all previously
+ installed binary files.
+ You can use this script to create native Linux versions of games that were
+ released for Windows only or to create native 64 bit versions if a Linux
+ build was originally released only as 32 bit version.  You can also use it
+ to install the screenselector plugin if the original build came without it.
 
  Usage:
-   $appname -k|--keep <Unity-game-dir>
+   $appname [--no-sdk] <Unity-game-dir>
    $appname -p|--print <Unity-game-dir>
    $appname -h|--help
 
  Options:
+   --no-sdk             don't download the SDK if the mirrored engine package
+                        is not available
+   -p, --print          print used engine version and exit
    -h, --help           print this message
-   -k, --keep           don't delete Windows binaries
 
 EOF
 exit 0
@@ -53,13 +60,14 @@ fi
 
 keep="no"
 print="no"
+nosdk=""
 origpath="$1"
-if [ "$1" = "-k" ] || [ "$1" = "--keep" ] ; then
-	keep="yes"
-	origpath="$2"
-fi
 if [ "$1" = "-p" ] || [ "$1" = "--print" ] ; then
 	print="yes"
+	origpath="$2"
+fi
+if [ "$1" = "--no-sdk" ] ; then
+	nosdk="--no-sdk"
 	origpath="$2"
 fi
 
@@ -85,19 +93,18 @@ if [ "$print" = "yes" ]; then
 fi
 
 if [ ! -f "$txz" ]; then
-	getunityengine $version
+	getunityengine $version $nosdk
 fi
 
 cd "$origpath"
-if [ "$keep" = "no" ]; then
-	rm -rvf ${game}.exe ${game}_Data/Mono/mono.dll ${game}_Data/Plugins
-fi
+rm -rvf "${game}" "${game}."* "${game}_Data/Mono/mono.dll" "${game}_Data/Mono/x86"* "${game}_Data/Plugins"
+
 tar xvf "$txz"
-mkdir -p ${game}_Data/Plugins
-mv $version/Plugins/* ${game}_Data/Plugins
-mv $version/Mono/* ${game}_Data/Mono
-mv $version/x86 ${game}.x86
-mv $version/x86_64 ${game}.x86_64
-chmod a+x ${game}.x86 ${game}.x86_64
+mkdir -p "${game}_Data/Plugins"
+mv $version/Plugins/* "${game}_Data/Plugins"
+mv $version/Mono/* "${game}_Data/Mono"
+mv $version/x86 "${game}.x86"
+mv $version/x86_64 "${game}.x86_64"
+chmod a+x "${game}.x86" "${game}.x86_64"
 rm -rf $version
 

@@ -31,6 +31,7 @@ version="$1"
 exe=`mktemp /tmp/UnitySetup-XXXXXXXXXX --suffix=.exe`
 files=`mktemp -d /tmp/unityengine-XXXXXXXXXX`
 engines="$HOME/.local/share/UnityEngine2deb/Engines"
+nosdk="no"
 
 if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] ; then
 cat << EOF
@@ -39,14 +40,21 @@ cat << EOF
  <version> must be specified as <major>.<minor>.<patch> (i.e. 4.6.5).
 
  Usage:
-   $appname <version>
+   $appname [--no-sdk] <version>
    $appname -h|--help
 
  Options:
    -h, --help           print this message
+   --no-sdk             don't download the SDK if the mirrored engine package
+                        is not available
 
 EOF
 exit 0
+fi
+
+if [ "$1" = "--no-sdk" ] ; then
+	nosdk="yes"
+	version="$2"
 fi
 
 txz="$engines/$version.tar.xz"
@@ -89,6 +97,12 @@ wget -O "$engines/links.txt" "https://raw.githubusercontent.com/darealshinji/Uni
 set +e; dldata="$(grep -F "$version" "$engines/links.txt")"; set -e
 
 if [ -z $dldata ]; then
+	if [ "$nosdk" = "yes" ]; then
+		echo "Requested engine version is not among the mirror list and SDK download is disabled."
+		echo "Run again without \`--no-sdk'"
+		exit 1
+	fi
+
 	### download the Unity SDK
 	set +e; which 7z 2>/dev/null >/dev/null; set -e
 	exitCode=$(echo $?)
