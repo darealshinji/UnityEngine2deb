@@ -1,5 +1,6 @@
 5.1.1 8a1e79b5357950e41f6f1f410834e33d https://dropbox.com/s/910lsmjy91n58qj
 5.1.0 092bd547b648213d3e3c59de5f93cd44 https://dropbox.com/s/ffcwnkr7u4gl0bl
+5.0.4 e484fff002dd851161fd645728ba5f7d https://dropbox.com/s/t2cwhq46vgsqmo6
 5.0.3 8ecf67c6615ce14fda818889740404d1 https://dropbox.com/s/rhet6qb1zyt6cm1
 5.0.2 3eb04566537ba9f2e714036c775bb1ec https://dropbox.com/s/79jqxls577kdmiu
 5.0.1 ca2c86a54600aa077e3d8bb10338d29b https://dropbox.com/s/q9nwigaaidpohfm
