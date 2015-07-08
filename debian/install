@@ -1,4 +1,3 @@
-u2deb            /usr/bin
-getunityengine   /usr/bin
-unitywin2linux   /usr/bin
-templates/*      /usr/share/u2deb
+copyunityengine   /usr/bin
+u2deb             /usr/bin
+templates/*       /usr/share/u2deb

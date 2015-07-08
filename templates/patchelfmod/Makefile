@@ -8,5 +8,5 @@ clean:
 distclean: clean
 
 $(BIN):
-	g++ -w -s -I. -o $@ $@.cpp
+	g++ -w -g -I. -o $@ $@.cpp
 
