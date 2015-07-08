@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="15.07.03.1"
+appversion="15.07.08.1"
 
 appname=$(basename "$0")
 scriptpath="$(dirname "$(readlink -f "$0")")"
@@ -40,13 +40,13 @@ errorExit() {
 help() {
 cat << EOF
 
- Create Debian packages of Unity Engine games
+ Create Debian packages of Unity engine games
 
  Usage:
-   $appname -h|--help|-V|--version
-   $appname -p|prepare <path> [OPTIONS]
-   $appname -b|build|make [OPTIONS]
-   $appname -c|clean [OPTIONS]
+   $appname -h | --help | -V | --version
+   $appname -p | prepare <gamedir> [OPTIONS]
+   $appname -b | build | make [OPTIONS]
+   $appname -c | clean [OPTIONS]
 
  Options:
    -h, --help           print this message

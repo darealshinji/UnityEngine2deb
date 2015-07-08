@@ -1,0 +1,47 @@
+.TH COPYUNITYENGINE 1 "" ""
+.SH NAME
+copyunityengine \- install Linux binaries into a Unity engine game
+
+.SH SYNOPSIS
+.B copyunityengine \fR[\fB\-\-no\-sdk \fR| \fB\-\-force\-sdk\fR] <gamedir>
+.br
+.B copyunityengine \-p\fR| \fB\-\-print  \fR<gamedir>
+.br
+.B copyunityengine \-d\fR| \fB\-\-download  \fR[\fB\-\-no\-sdk \fR| \fB\-\-force\-sdk\fR] <version>
+.br
+.B copyunityengine \-h\fR| \fB\-\-help
+
+.SH DESCRIPTION
+Install Linux binaries into a Unity engine game and delete all previously
+installed binary files.
+You can use this script to create native Linux versions of games that were
+released for Windows only or to create native 64 bit versions if a Linux
+build was originally released only as 32 bit version.
+You can also use it to install the screenselector plugin if the original build
+came without it.
+
+.SH OPTIONS
+.TP
+\fB\-\-no\-sdk
+don't download the SDK if a mirrored engine package is not available
+.TP
+\fB\-\-force\-sdk
+download the SDK even if a mirrored engine package is available
+.TP
+\fB\-p, \-\-print
+print used engine version and exit
+.TP
+\fB\-d, \-\-download
+download the engine package specified by its version and exit.
+Download location is
+.I ~/.local/share/UnityEngine2deb/Engines
+.TP
+\fB\-h, \-\-help
+show help text and quit
+
+
+.SH SEE ALSO
+.I https://github.com/darealshinji/UnityEngine2deb
+
+.SH AUTHOR
+djcj <djcj@gmx.de>

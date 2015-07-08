@@ -1,20 +1,26 @@
 .TH U2DEB 1 "" ""
 .SH NAME
-u2deb \- create Debian packages of Unity Engine games
+u2deb \- create Debian packages of Unity engine games
 
 .SH SYNOPSIS
-.B u2deb \fR\-h|help
+.B u2deb \-h \fR| \fBhelp
 .br
-.B u2deb \fR\-p|prepare <path> [OPTIONS]
+.B u2deb \-p \fR| \fBprepare \fR<gamedir> [OPTIONS]
 .br
-.B u2deb \fR\-b|build|make [OPTIONS]
+.B u2deb \-b \fR| \fBbuild \fR| \fBmake \fR[OPTIONS]
 .br
-.B u2deb \fR\-c|clean [OPTIONS]
+.B u2deb \-c \fR| \fBclean \fR[OPTIONS]
 
 .SH DESCRIPTION
 Games that were built on the Unity engine became quite popular these days.
 Those games can be built to run natively on GNU/Linux systems.
 This Bash script helps you to almost automatically create Debian packages of such games.
+
+Package a Unity game in two steps.  First run \fBu2deb prepare <gamedir>\fR and follow the instructions.
+The game files will be copied into a temporary directory and Debian packaging files will be generated.
+You can manually edit those files.  Then run \fBu2deb build\fR to create the package.
+To delete the temporary files run \fBu2deb clean\fR.
+You can get a full list of options and environment variables with \fBu2deb --help\fR.
 
 .SH OPTIONS
 .TP
