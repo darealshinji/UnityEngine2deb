@@ -1,15 +1,15 @@
-u2deb (15.07.03.1~trusty) trusty; urgency=low
+u2deb (15.07.08.1~trusty) trusty; urgency=low
 
   * New scripts:
-      * getunityengine: download Linux binaries of a specific engine version
-      * unitywin2linux: install Linux binaries into a Windows-only game
+      * copyunityengine: download and install Linux binaries of a specific
+        engine version
   * Create random build directory
   * Don't fail package building if there's a 64 bit binary but no 32 bit one
   * Ship with a copy of PatchELFmod so we don't have to rely on it as a
     third-party dependency
   * Install files into /usr/lib/games
 
- -- Marshall Banana <djcj@gmx.de>  Fri, 03 Jul 2015 23:50:23 +0200
+ -- Marshall Banana <djcj@gmx.de>  Wed, 08 Jul 2015 17:44:40 +0200
 
 u2deb (15.03.26.1~trusty) trusty; urgency=low
 
