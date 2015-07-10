@@ -14,9 +14,11 @@ You can use this script to create native Linux versions of games that were relea
 Windows only or to create native 64 bit versions if a Linux build was originally released only as 32 bit version.
 You can also use it to install the screenselector plugin if the original build came without it.
 
-Minimum dependencies: `debhelper imagemagick p7zip-full`
+Minimum dependencies: `debhelper imagemagick p7zip-full¹`
 
-Recommended dependencies: `aria2 execstack lintian libgtk2.0-0 libgtk2.0-0:i386 libglu1-mesa libglu1-mesa:i386`
+Recommended dependencies: `aria2¹ wget¹ execstack lintian libgtk2.0-0 libgtk2.0-0:i386 libglu1-mesa libglu1-mesa:i386`
+
+¹ only required by copyunityengine
 
 **Examples:**
 
@@ -54,3 +56,12 @@ unzip coelophyte.zip -d coelophyte
 ./u2deb build
 ```
 
+**Package this tool:**
+
+You can also build a Debian package from this tool.
+```
+sudo apt-get install debhelper git
+git clone https://github.com/darealshinji/UnityEngine2deb.git
+cd UnityEngine2deb
+dpkg-buildpackage -b -us -uc
+```
