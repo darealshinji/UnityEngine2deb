@@ -265,9 +265,8 @@ if [ $mode = "prepare" ] ; then
 
   # remove executable stack
   export PATH="/usr/local/sbin:/usr/sbin:/sbin:${PATH}"  # on Debian /sbin isn't in PATH by default
-  set +e; which execstack 2>/dev/null >/dev/null; set -e
-  exitCode=$(echo $?)
-  if [ $exitCode = 0 ]; then
+  execstack="$(whereis -b execstack | awk '{print $2}')"
+  if [ "x$execstack" != "x" ]; then
     find "$sourcedir" -name libmono.so -exec execstack -c '{}' \;
   fi
 
