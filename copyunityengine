@@ -73,9 +73,8 @@ downloadUnityEngine () {
 	exe=`mktemp -u /tmp/UnitySetup-XXXXXXXXXX --suffix=.exe`
 	txz="$engines/$version.tar.xz"
 
-	set +e; which aria2c 2>/dev/null >/dev/null; set -e
-	exitCode=$(echo $?)
-	if [ $exitCode = 0 ]; then
+	bin="$(whereis -b aria2c | awk '{print $2}')"
+	if [ "x$bin" = "x" ]; then
 		# The SDKs are huge, usually over 1G. If available, use aria2c to
 		# download the SDK because of its ability to pre-allocate space.
 		download="aria2c --file-allocation=prealloc -d / -o"
@@ -121,9 +120,8 @@ downloadUnityEngine () {
 		fi
 
 		### download the Unity SDK
-		set +e; which 7z 2>/dev/null >/dev/null; set -e
-		exitCode=$(echo $?)
-		if [ $exitCode = 1 ]; then
+		bin="$(whereis -b 7z | awk '{print $2}')"
+		if [ "x$bin" = "x" ]; then
 			echo "You need 7zip to extract files from the Unity SDK setup package (\`apt-get install p7zip-full')."
 			exit 1
 		fi
@@ -221,7 +219,7 @@ downloadUnityEngine () {
 
 	echo ""
 	echo "-- download Unity $version engine files"
-	wget -O "$txz" "$url"
+	wget -O "$txz" $url/$version.tar.xz
 	md5_2=$(md5sum "$txz" | awk '{print $1}')
 	if [ "$md5_1" != "$md5_2" ]; then
 		echo ""
