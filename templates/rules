@@ -96,11 +96,11 @@ override_dh_makeshlibs:
 
 
 override_dh_shlibdeps:
-ifeq ($(PATCHELFMOD),yes)
+ifeq ($(PATCHELF),yes)
 	# remove unnecessary dependencies that a binary was errerously linked against
 	# by deleting their DT_NEEDED entries from the ELF header
 
-	$(MAKE) -C $(CURDIR)/debian/patchelfmod
+	$(MAKE) -C $(CURDIR)/debian/patchelf
 
 	rm -f uselessdeps.log
 	(dh_shlibdeps -- --warnings=2 2>&1 | tee uselessdeps.log) > /dev/null
@@ -110,7 +110,8 @@ ifeq ($(PATCHELFMOD),yes)
 	do                                                                                \
 	    dep=$$(cut -d' ' -f15 uselessdeps.log | sed -n $${n}p) ;                      \
 	    bin=$$(cut -d' ' -f10 uselessdeps.log | sed -n $${n}p) ;                      \
-	    $(CURDIR)/debian/patchelfmod/patchelfmod --debug --remove-needed $$dep $$bin 2>&1 | grep -v -e 'keeping' ; \
+	    $(CURDIR)/debian/patchelf/patchelf --debug --remove-needed $$dep $$bin 2>&1 | \
+	        grep -v -e 'keeping' | grep -v -e 'Kernel' ;                              \
 	done ;
 endif
 ifeq ($(ARCH), x86)

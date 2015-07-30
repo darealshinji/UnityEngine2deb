@@ -31,7 +31,7 @@ unzip env.zip -d env-game
 export PKGNAME=env-game
 export UPSTREAMNAME=Env
 ./u2deb prepare env-game --data
-./u2deb make
+./u2deb build
 ```
 
 Build a 64 bit package from a 32 bit native game:
