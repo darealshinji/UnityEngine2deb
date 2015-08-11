@@ -298,8 +298,10 @@ cd "$origpath"
 rm -rvf "${game}" "${game}."* "${game}_Data/Mono/mono.dll" "${game}_Data/Mono/x86"* "${game}_Data/Plugins"
 
 tar xvf "$txz"
-mkdir -p "${game}_Data/Plugins"
-mv $version/Plugins/* "${game}_Data/Plugins"
+if [ -d $version/Plugins ]; then
+	mkdir -p "${game}_Data/Plugins"
+	mv $version/Plugins/* "${game}_Data/Plugins"
+fi
 mv $version/Mono/* "${game}_Data/Mono"
 mv $version/x86 "${game}.x86"
 mv $version/x86_64 "${game}.x86_64"
