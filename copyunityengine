@@ -28,6 +28,7 @@ LC_ALL=C
 
 appname=$(basename "$0")
 engines="$HOME/.local/share/UnityEngine2deb/Engines"
+links_url="https://raw.githubusercontent.com/darealshinji/UnityEngine2deb/master/links.txt"
 
 errorExit() {
 	echo "error: $1"
@@ -108,7 +109,7 @@ downloadUnityEngine () {
 	fi
 	# each line in links.txt has three fields with the following data
 	# separated by spaces: <version> <md5sum> <url>
-	wget -O "$engines/links.txt" "https://raw.githubusercontent.com/darealshinji/UnityEngine2deb/master/links.txt"
+	wget -O "$engines/links.txt" "$links_url"
 
 	set +e; dldata="$(grep -F "$version" "$engines/links.txt")"; set -e
 
