@@ -76,11 +76,11 @@ downloadUnityEngine () {
 
 	bin="$(whereis -b aria2c | awk '{print $2}')"
 	if [ "x$bin" = "x" ]; then
+		download="wget -O"
+	else
 		# The SDKs are huge, usually over 1G. If available, use aria2c to
 		# download the SDK because of its ability to pre-allocate space.
 		download="aria2c --file-allocation=prealloc -d / -o"
-	else
-		download="wget -O"
 	fi
 
 	major=$(echo "$version" | cut -d. -f1)

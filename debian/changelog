@@ -1,3 +1,9 @@
+u2deb (15.09.09.1~trusty) trusty; urgency=low
+
+  * copyunityengine: fix checking for aria2c
+
+-- Marshall Banana <djcj@gmx.de>  Wed, 09 Sep 2015 07:31:52 +0200
+
 u2deb (15.08.15.1~trusty) trusty; urgency=low
 
   * copyunityengine: small modification to enable downloads from Google Drive
