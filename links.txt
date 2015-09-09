@@ -1,3 +1,4 @@
+5.2.0 9a275082dea6151976b6c391955968f5 https://drive.google.com/uc?export=download&id=0BxClEVSW8QykTlQtXzh6d1RpV2c
 5.1.3 71dc01d4499aabee977190d58c89f2ce https://drive.google.com/uc?export=download&id=0BxClEVSW8Qykd1lfb1NkM0x5U1E
 5.1.2 2b05e457bc8dc3e7df119c629ce8f902 https://drive.google.com/uc?export=download&id=0BxClEVSW8QykZjB5UmloUjZucmM
 5.1.1 8a1e79b5357950e41f6f1f410834e33d https://drive.google.com/uc?export=download&id=0BxClEVSW8QykbExocFNfT0xBUFU
