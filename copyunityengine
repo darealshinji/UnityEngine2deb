@@ -79,7 +79,7 @@ downloadUnityEngine () {
 		download="wget -O"
 	else
 		# The SDKs are huge, usually over 1G. If available, use aria2c to
-		# download the SDK because of its ability to pre-allocate space.
+		# download the SDK because of its ability to pre-allocate space (avoids fragmentation).
 		download="aria2c --file-allocation=prealloc -d / -o"
 	fi
 
