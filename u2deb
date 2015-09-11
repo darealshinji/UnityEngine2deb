@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="15.09.09.1"
+appversion="15.09.11.1"
 
 appname=$(basename "$0")
 scriptpath="$(dirname "$(readlink -f "$0")")"
@@ -93,14 +93,12 @@ if [ -f "$wdconf" ]; then
 fi
 }
 
-if [ "$1" = "-V" ] || [ "$1" = "--version" ] ; then
-  echo $appversion
-  exit 0
-fi
-if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "help" ] ; then
-  help
-  exit 0
-fi
+case x"$1" in
+  x|x--help|x-help|x-h|x-\?)
+    help;;
+  x-V|x-v|x--version|x-version)
+    echo $appversion; exit 0;;
+esac
 
 if [ -d "$scriptpath/templates" ] ; then
   templates="$scriptpath/templates"

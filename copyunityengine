@@ -26,6 +26,8 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
+appversion="15.09.11.1"
+
 appname=$(basename "$0")
 engines="$HOME/.local/share/UnityEngine2deb/Engines"
 links_url="https://raw.githubusercontent.com/darealshinji/UnityEngine2deb/master/links.txt"
@@ -62,9 +64,14 @@ cat << EOF
                           \`$engines'
 
    -h, --help           print this message
+   -V, --version        display version info and quit
 
 EOF
 exit 0
+fi
+if [ "$1" = "-V" ] || [ "$1" = "--version" ] ; then
+  echo $appversion
+  exit 0
 fi
 
 downloadUnityEngine () {
