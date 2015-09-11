@@ -29,6 +29,7 @@ LC_ALL=C
 appversion="15.09.11.1"
 
 appname=$(basename "$0")
+appname_u2deb="u2deb"
 scriptpath="$(dirname "$(readlink -f "$0")")"
 tmpdir="`mktemp -d /tmp/UnityEngine2mojo_tmpXXXXXXXXXX`"
 mojoreadme="`mktemp -u /tmp/mojoreadme_XXXXXXXXXX`"
@@ -36,6 +37,7 @@ mojobins="`mktemp -d /tmp/mojobins_XXXXXXXXXX`"
 mojobins_extracted="MojoSetup-Bins-QuickSetup"
 mojobins_archive="QuickSetup.tar.gz"
 mojobins_url="https://github.com/darealshinji/MojoSetup-Bins/archive/$mojobins_archive"
+templates_url="https://raw.githubusercontent.com/darealshinji/UnityEngine2deb/master/templates"
 
 errorExit() {
   echo "error: $1"
@@ -70,8 +72,6 @@ EOF
 }
 
 # parse commands
-custom_icon=""
-readme=""
 case x"$1" in
   x--icon=*)
     custom_icon="$optarg"
@@ -94,14 +94,12 @@ esac
 # templates
 if [ -d "$scriptpath/templates" ] ; then
   templates="$scriptpath/templates"
-elif [ -d "$scriptpath/../share/$appname" ] ; then
-  templates="$scriptpath/../share/$appname"
-elif [ -d "/usr/local/share/$appname" ] ; then
-  templates="/usr/local/share/$appname"
-elif [ -d "/usr/share/$appname" ] ; then
-  templates="/usr/share/$appname"
-else
-  errorExit "Can't find the templates!"
+elif [ -d "$scriptpath/../share/$appname_u2deb" ] ; then
+  templates="$scriptpath/../share/$appname_u2deb"
+elif [ -d "/usr/local/share/$appname_u2deb" ] ; then
+  templates="/usr/local/share/$appname_u2deb"
+elif [ -d "/usr/share/$appname_u2deb" ] ; then
+  templates="/usr/share/$appname_u2deb"
 fi
 
 # check $origpath
@@ -202,18 +200,22 @@ chmod 0755 "$tmpdir/start-game.sh"
 
 # ScreenSelector/splash image
 splash="$tmpdir/${name}_Data/ScreenSelector.png"
-test -f "$splash" || cp "$templates/ScreenSelector.png" "$splash"
+if [ ! -f "$splash" ] && [ -d "$templates" ] ; then
+  cp "$templates/ScreenSelector.png" "$splash"
+fi
 
 # icon
 icon="$tmpdir/${name}_Data/Resources/UnityPlayer.png"
 test -f "$custom_icon" && cp -f "$custom_icon" "$icon"
-test -f "$icon" || cp -f "$templates/icon.png" "$icon"
+if [ ! -f "$icon" ] && [ -d "$templates" ] ; then
+  cp "$templates/icon.png" "$icon"
+fi
 
 # readme
 if [ -f "$readme" ] ; then
   cp "$readme" "$mojoreadme"
 else
-  cp "$templates/description.mojo" "$mojoreadme"
+  echo "This game was built on the Unity engine (http://unity3d.com) and has been exported to GNU/Linux." > "$mojoreadme"
   echo ""
   echo "Please add a more detailed description about the game in the text file"
   echo "\`$mojoreadme'"
@@ -249,6 +251,8 @@ cd $mojobins
 wget $mojobins_url
 tar xvf $mojobins_archive
 cd $mojobins_extracted
+test -f $splash || wget -O "$splash" "$templates_url/ScreenSelector.png"
+test -f $icon || wget -O "$icon" "$templates_url/icon.png"
 sed -i 's|category = "Misc;"|category = "Game;"|g' mojo/scripts/config.lua.in  # force category "Game"
 export FULLNAME="$FULLNAME"
 export SHORTNAME=$name
@@ -260,7 +264,7 @@ export SPLASH=$splash
 export README=$mojoreadme
 ./create-package.sh $tmpdir
 cp -f ${name}-${VERSION}-install.sh "$HOME"
-echo "File saved ad \`$HOME/${name}-${VERSION}-install.sh'"
+echo "File saved at \`$HOME/${name}-${VERSION}-install.sh'"
 cd "$HOME"
 
 # clean-up
