@@ -1,0 +1,269 @@
+#!/bin/bash
+
+set -e
+
+# Copyright (c) 2015, djcj <djcj@gmx.de>
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+
+LANG=C
+LANGUAGE=C
+LC_ALL=C
+
+appversion="15.09.11.1"
+
+appname=$(basename "$0")
+scriptpath="$(dirname "$(readlink -f "$0")")"
+tmpdir="`mktemp -d /tmp/UnityEngine2mojo_tmpXXXXXXXXXX`"
+mojoreadme="`mktemp -u /tmp/mojoreadme_XXXXXXXXXX`"
+mojobins="`mktemp -d /tmp/mojobins_XXXXXXXXXX`"
+mojobins_extracted="MojoSetup-Bins-QuickSetup"
+mojobins_archive="QuickSetup.tar.gz"
+mojobins_url="https://github.com/darealshinji/MojoSetup-Bins/archive/$mojobins_archive"
+
+errorExit() {
+  echo "error: $1"
+  exit 1
+}
+
+help() {
+cat << EOF
+
+ Create Mojo Setup packages of Unity engine games
+
+ Usage:
+   $appname -h | --help | -V | --version
+   $appname [options] <gamedir>
+
+ Options:
+   -h, --help           print this message
+   -V, --version        display version info and quit
+
+   --icon=<icon>        use this icon for the desktop entry
+   --readme=<readme>    use this readme file
+
+ Environment variables:
+   FULLNAME     the original name of the game, including special chars
+                           or spaces
+   SHORTNAME    short name, used as executable, directory and package name
+   VERSION      release version string
+   VENDOR       copyright holder (or publisher/developer)
+   README       readme file to use
+
+EOF
+}
+
+# parse commands
+custom_icon=""
+readme=""
+case x"$1" in
+  x--icon=*)
+    custom_icon="$optarg"
+    ;;
+  x--readme=*)
+    readme="$optarg"
+    ;;
+  x|x--help|x-help|x-h|x-\?)
+    help
+    ;;
+  x-V|x-v|x--version|x-version)
+    echo $appversion
+    exit 0
+    ;;
+  *)
+    origpath="$1"
+    ;;
+esac
+
+# templates
+if [ -d "$scriptpath/templates" ] ; then
+  templates="$scriptpath/templates"
+elif [ -d "$scriptpath/../share/$appname" ] ; then
+  templates="$scriptpath/../share/$appname"
+elif [ -d "/usr/local/share/$appname" ] ; then
+  templates="/usr/local/share/$appname"
+elif [ -d "/usr/share/$appname" ] ; then
+  templates="/usr/share/$appname"
+else
+  errorExit "Can't find the templates!"
+fi
+
+# check $origpath
+if [ -z "$origpath" ] ; then
+  errorExit "no path specified"
+elif [ ! -e "$origpath" ] ; then
+  errorExit "path to '$origpath' doesn't exist"
+elif [ ! -d "$origpath" ] ; then
+  errorExit "'$origpath' is not a directory"
+else
+  path="$( cd "$origpath" && pwd )"
+fi
+
+# get the application name
+filename="$(basename "$(find "$origpath" -type d -name *_Data)" | head -c-6)"
+[ -z "$SHORTNAME" ] && name="$filename" || name="$SHORTNAME"
+[ -z "$FULLNAME" ] && FULLNAME="$name"
+if [ -n "$FULLNAME" ] && [ -n "$SHORTNAME" ] ; then
+  name="$SHORTNAME"
+fi
+
+# check for architectures
+x86="no"
+x86_64="no"
+rename_to_x86="no"
+rename_to_x86_64="no"
+[ -f "$origpath/$filename".x86 ] && x86="yes"
+[ -f "$origpath/$filename".x86_64 ] && x86_64="yes"
+if [ $x86 = "no" ] && [ $x86_64 = "no" ] ; then
+  echo "neither '$filename.x86' nor '$filename.x86_64' found"
+  if [ -f "$origpath/$filename" ] ; then
+    if [ "$(file "$origpath/$filename" | grep 'ELF 32-bit')" ]; then
+      echo "'$filename' (x86) found"
+      x86="yes"
+      rename_to_x86="yes"
+    elif [ "$(file "$origpath/$filename" | grep 'ELF 64-bit')" ]; then
+      echo "'$filename' (x86_64) found"
+      x86_64="yes"
+      rename_to_x86_64="yes"
+    else
+      errorExit "'$filename' was found but is not a valid ELF binary"
+    fi
+  else
+    errorExit "couldn't find '$filename' either"
+  fi
+fi
+
+# copy source files
+echo "copy source files... "
+mkdir -p "$tmpdir"
+cp -vr "$origpath"/* "$tmpdir"
+echo "done"
+
+# remove executable bits
+find "$tmpdir" -type f -exec chmod a-x '{}' \;
+
+# remove executable stack
+export PATH="/usr/local/sbin:/usr/sbin:/sbin:${PATH}"  # on Debian /sbin isn't in PATH by default
+execstack="$(whereis -b execstack | awk '{print $2}')"
+if [ "x$execstack" != "x" ]; then
+  find "$tmpdir" -name libmono.so -exec execstack -c '{}' \;
+fi
+
+# delete unnecessary files
+for f in libCSteamworks.so libsteam_api.so libSteamworksNative.so SteamworksNative.dll \
+         \*.dll.mdb Thumbs.db .DS_Store ;
+do
+  find "$tmpdir" -name "$f" -delete
+done
+rm -rf `find "$tmpdir" -type d -name __MACOSX`
+
+# rename application
+name=$(echo "$name" | sed -e 's/\(.*\)/\L\1/; s/\ -\ /-/g; s/\ /-/g; s/_/-/g')
+[ "$filename" != "$name" ] && rename "s/$filename/$name/" "$tmpdir"/*
+if [ "$rename_to_x86" = "yes" ] && [ -f "$tmpdir/$name" ] ; then
+  mv "$tmpdir/$name" "$tmpdir/${name}.x86"
+  echo "application was renamed to ${name}.x86"
+elif [ "$rename_to_x86_64" = "yes" ] && [ -f "$tmpdir/$name" ] ; then
+  mv "$tmpdir/$name" "$tmpdir/${name}.x86_64"
+  echo "application was renamed to ${name}.x86_64"
+fi
+
+# set executable bits
+test "$x86" = "yes" && chmod 0755 "$tmpdir/${name}.x86"
+test "$x86_64" = "yes" && chmod 0755 "$tmpdir/${name}.x86_64"
+
+# generate startup script
+cat <<EOF > "$tmpdir/start-game.sh"
+#!/bin/sh
+cd "\$(dirname "\$(readlink -f "\$0")")"
+bin="${name}.x86"
+if [ "\$(uname -m)" = "x86_64" ] && [ -x "\${bin}_64" ]; then
+  bin="\${bin}_64"
+fi
+"./\$bin" \$@
+EOF
+chmod 0755 "$tmpdir/start-game.sh"
+
+# ScreenSelector/splash image
+splash="$tmpdir/${name}_Data/ScreenSelector.png"
+test -f "$splash" || cp "$templates/ScreenSelector.png" "$splash"
+
+# icon
+icon="$tmpdir/${name}_Data/Resources/UnityPlayer.png"
+test -f "$custom_icon" && cp -f "$custom_icon" "$icon"
+test -f "$icon" || cp -f "$templates/icon.png" "$icon"
+
+# readme
+if [ -f "$readme" ] ; then
+  cp "$readme" "$mojoreadme"
+else
+  cp "$templates/description.mojo" "$mojoreadme"
+  echo ""
+  echo "Please add a more detailed description about the game in the text file"
+  echo "\`$mojoreadme'"
+  echo "and press any key to continue."
+  read -p "" -n1 -s
+fi
+
+# enter packaging information
+echo ""
+echo "name: $FULLNAME"
+echo "application/package name: $name"
+if [ -z "$VERSION" ] ; then
+  echo ""
+  echo "Enter the game's release version. It should begin with a number"
+  read -p "and mustn't contain and spaces or underscores: " VERSION
+else
+  echo "package version: $VERSION"
+fi
+if [ -z "$VENDOR" ] ; then
+  echo ""
+  read -p "Who's holding the copyright? " VENDOR
+else
+  echo "copyright: $VENDOR"
+fi
+echo ""
+echo ""
+[ -z "$SHORTDESCRIPTION" ] && SHORTDESCRIPTION="Unity engine video game"
+[ -z "$VERSION" ] && VERSION=$(date +%y.%m.%d.1)
+[ -z "$VENDOR" ] && VENDOR="the creator of '$name'"
+
+# build Mojo setup
+cd $mojobins
+wget $mojobins_url
+tar xvf $mojobins_archive
+cd $mojobins_extracted
+sed -i 's|category = "Misc;"|category = "Game;"|g' mojo/scripts/config.lua.in  # force category "Game"
+export FULLNAME="$FULLNAME"
+export SHORTNAME=$name
+export VERSION=$VERSION
+export VENDOR="$VENDOR"
+export START=start-game.sh
+export ICON="${name}_Data/Resources/UnityPlayer.png"
+export SPLASH=$splash
+export README=$mojoreadme
+./create-package.sh $tmpdir
+cp -f ${name}-${VERSION}-install.sh "$HOME"
+echo "File saved ad \`$HOME/${name}-${VERSION}-install.sh'"
+cd "$HOME"
+
+# clean-up
+rm -rf $tmpdir $mojobins $mojoreadme
+
+exit 0

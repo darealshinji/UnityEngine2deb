@@ -1,3 +1,4 @@
 copyunityengine   /usr/bin
 u2deb             /usr/bin
+u2mojo            /usr/bin
 templates/*       /usr/share/u2deb
