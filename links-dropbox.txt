@@ -1,3 +1,4 @@
+5.2.1 25dc33879da31bde72d720a21ff1ca77 https://dropbox.com/s/a5xwansefrpw2c6/5.2.1.tar.xz
 5.2.0 9a275082dea6151976b6c391955968f5 https://dropbox.com/s/gbekyavt29jmyto/5.2.0.tar.xz
 5.1.3 71dc01d4499aabee977190d58c89f2ce https://dropbox.com/s/vrwbg9ma1qepxf2/5.1.3.tar.xz
 5.1.2 2b05e457bc8dc3e7df119c629ce8f902 https://dropbox.com/s/szgzfvo9ax97gnq/5.1.2.tar.xz
