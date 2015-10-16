@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="15.09.11.1"
+appversion="15.10.16.1"
 
 appname=$(basename "$0")
 engines="$HOME/.local/share/UnityEngine2deb/Engines"
@@ -97,10 +97,10 @@ downloadUnityEngine () {
 			if [ $length -lt 5 ]; then
 				errorExit "Incorrect version string!";
 			fi
-		;;
+			;;
 		*)
 			errorExit "Incorrect version string!"
-		;;
+			;;
 	esac
 
 	mkdir -p "$engines"
@@ -118,7 +118,9 @@ downloadUnityEngine () {
 	# separated by spaces: <version> <md5sum> <url>
 	wget -O "$engines/links.txt" "$links_url"
 
-	set +e; dldata="$(grep -F "$version" "$engines/links.txt")"; set -e
+	set +e
+	dldata="$(grep -F "$version" "$engines/links.txt")"
+	set -e
 
 	if [ x"$dldata" = x"" ] || [ "$forcesdk" = "yes" ]; then
 		if [ "$sdk" = "no" ]; then
@@ -130,28 +132,42 @@ downloadUnityEngine () {
 		### download the Unity SDK
 		bin="$(whereis -b 7z | awk '{print $2}')"
 		if [ "x$bin" = "x" ]; then
-			echo "You need 7zip to extract files from the Unity SDK setup package (\`apt-get install p7zip-full')."
+			echo "You need 7zip to extract files from the Unity SDK setup package (\`sudo apt-get install p7zip-full')."
 			exit 1
 		fi
+
+		# inform about bandwidth and disk space
+		echo ""
+		echo "You're about to download a Unity3D SDK.  Its file size may exceed 1G and"
+		echo "you might need up to 6G of additional free disk space to extract the"
+		read -r -p "downloaded file.  Do you really want to continue? [Y/n] " response
+		case $response in
+			[Nn]*)
+				exit 0
+				;;
+			*)
+				;;
+		esac
 
 		echo ""
 		echo "-- download Unity $version SDK"
 		rm -f $exe
 		if [ $major = 5 ]; then
 			url="$(wget -q -O - "https://unity3d.com/get-unity/download/archive" | grep "UnitySetup64-$version" | cut -d '"' -f2)"
-			if [ -z $url ]; then
-				errorExit "Requested version is not available!"
-			fi
-			$download $exe $url
 		elif [ $major = 4 ]; then
 			url="http://download.unity3d.com/download_unity/UnitySetup-$version.exe"
+			set +e
 			wget -q --spider $url
+			set -e
 			exitCode=$(echo $?)
 			if [ $exitCode != 0 ]; then
-				errorExit "Requested version is not available!"
+				url=""
 			fi
-			$download $exe $url
 		fi
+		if [ -z $url ]; then
+			errorExit "Requested version is not available on the web server!"
+		fi
+		$download $exe $url
 
 		echo ""
 		echo "-- extract SDK files"
@@ -159,6 +175,9 @@ downloadUnityEngine () {
 		7z x $exe -o$files
 
 		set +e
+		# The directory names have non-ASCII characters that make it impossible
+		# to work with the shell. We're renaming them to their inode numbers
+		# and then we're moving the Linux-related directories into the top directory.
 		inodes="$(ls -1i "$files" | awk '{print $1}' | tr '\n' ' ')"
 		for n in $inodes; do
 			find $files -inum $n -exec mv -v '{}' $files/$n 2>/dev/null \;
@@ -213,7 +232,7 @@ downloadUnityEngine () {
 		echo "-- create archive"
 		cd $files && tar cvfJ "$txz" $version
 		cd /tmp
-		rm -rf "$files" "$exe"
+		rm -rf $files $exe
 
 		echo ""
 		echo "-- archive saved at \`$engines/$version.tar.xz'"
