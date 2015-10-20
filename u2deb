@@ -158,7 +158,7 @@ for opt; do
     "--no-patchelf")
       patchelf="no"
       ;;
-    "help"|"-h"|"--version"|"-V")
+    "--help"|"-h"|"--version"|"-V")
       ;;
     *)
       origpath="$optarg"
