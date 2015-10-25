@@ -1,0 +1,54 @@
+.TH U2DEB 1 "" ""
+.SH NAME
+u2mojo \- create Mojo Setup packages of Unity engine games
+
+.SH SYNOPSIS
+.B u2mojo \-h \fR| \fB\-\-help \fR| \fB\-V \fR| \fB\-\-version
+.br
+.B u2mojo \fR[options] <gamedir>
+
+.SH DESCRIPTION
+Games that were built on the Unity engine became quite popular these days.
+Those games can be built to run natively on GNU/Linux systems.
+MojoSetup is a portable, flexible installation application and this script
+helps you to create Mojo Setup packages of Unity engine games.
+The MojoSetup binaries for amd64 and i386 architectures will be downloaded from Github.
+
+.SH OPTIONS
+.TP
+\fB\-h, \-\-help
+show help text and quit
+.TP
+\fB\-V, \-\-version
+display version info and quit
+.TP
+\fB\-\-icon=\fR<icon>
+use this icon for the desktop entry
+.TP
+\fB\-\-readme=\fR<icon>
+use this readme file
+
+.SH "Environment variables"
+.TP
+\fBFULLNAME
+the original name of the game, including special chars or spaces
+.TP
+\fBSHORTNAME
+short name, used as executable, directory and package name
+.TP
+\fBVERSION
+release version string
+.TP
+\fBVENDOR
+copyright holder (or publisher/developer)
+
+.SH SEE ALSO
+.I https://github.com/darealshinji/UnityEngine2deb
+.br
+.I https://github.com/darealshinji/MojoSetup-Bins
+.PP
+.BR copyunityengine (1),
+.BR u2deb (1)
+
+.SH AUTHOR
+djcj <djcj@gmx.de>

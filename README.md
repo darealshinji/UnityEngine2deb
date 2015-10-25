@@ -8,11 +8,14 @@ The game files will be copied into a temporary directory and Debian packaging fi
 You can manually edit those files. Then run `u2deb build` to create the package. To delete the temporary files
 run `u2deb clean`. You can get a full list of options and environment variables with `u2deb --help`.
 
-**copyunityengine**: This script will download and install Linux binaries of a Unity engine game and delete all previously
+**copyunityengine**: This script will download and install GNU/Linux binaries of a Unity engine game and delete all previously
 installed binary files. Usage is `copyunityengine <gamedir>`.
-You can use this script to create native Linux versions of games that were released for
-Windows only or to create native 64 bit versions if a Linux build was originally released only as 32 bit version.
+You can use this script to create native GNU/Linux versions of games that were released for
+Windows only or to create native 64 bit versions if a GNU/Linux build was originally released only as 32 bit version.
 You can also use it to install the screenselector plugin if the original build came without it.
+
+**u2mojo**: This script helps you to create portable [MojoSetup](http://www.icculus.org/mojosetup/)
+installers for any GNU/Linux distribution.
 
 Minimum dependencies: `debhelper imagemagick p7zip-full¹`
 
@@ -54,6 +57,19 @@ unzip coelophyte.zip -d coelophyte
 ./copyunityengine coelophyte
 ./u2deb prepare coelophyte
 ./u2deb build
+```
+
+Build a MojoSetup installer:
+```
+wget -O env.zip http://www.moddb.com/downloads/mirror/64567/100/dfda248f3f6f8dc9c4f9ef92b9abe1aa
+unzip env.zip -d env-game
+echo "Env is an abstract first-person physics platformer." > /tmp/env-game-description
+echo "Homepage: http://www.moddb.com/games/env" >> /tmp/env-game-description
+export FULLNAME=Env
+export SHORTNAME=env-game
+export VENDOR="SamChester"
+export VERSION=1.0
+./u2mojo --readme=/tmp/env-game-description env-game
 ```
 
 **Package this tool:**
