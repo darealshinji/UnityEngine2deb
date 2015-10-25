@@ -34,8 +34,8 @@ scriptpath="$(dirname "$(readlink -f "$0")")"
 tmpdir="`mktemp -d /tmp/UnityEngine2mojo_tmpXXXXXXXXXX`"
 mojoreadme="`mktemp -u /tmp/mojoreadme_XXXXXXXXXX`"
 mojobins="`mktemp -d /tmp/mojobins_XXXXXXXXXX`"
-mojobins_extracted="MojoSetup-Bins-QuickSetup"
-mojobins_archive="QuickSetup.tar.gz"
+mojobins_extracted="MojoSetup-Bins-master"
+mojobins_archive="master.tar.gz"
 mojobins_url="https://github.com/darealshinji/MojoSetup-Bins/archive/$mojobins_archive"
 templates_url="https://raw.githubusercontent.com/darealshinji/UnityEngine2deb/master/templates"
 
@@ -66,30 +66,33 @@ cat << EOF
    SHORTNAME    short name, used as executable, directory and package name
    VERSION      release version string
    VENDOR       copyright holder (or publisher/developer)
-   README       readme file to use
 
 EOF
 }
 
 # parse commands
 case x"$1" in
-  x--icon=*)
-    custom_icon="$optarg"
-    ;;
-  x--readme=*)
-    readme="$optarg"
-    ;;
   x|x--help|x-help|x-h|x-\?)
-    help
-    ;;
+    help;;
   x-V|x-v|x--version|x-version)
-    echo $appversion
-    exit 0
-    ;;
-  *)
-    origpath="$1"
-    ;;
+    echo $appversion; exit 0;;
 esac
+for opt; do
+  optarg="${opt#*=}"
+  case "$opt" in
+    --icon=*)
+      custom_icon="$optarg"
+      ;;
+    --readme=*)
+      readme="$optarg"
+      ;;
+    --help|-h|--version|-V)
+      ;;
+    *)
+      origpath="$optarg"
+      ;;
+  esac
+done
 
 # templates
 if [ -d "$scriptpath/templates" ] ; then
@@ -253,7 +256,7 @@ tar xvf $mojobins_archive
 cd $mojobins_extracted
 test -f $splash || wget -O "$splash" "$templates_url/ScreenSelector.png"
 test -f $icon || wget -O "$icon" "$templates_url/icon.png"
-sed -i 's|category = "Misc;"|category = "Game;"|g' mojo/scripts/config.lua.in  # force category "Game"
+sed -i 's|category = "Misc;"|category = "Game;"|g' setup-files/scripts/config.lua.in  # force category "Game"
 export FULLNAME="$FULLNAME"
 export SHORTNAME=$name
 export VERSION=$VERSION
