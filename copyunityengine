@@ -82,14 +82,19 @@ downloadUnityEngine () {
 	txz="$engines/$version.tar.xz"
 
 	bin="$(whereis -b aria2c | awk '{print $2}')"
-	if [ "x$bin" = "x" ]; then
-		download="wget -O"
-	else
-		# The SDKs are huge, usually over 1G. If available, use aria2c to
+	have_aria2c="no"
+	if [ "x$bin" != "x" ]; then
+		have_aria2c="yes"
+	fi
+	if [ "$have_aria2c" = "yes" ]; then
+		# The SDKs are huge, usually over 1G.  If available, use aria2c to
 		# download the SDK because of its ability to pre-allocate space (avoids fragmentation).
 		download="aria2c --file-allocation=prealloc -d / -o"
+	else
+		download="wget -O"
 	fi
 
+	decimal_ver="$(echo $version | tr -d .)"
 	major=$(echo "$version" | cut -d. -f1)
 	length=$(($(printf "$version" | wc -m)))
 	case $major in
@@ -130,29 +135,31 @@ downloadUnityEngine () {
 		fi
 
 		### download the Unity SDK
+
 		bin="$(whereis -b 7z | awk '{print $2}')"
 		if [ "x$bin" = "x" ]; then
-			echo "You need 7zip to extract files from the Unity SDK setup package (\`sudo apt-get install p7zip-full')."
-			exit 1
+			errorExit "you need 7zip to extract files from the Unity SDK setup package (\`sudo apt-get install p7zip-full')."
 		fi
 
-		# inform about bandwidth and disk space
-		echo ""
-		echo "You're about to download a Unity3D SDK.  Its file size may exceed 1G and"
-		echo "you might need up to 6G of additional free disk space to extract the"
-		read -r -p "downloaded file.  Do you really want to continue? [Y/n] " response
-		case $response in
-			[Nn]*)
-				exit 0
-				;;
-			*)
-				;;
-		esac
+		# inform about bandwidth and disk space for Unity < v5.3.0
+		if [ $decimal_ver -lt 530 ]; then
+			echo ""
+			echo "You're about to download a Unity3D SDK.  Its file size may exceed 1G and"
+			echo "you might need up to 6G of additional free disk space to extract the"
+			read -r -p "downloaded file.  Do you really want to continue? [Y/n] " response
+			case $response in
+				[Nn]*)
+					exit 0
+					;;
+				*)
+					;;
+			esac
+		fi
 
 		echo ""
 		echo "-- download Unity $version SDK"
 		rm -f $exe
-		if [ $major = 5 ]; then
+		if [ $major = 5 ] && [ $decimal_ver -lt 530 ]; then
 			url="$(wget -q -O - "https://unity3d.com/get-unity/download/archive" | grep "UnitySetup64-$version" | cut -d '"' -f2)"
 		elif [ $major = 4 ]; then
 			url="http://download.unity3d.com/download_unity/UnitySetup-$version.exe"
@@ -164,10 +171,35 @@ downloadUnityEngine () {
 				url=""
 			fi
 		fi
+		if [ $decimal_ver -ge 530 ]; then
+			url=$(wget -q -O - "https://unity3d.com/get-unity/download/archive" | grep "Unity-$version.*\.torrent" | cut -d '"' -f2 | head -n1)
+		fi
 		if [ -z $url ]; then
 			errorExit "Requested version is not available on the web server!"
 		fi
-		$download $exe $url
+
+		# start the actual downloading
+		if [ $decimal_ver -ge 530 ]; then
+			if [ "$have_aria2c" = "no" ]; then
+				errorExit "aria2c is required to download binaries for engine version 5.3.0 or later"
+			fi
+			torrent=`mktemp -u /tmp/UnitySetup-XXXXXXXXXX --suffix=.torrent`
+			wget -O $torrent $url
+
+			torrent_files=`mktemp -d /tmp/unityengine-XXXXXXXXXX`
+			idx=$(aria2c -S $torrent | grep 'UnitySetup-Linux-Support-for-Editor.exe' | sed 's/|.*//g; s/ //g')
+			aria2c --select-file=$idx \
+				--bt-remove-unselected-file=true \
+				--file-allocation=none \
+				--seed-time=0 \
+				-d $torrent_files \
+				$torrent
+
+			find $torrent_files/* -type f -name "UnitySetup-Linux-Support-for-Editor.exe" -exec mv '{}' "$torrent_files" \;
+			exe="$torrent_files/UnitySetup-Linux-Support-for-Editor.exe"
+		else
+			$download $exe $url
+		fi
 
 		echo ""
 		echo "-- extract SDK files"
