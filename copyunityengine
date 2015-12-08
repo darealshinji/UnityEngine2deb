@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="15.10.16.1"
+appversion="15.12.08.1"
 
 appname=$(basename "$0")
 engines="$HOME/.local/share/UnityEngine2deb/Engines"

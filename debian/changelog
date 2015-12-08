@@ -1,3 +1,15 @@
+u2deb (15.12.08.1~trusty) trusty; urgency=low
+
+  * copyunityengine:
+      * show confirmation dialog before downloading huge files
+      * inform when the checksum is okay
+      * enable automatic download for Unity >= 5.3 (files will be downloaded
+        with Aria2c via BitTorrent)
+  * New scripts:
+      * u2mojo: create Mojo Setup packages of Unity engine games
+
+ -- Marshall Banana <djcj@gmx.de>  Tue, 08 Dec 2015 23:10:12 +0100
+
 u2deb (15.09.09.1~trusty) trusty; urgency=low
 
   * copyunityengine: fix checking for aria2c
