@@ -17,9 +17,9 @@ You can also use it to install the screenselector plugin if the original build c
 **u2mojo**: This script helps you to create portable [MojoSetup](http://www.icculus.org/mojosetup/)
 installers for any GNU/Linux distribution.
 
-Minimum dependencies: `debhelper imagemagick p7zip-full¹`
+Minimum dependencies: `debhelper imagemagick aria2¹ p7zip-full¹ wget¹`
 
-Recommended dependencies: `aria2¹ wget¹ execstack lintian libgtk2.0-0 libgtk2.0-0:i386 libglu1-mesa libglu1-mesa:i386`
+Recommended dependencies: `execstack lintian libgtk2.0-0 libgtk2.0-0:i386 libglu1-mesa libglu1-mesa:i386`
 
 ¹ only required by copyunityengine
 
