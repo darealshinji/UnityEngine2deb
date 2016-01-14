@@ -1,8 +1,13 @@
 u2deb (16.01.14.1~trusty) trusty; urgency=low
 
-  * copyunityengine: get version number from Unity 5 games
+  * copyunityengine:
+      * get version number from Unity 5 games
+  * u2deb:
+      * convert ScreenSelector.bmp to .png
+      * delete ScreenSelector.bmp
+      * automatic fix of DOS line endings in descriptions
 
- -- Marshall Banana <djcj@gmx.de>  Thu, 14 Jan 2016 13:06:19 +0100
+ -- Marshall Banana <djcj@gmx.de>  Thu, 14 Jan 2016 13:44:44 +0100
 
 u2deb (15.12.08.1~trusty) trusty; urgency=low
 
