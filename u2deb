@@ -344,6 +344,7 @@ if [ $mode = "prepare" ] ; then
     echo "and press any key to continue."
     read -p "" -n1 -s
   fi
+  sed -i 's/\r//' "$topsrc/description"  # dos2unix line endings
   echo "" >> "$topsrc/description"  # add a new line to the end of the file
   if [ -z "$VERSION" ] ; then
     echo ""
