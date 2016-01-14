@@ -290,11 +290,8 @@ if [ $mode = "prepare" ] ; then
   ScreenSelector="$sourcedir/${name}_Data/ScreenSelector"
 
   # convert ScreenSelector.bmp to ScreenSelector.png
-  imconvert="$(whereis -b convert | awk '{print $2}')"
-  if [ "x$imconvert" != "x" ]; then
-    if [ -f "${ScreenSelector}.bmp" ] && [ ! -f "${ScreenSelector}.png" ] ; then
-      "$imconvert" "${ScreenSelector}.bmp" "${ScreenSelector}.png"
-    fi
+  if [ -f "${ScreenSelector}.bmp" ] && [ ! -f "${ScreenSelector}.png" ] ; then
+    convert "${ScreenSelector}.bmp" "${ScreenSelector}.png"
   fi
 
   # remove unused ScreenSelector.bmp
