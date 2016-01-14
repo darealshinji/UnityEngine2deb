@@ -2,7 +2,7 @@
 
 set -e
 
-# Copyright (c) 2014-2015, djcj <djcj@gmx.de>
+# Copyright (c) 2014-2016, djcj <djcj@gmx.de>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="15.10.20.1"
+appversion="16.01.14.1"
 
 appname=$(basename "$0")
 scriptpath="$(dirname "$(readlink -f "$0")")"
@@ -265,7 +265,7 @@ if [ $mode = "prepare" ] ; then
   export PATH="/usr/local/sbin:/usr/sbin:/sbin:${PATH}"  # on Debian /sbin isn't in PATH by default
   execstack="$(whereis -b execstack | awk '{print $2}')"
   if [ "x$execstack" != "x" ]; then
-    find "$sourcedir" -name libmono.so -exec execstack -c '{}' \;
+    find "$sourcedir" -name libmono.so -exec "$execstack" -c '{}' \;
   fi
 
   # delete unnecessary files
@@ -287,10 +287,23 @@ if [ $mode = "prepare" ] ; then
     echo "application was renamed to ${name}.x86_64"
   fi
 
+  ScreenSelector="$sourcedir/${name}_Data/ScreenSelector"
+
+  # convert ScreenSelector.bmp to ScreenSelector.png
+  imconvert="$(whereis -b convert | awk '{print $2}')"
+  if [ "x$imconvert" != "x" ]; then
+    if [ -f "${ScreenSelector}.bmp" ] && [ ! -f "${ScreenSelector}.png" ] ; then
+      "$imconvert" "${ScreenSelector}.bmp" "${ScreenSelector}.png"
+    fi
+  fi
+
+  # remove unused ScreenSelector.bmp
+  rm -f "${ScreenSelector}.bmp"
+
   # add a ScreenSelector.png if required
   if [ -f "`find "$sourcedir" -name ScreenSelector.so | head -n1`" ] && \
-     [ ! -f "$sourcedir/${name}_Data/ScreenSelector.png" ] ; then
-    cp "$templates/ScreenSelector.png" "$sourcedir/${name}_Data/ScreenSelector.png"
+     [ ! -f "${ScreenSelector}.png" ] ; then
+    cp "$templates/ScreenSelector.png" "${ScreenSelector}.png"
   fi
 
   # icon
