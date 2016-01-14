@@ -1,3 +1,9 @@
+u2deb (16.01.14.1~trusty) trusty; urgency=low
+
+  * copyunityengine: get version number from Unity 5 games
+
+ -- Marshall Banana <djcj@gmx.de>  Thu, 14 Jan 2016 13:06:19 +0100
+
 u2deb (15.12.08.1~trusty) trusty; urgency=low
 
   * copyunityengine:
