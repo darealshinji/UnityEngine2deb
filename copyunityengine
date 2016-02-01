@@ -51,6 +51,7 @@ help() {
    $appname [ --no-sdk | --force-sdk ] <gamedir>
    $appname -p | --print <gamedir>
    $appname -d | --download [ --no-sdk | --force-sdk ] <version>
+   $appname --package <version> <exe>
    $appname -h | --help
 
  Options:
@@ -62,6 +63,13 @@ help() {
    -d, --download       download the engine package specified by its version
                           and exit.  Download location is:
                           \`$engines'
+       --package        create an engine package from a specified SDK file
+
+       <version>        engine version, separated by points; pattern is x.x.x;
+                          example: 4.3.1 (don't use something like 4.3.1f3)
+       <exe>            Windows installer that contains the Linux binaries; on
+                          newer versions they're in a separate "Linux-Support-
+                          for-Editor" setup file
 
    -h, --help           print this message
    -V, --version        display version info and quit
@@ -138,10 +146,29 @@ extractSDKfiles() {
 	echo "-- create archive"
 	cd $files && tar cvfJ "$txz" $version
 	cd /tmp
-	rm -rf $files $exe
+	rm -rf $files
 
 	echo ""
 	echo "-- archive saved at \`$txz'"
+}
+
+checkUnityVersionString() {
+	version="$1"
+	length=$(($(printf "$version" | wc -m)))
+	msg="Incorrect version string!"
+	case $(echo "$version" | cut -d. -f1) in
+		4|5)
+			if [ $length -lt 5 ]; then
+				errorExit "$msg (too short)"
+			fi
+			if [ $length -gt 5 ]; then
+				errorExit "$msg (too long)"
+			fi
+			;;
+		*)
+			errorExit "$msg"
+			;;
+	esac
 }
 
 downloadUnityEngine() {
@@ -166,17 +193,7 @@ downloadUnityEngine() {
 
 	decimal_ver="$(echo $version | tr -d .)"
 	major=$(echo "$version" | cut -d. -f1)
-	length=$(($(printf "$version" | wc -m)))
-	case $major in
-		4|5)
-			if [ $length -lt 5 ]; then
-				errorExit "Incorrect version string!";
-			fi
-			;;
-		*)
-			errorExit "Incorrect version string!"
-			;;
-	esac
+	checkUnityVersionString $version
 
 	mkdir -p "$engines"
 	if [ -f "$txz" ] && [ "$forcesdk" = "no" ]; then
@@ -272,6 +289,7 @@ downloadUnityEngine() {
 		fi
 
 		extractSDKfiles $exe $version $txz
+		rm -f $exe
 		exit 0
 	fi
 
@@ -309,6 +327,7 @@ forcesdk="no"
 dlonly="no"
 no_sdk_opt_set="no"
 force_sdk_opt_set="no"
+createpackage="no"
 for opt; do
 	optarg="${opt#*=}"
 	case "$opt" in
@@ -328,6 +347,9 @@ for opt; do
 		"--print"|"-p")
 			printonly="yes"
 			;;
+		"--package")
+			createpackage="yes"
+			;;
 		"--help"|"-h"|"--version"|"-V")
 			;;
 		*)
@@ -335,6 +357,28 @@ for opt; do
 			;;
 	esac
 done
+
+if [ "$createpackage" = "yes" ]; then
+	version="$2"
+	exe="$3"
+	if [ $# -gt 3 ]; then
+		errorExit "too many arguments for \`--package'; usage is: $appname --package <version> <exe>"
+	fi
+	if [ $# -lt 3 ]; then
+		errorExit "missing arguments for \`--package'; usage is: $appname --package <version> <exe>"
+	fi
+	checkUnityVersionString $version
+	if [ -e "$PWD/$version.tar.xz" ]; then
+		errorExit "\`$PWD/$version.tar.xz' already exists"
+	fi
+	if [ ! -e "$exe" ]; then
+		errorExit "\`$exe' doesn't exist"
+	elif [ -d "$exe" ]; then
+		errorExit "\`$exe' is a directory"
+	fi
+	extractSDKfiles $exe $version "$PWD/$version.tar.xz"
+	exit 0
+fi
 
 if [ "$no_sdk_opt_set" = "yes" ] && [ "$force_sdk_opt_set" = "yes" ]; then
 	errorExit "you cannot use \`--no-sdk' and \`--force-sdk' together"

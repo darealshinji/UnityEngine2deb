@@ -9,6 +9,8 @@ copyunityengine \- install Linux binaries into a Unity engine game
 .br
 .B copyunityengine \-d\fR| \fB\-\-download  \fR[\fB\-\-no\-sdk \fR| \fB\-\-force\-sdk\fR] <version>
 .br
+.B copyunityengine \-\-package \fR<version> <exe>
+.br
 .B copyunityengine \-h\fR| \fB\-\-help
 
 .SH DESCRIPTION
@@ -35,6 +37,17 @@ print used engine version and exit
 download the engine package specified by its version and exit.
 Download location is
 .I ~/.local/share/UnityEngine2deb/Engines
+.TP
+\fB\-\-package
+create an engine package from a specified SDK file
+.TP
+\fB<version>
+engine version, separated by points; pattern is x.x.x;
+example: 4.3.1 (don't use something like 4.3.1f3)
+.TP
+\fB<exe>
+Windows installer that contains the Linux binaries;
+on newer versions they're in a separate "Linux-Support-for-Editor" setup file
 .TP
 \fB\-h, \-\-help
 show help text and quit
