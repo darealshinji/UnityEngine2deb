@@ -37,8 +37,8 @@ errorExit() {
 	exit 1
 }
 
-if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] ; then
-cat << EOF
+help() {
+	cat << EOF
 
  Install Linux binaries into a Unity engine game and delete all previously
  installed binary files.
@@ -67,14 +67,10 @@ cat << EOF
    -V, --version        display version info and quit
 
 EOF
-exit 0
-fi
-if [ "$1" = "-V" ] || [ "$1" = "--version" ] ; then
-  echo $appversion
-  exit 0
-fi
+	exit 0
+}
 
-extractSDKfiles () {
+extractSDKfiles() {
 	exe="$1"
 	version="$2"
 	txz="$3"
@@ -148,7 +144,7 @@ extractSDKfiles () {
 	echo "-- archive saved at \`$txz'"
 }
 
-downloadUnityEngine () {
+downloadUnityEngine() {
 	version="$1"
 	sdk="$2"
 	forcesdk="$3"
@@ -298,44 +294,57 @@ downloadUnityEngine () {
 	fi
 }
 
+
+case x"$1" in
+	x|x--help|x-help|x-h|x-\?)
+		help;;
+	x-V|x-v|x--version|x-version)
+		echo $appversion; exit 0;;
+esac
+
 keep="no"
-print="no"
+printonly="no"
 sdk="yes"
 forcesdk="no"
 dlonly="no"
-origpath="$1"
-if [ "$1" = "-p" ] || [ "$1" = "--print" ]; then
-	print="yes"
-	origpath="$2"
-fi
-if [ "$1" = "--no-sdk" ]; then
-	sdk="no"
-	forcesdk="no"
-	origpath="$2"
-elif [ "$1" = "--force-sdk" ]; then
-	sdk="yes"
-	forcesdk="yes"
-	origpath="$2"
+no_sdk_opt_set="no"
+force_sdk_opt_set="no"
+for opt; do
+	optarg="${opt#*=}"
+	case "$opt" in
+		"--no-sdk")
+			sdk="no"
+			forcesdk="no"
+			no_sdk_opt_set="yes"
+			;;
+		"--force-sdk")
+			sdk="yes"
+			forcesdk="yes"
+			force_sdk_opt_set="yes"
+			;;
+		"--download"|"-d")
+			dlonly="yes"
+			;;
+		"--print"|"-p")
+			printonly="yes"
+			;;
+		"--help"|"-h"|"--version"|"-V")
+			;;
+		*)
+			origpath="$optarg"
+			;;
+	esac
+done
+
+if [ "$no_sdk_opt_set" = "yes" ] && [ "$force_sdk_opt_set" = "yes" ]; then
+	errorExit "you cannot use \`--no-sdk' and \`--force-sdk' together"
 fi
 
-if [ "$1" = "-d" ] || [ "$1" = "--download" ]; then
-	dlonly="yes"
-
-	if [ x"$2" = x"--no-sdk" ]; then
-		sdk="no"
-		forcesdk="no"
-		version="$3"
-	elif [ x"$2" = x"--force-sdk" ]; then
-		sdk="yes"
-		forcesdk="yes"
-		version="$3"
-	else
-		version="$2"
-	fi
+if [ "$dlonly" = "yes" ]; then
+	version="$origpath"
 	if [ -z "$version" ]; then
 		errorExit "no version string specified"
 	fi
-
 	downloadUnityEngine $version $sdk $forcesdk
 	exit 0
 fi
@@ -357,7 +366,7 @@ fi
 version="$(head -c 30 "$datadir/$versionFile" | strings | head -c5)"
 txz="$engines/$version.tar.xz"
 
-if [ "$print" = "yes" ]; then
+if [ "$printonly" = "yes" ]; then
 	echo "Used Unity engine: version $version"
 	exit 0
 fi
