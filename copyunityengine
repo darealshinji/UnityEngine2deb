@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="16.01.14.1"
+appversion="16.02.01.1"
 
 appname=$(basename "$0")
 engines="$HOME/.local/share/UnityEngine2deb/Engines"
@@ -73,6 +73,80 @@ if [ "$1" = "-V" ] || [ "$1" = "--version" ] ; then
   echo $appversion
   exit 0
 fi
+
+extractSDKfiles () {
+	exe="$1"
+	version="$2"
+	txz="$3"
+
+	echo ""
+	echo "-- extract SDK files"
+	files=`mktemp -d /tmp/unityengine-XXXXXXXXXX`
+	7z x $exe -o$files
+
+	set +e
+	# The directory names have non-ASCII characters that make it impossible
+	# to work with the shell. We're renaming them to their inode numbers
+	# and then we're moving the Linux-related directories into the top directory.
+	inodes="$(ls -1i "$files" | awk '{print $1}' | tr '\n' ' ')"
+	for n in $inodes; do
+		find $files -inum $n -exec mv -v '{}' $files/$n 2>/dev/null \;
+	done
+	find $files -type d -name linux*_withgfx_development* -exec mv '{}' "$files" 2>/dev/null \;
+	find $files -type d -name linux*_headless_development* -exec mv '{}' "$files" 2>/dev/null \;
+	find $files -type d -name linux*headlessstandaloneplayer -exec mv '{}' "$files" 2>/dev/null \;
+	find $files -type d -name linux*developmentstandaloneplayer -exec mv '{}' "$files" 2>/dev/null \;
+	set -e
+
+	echo ""
+	echo "-- move engine binaries"
+	mkdir -vp $files/$version/Mono/x86
+	mkdir -vp $files/$version/Mono/x86_64
+	mkdir -vp $files/$version/Plugins/x86
+	mkdir -vp $files/$version/Plugins/x86_64
+
+	if [ -d $files/linux32headlessstandaloneplayer ]; then
+		mv -v $files/linuxdevelopmentstandaloneplayer/LinuxPlayer $files/$version/x86
+		mv -v $files/linux64developmentstandaloneplayer/LinuxPlayer $files/$version/x86_64
+		mv -v $files/linux32headlessstandaloneplayer/Data/Mono/libmono.so $files/$version/Mono/x86
+		mv -v $files/linux64developmentstandaloneplayer/Data/Mono/libmono.so $files/$version/Mono/x86_64
+		if [ -d $files/linuxdevelopmentstandaloneplayer/Data/Plugins ]; then
+			mv -v $files/linuxdevelopmentstandaloneplayer/Data/Plugins/ScreenSelector.so $files/$version/Plugins/x86
+			mv -v $files/linux64developmentstandaloneplayer/Data/Plugins/ScreenSelector.so $files/$version/Plugins/x86_64
+		else
+			rm -r $files/$version/Plugins
+		fi
+	elif [ -f $files/linuxdevelopmentstandaloneplayer/Data/Mono/libmono.so ]; then
+		mv -v $files/linuxdevelopmentstandaloneplayer/LinuxPlayer $files/$version/x86
+		mv -v $files/linux64developmentstandaloneplayer/LinuxPlayer $files/$version/x86_64
+		mv -v $files/linuxdevelopmentstandaloneplayer/Data/Mono/libmono.so $files/$version/Mono/x86
+		mv -v $files/linux64developmentstandaloneplayer/Data/Mono/libmono.so $files/$version/Mono/x86_64
+		rm -r $files/$version/Plugins
+	else
+		mv -v $files/linux32_withgfx_development*/LinuxPlayer $files/$version/x86
+		mv -v $files/linux64_withgfx_development*/LinuxPlayer $files/$version/x86_64
+		mv -v $files/linux32_withgfx_development*/Data/Plugins/x86/ScreenSelector.so $files/$version/Plugins/x86
+		mv -v $files/linux64_withgfx_development*/Data/Plugins/x86_64/ScreenSelector.so $files/$version/Plugins/x86_64
+		mv -v $files/linux32_headless_development*/Data/Mono/x86/libmono.so $files/$version/Mono/x86
+		mv -v $files/linux64_headless_development*/Data/Mono/x86_64/libmono.so $files/$version/Mono/x86_64
+	fi
+
+	echo ""
+	echo "-- strip engine binaries"
+	strip -v $files/$version/x86* $files/$version/Mono/x86*/*
+	if [ -d $files/$version/Plugins ]; then
+		strip -v $files/$version/Plugins/x86*/*
+	fi
+
+	echo ""
+	echo "-- create archive"
+	cd $files && tar cvfJ "$txz" $version
+	cd /tmp
+	rm -rf $files $exe
+
+	echo ""
+	echo "-- archive saved at \`$txz'"
+}
 
 downloadUnityEngine () {
 	version="$1"
@@ -201,74 +275,7 @@ downloadUnityEngine () {
 			$download $exe $url
 		fi
 
-		echo ""
-		echo "-- extract SDK files"
-		files=`mktemp -d /tmp/unityengine-XXXXXXXXXX`
-		7z x $exe -o$files
-
-		set +e
-		# The directory names have non-ASCII characters that make it impossible
-		# to work with the shell. We're renaming them to their inode numbers
-		# and then we're moving the Linux-related directories into the top directory.
-		inodes="$(ls -1i "$files" | awk '{print $1}' | tr '\n' ' ')"
-		for n in $inodes; do
-			find $files -inum $n -exec mv -v '{}' $files/$n 2>/dev/null \;
-		done
-		find $files -type d -name linux*_withgfx_development* -exec mv '{}' "$files" 2>/dev/null \;
-		find $files -type d -name linux*_headless_development* -exec mv '{}' "$files" 2>/dev/null \;
-		find $files -type d -name linux*headlessstandaloneplayer -exec mv '{}' "$files" 2>/dev/null \;
-		find $files -type d -name linux*developmentstandaloneplayer -exec mv '{}' "$files" 2>/dev/null \;
-		set -e
-
-		echo ""
-		echo "-- move engine binaries"
-		mkdir -vp $files/$version/Mono/x86
-		mkdir -vp $files/$version/Mono/x86_64
-		mkdir -vp $files/$version/Plugins/x86
-		mkdir -vp $files/$version/Plugins/x86_64
-
-		if [ -d $files/linux32headlessstandaloneplayer ]; then
-			mv -v $files/linuxdevelopmentstandaloneplayer/LinuxPlayer $files/$version/x86
-			mv -v $files/linux64developmentstandaloneplayer/LinuxPlayer $files/$version/x86_64
-			mv -v $files/linux32headlessstandaloneplayer/Data/Mono/libmono.so $files/$version/Mono/x86
-			mv -v $files/linux64developmentstandaloneplayer/Data/Mono/libmono.so $files/$version/Mono/x86_64
-			if [ -d $files/linuxdevelopmentstandaloneplayer/Data/Plugins ]; then
-				mv -v $files/linuxdevelopmentstandaloneplayer/Data/Plugins/ScreenSelector.so $files/$version/Plugins/x86
-				mv -v $files/linux64developmentstandaloneplayer/Data/Plugins/ScreenSelector.so $files/$version/Plugins/x86_64
-			else
-				rm -r $files/$version/Plugins
-			fi
-		elif [ -f $files/linuxdevelopmentstandaloneplayer/Data/Mono/libmono.so ]; then
-			mv -v $files/linuxdevelopmentstandaloneplayer/LinuxPlayer $files/$version/x86
-			mv -v $files/linux64developmentstandaloneplayer/LinuxPlayer $files/$version/x86_64
-			mv -v $files/linuxdevelopmentstandaloneplayer/Data/Mono/libmono.so $files/$version/Mono/x86
-			mv -v $files/linux64developmentstandaloneplayer/Data/Mono/libmono.so $files/$version/Mono/x86_64
-			rm -r $files/$version/Plugins
-		else
-			mv -v $files/linux32_withgfx_development*/LinuxPlayer $files/$version/x86
-			mv -v $files/linux64_withgfx_development*/LinuxPlayer $files/$version/x86_64
-			mv -v $files/linux32_withgfx_development*/Data/Plugins/x86/ScreenSelector.so $files/$version/Plugins/x86
-			mv -v $files/linux64_withgfx_development*/Data/Plugins/x86_64/ScreenSelector.so $files/$version/Plugins/x86_64
-			mv -v $files/linux32_headless_development*/Data/Mono/x86/libmono.so $files/$version/Mono/x86
-			mv -v $files/linux64_headless_development*/Data/Mono/x86_64/libmono.so $files/$version/Mono/x86_64
-		fi
-
-		echo ""
-		echo "-- strip engine binaries"
-		strip -v $files/$version/x86* $files/$version/Mono/x86*/*
-		if [ -d $files/$version/Plugins ]; then
-			strip -v $files/$version/Plugins/x86*/*
-		fi
-
-		echo ""
-		echo "-- create archive"
-		cd $files && tar cvfJ "$txz" $version
-		cd /tmp
-		rm -rf $files $exe
-
-		echo ""
-		echo "-- archive saved at \`$engines/$version.tar.xz'"
-
+		extractSDKfiles $exe $version $txz
 		exit 0
 	fi
 
