@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="16.01.14.1"
+appversion="16.02.04.1"
 
 appname=$(basename "$0")
 scriptpath="$(dirname "$(readlink -f "$0")")"
@@ -322,14 +322,10 @@ if [ $mode = "prepare" ] ; then
 
   # enter packaging information
   echo ""
-  echo "name: $UPSTREAMNAME"
-  echo "application/package name: $name"
   if [ -z "$SHORTDESCRIPTION" ] ; then
     echo ""
     echo "Please enter a brief description,"
     read -p "i.e. 'Unity engine video game': " SHORTDESCRIPTION
-  else
-    echo "description: $SHORTDESCRIPTION"
   fi
   if [ -f "$PWD/description" ] ; then
     cp "$PWD/description" "$topsrc"
@@ -347,34 +343,24 @@ if [ $mode = "prepare" ] ; then
     echo ""
     echo "Enter the game's release version. It should begin with a number"
     read -p "and mustn't contain and spaces or underscores: " VERSION
-  else
-    echo "package version: $VERSION"
   fi
   if [ -z "$MAINTAINER" ] ; then
     echo ""
     echo "Enter the package maintainer information."
     echo "Use the following pattern: John Doe <nick@domain.org>"
     read -p " " MAINTAINER
-  else
-    echo "package maintainer: $MAINTAINER"
   fi
   if [ -z "$HOMEPAGE" ] ; then
     echo ""
     read -p "What's the game's homepage? " HOMEPAGE
-  else
-    echo "homepage: $HOMEPAGE"
   fi
   if [ -z "$YEAR" ] ; then
     echo ""
     read -p "What year is this game from? " YEAR
-  else
-    echo "year: $YEAR"
   fi
   if [ -z "$COPYRIGHT" ] ; then
     echo ""
     read -p "Who's holding the copyright? " COPYRIGHT
-  else
-    echo "copyright: $COPYRIGHT"
   fi
   echo ""
   echo ""
@@ -383,17 +369,11 @@ if [ $mode = "prepare" ] ; then
   [ -z "$MAINTAINER" ] && MAINTAINER="John Doe <nick@domain.org>"
   [ -z "$HOMEPAGE" ] && HOMEPAGE="http://www.unity3d.com/"
   [ -z "$YEAR" ] && YEAR=$(date +%Y)
-  [ -z "$COPYRIGHT" ] && COPYRIGHT="the creator of '$name'"
+  [ -z "$COPYRIGHT" ] && COPYRIGHT="the creator(s) of '$UPSTREAMNAME'"
 
   # create Debian files
-  mkdir -p "$debian"
-  cp -r \
-  "$templates/source" \
-  "$templates/compat" \
-  "$templates/lintian-overrides" \
-  "$templates/rules" \
-  "$templates/make-icons.sh" \
-  "$templates/patchelf" "$debian"
+  mkdir -p "$builddir/x86"
+  cp -r "$templates" "$debian"
   chmod a+x "$debian/rules" "$debian/make-icons.sh"
 
   cat >> "$builddir/x86/${name}.desktop" << EOF
@@ -433,13 +413,10 @@ Upstream-Name: $UPSTREAMNAME
 Source: $HOMEPAGE
 
 Files: *
-Copyright: $YEAR $COPYRIGHT
-License:
- Copyright (c) $YEAR, $COPYRIGHT
- All Rights Reserved.
-
+Copyright: 2012-2016 Unity Technologies
+           $YEAR $COPYRIGHT
 EOF
-  cat "$templates/debian-copyright" >> "$debian/copyright"
+  cat "$templates/copyright.in" >> "$debian/copyright"
 
   [ $datapackage = "yes" ] && datadeps=", ${name}-data (= \${binary:Version})"
   cat >> "$debian/control.in" << EOF
@@ -521,9 +498,28 @@ EOF
   if [ -d "$builddir/x86" ] && [ -d "$builddir/x86_64" ] ; then
     echo "arch_only = --arch" >> "$builddir/x86_64/debian/confflags"
   fi
-  echo ""
-  echo "The files are prepared. Run '$appname build' to build Debian packages."
-  echo "Or modify the the files in '$builddir' first."
+
+  cat <<EOL
+
+                   >> Summary <<
+                    name: $UPSTREAMNAME
+application/package name: $name
+             description: $SHORTDESCRIPTION
+         package version: $VERSION
+       packagemaintainer: $MAINTAINER
+                homepage: $HOMEPAGE
+                    year: $YEAR
+               copyright: $COPYRIGHT
+
+       build datapackage? $datapackage
+      compression method: $compression
+             disable x86? $disable_x86
+          disable x86_64? $disable_x86_64
+            use patchelf? $patchelf
+
+The files are prepared. Run '$appname build' to build Debian packages.
+Or modify the the files in '$builddir' first.
+EOL
 
   exit 0
 fi

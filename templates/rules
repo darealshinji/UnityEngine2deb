@@ -41,6 +41,7 @@ plugindir  = source/$(NAME)_Data/Plugins
 %:
 	dh ${@}
 
+
 override_dh_auto_install:
 	mkdir -p $(libdir)
 	mkdir -p $(ICONDEST)
@@ -91,6 +92,10 @@ endif
 	done
 
 
+override_dh_installdocs:
+	dh_installdocs -A debian/USLA debian/USLA.pdf debian/USLA.rtf
+
+
 # Unity engine games don't provide any shared libraries
 override_dh_makeshlibs:
 
@@ -119,6 +124,7 @@ ifeq ($(ARCH), x86)
 else
 	dh_shlibdeps -l/usr/lib/x86_64-linux-gnu/mesa/:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu
 endif
+
 
 override_dh_gencontrol:
 	dh_gencontrol
