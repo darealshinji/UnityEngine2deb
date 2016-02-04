@@ -2,7 +2,7 @@
 
 set -e
 
-# Copyright (c) 2015, djcj <djcj@gmx.de>
+# Copyright (c) 2015-2016, djcj <djcj@gmx.de>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="15.10.25.1"
+appversion="16.02.04.1"
 
 appname=$(basename "$0")
 appname_u2deb="u2deb"
@@ -34,10 +34,13 @@ scriptpath="$(dirname "$(readlink -f "$0")")"
 tmpdir="`mktemp -d /tmp/UnityEngine2mojo_tmpXXXXXXXXXX`"
 mojoreadme="`mktemp -u /tmp/mojoreadme_XXXXXXXXXX`"
 mojobins="`mktemp -d /tmp/mojobins_XXXXXXXXXX`"
-mojobins_extracted="MojoSetup-Bins-master"
-mojobins_archive="master.tar.gz"
-mojobins_url="https://github.com/darealshinji/MojoSetup-Bins/archive/$mojobins_archive"
 templates_url="https://raw.githubusercontent.com/darealshinji/UnityEngine2deb/master/templates"
+
+mojobins_version="0.0.885"
+mojobins_extracted="MojoSetup-Bins-$mojobins_version"
+mojobins_archive="${mojobins_extracted}-linux.tar.xz"
+mojobins_md5sum="746c1098ab48465eb35eb4b76b5666ac"
+mojobins_url="https://github.com/darealshinji/MojoSetup-Bins/releases/download/v$mojobins_version/$mojobins_archive"
 
 errorExit() {
   echo "error: $1"
@@ -252,11 +255,12 @@ echo ""
 # build Mojo setup
 cd $mojobins
 wget $mojobins_url
+echo "$mojobins_md5sum *$mojobins_archive" | md5sum -c -
 tar xvf $mojobins_archive
 cd $mojobins_extracted
 test -f $splash || wget -O "$splash" "$templates_url/ScreenSelector.png"
 test -f $icon || wget -O "$icon" "$templates_url/icon.png"
-sed -i 's|category = "Misc;"|category = "Game;"|g' setup-files/scripts/config.lua.in  # force category "Game"
+sed -i 's|category = "Misc;"|category = "Game;"|g' config.lua.in  # force category "Game"
 export FULLNAME="$FULLNAME"
 export SHORTNAME=$name
 export VERSION=$VERSION
