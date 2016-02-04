@@ -65,14 +65,18 @@ help() {
                           \`$engines'
        --package        create an engine package from a specified SDK file
 
-       <version>        engine version, separated by points; pattern is x.x.x;
-                          example: 4.3.1 (don't use something like 4.3.1f3)
-       <exe>            Windows installer that contains the Linux binaries; on
-                          newer versions they're in a separate "Linux-Support-
-                          for-Editor" setup file
-
    -h, --help           print this message
    -V, --version        display version info and quit
+
+       <version>        engine version, separated by points; pattern is x.x.x;
+                          example: 4.3.1 (don't use something like 4.3.1f3)
+
+       <exe>            Windows installer that contains the Linux binaries.
+                          From version 5.3.0 on they're in a separate "Linux-
+                          Support-for-Editor" setup file which can be
+                          downloaded with the Unity Download Assistent (Unity
+                          Installer) using wine if there is not torrent file
+                          available to download it.
 
 EOF
 	exit 0
