@@ -1,21 +1,3 @@
-/*
- *  Copyright (c) 2004-2015 Eelco Dolstra <eelco.dolstra@logicblox.com>
- *  https://github.com/NixOS/patchelf
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or (at
- *  your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful, but
- *  WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- *  General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include <string>
 #include <vector>
 #include <set>
@@ -35,11 +17,7 @@
 #include <fcntl.h>
 #include <limits.h>
 
-#if (defined HAVE_ELF_H)
-    #include <elf.h>
-#else
-    #include "../inc/elf.h"
-#endif
+#include "elf.h"
 
 using namespace std;
 
@@ -62,9 +40,10 @@ unsigned char * contents = 0;
 
 
 static unsigned int getPageSize(){
-#if (defined HAVE_SYSCONF)
-    // if present, use sysconf to get kernel page size
-    return sysconf(_SC_PAGESIZE);
+#ifdef MIPSEL
+    /* The lemote fuloong 2f kernel defconfig sets a page size of
+       16KB. */
+    return 4096 * 4;
 #else
     return 4096;
 #endif
@@ -176,7 +155,7 @@ public:
 
     void setInterpreter(const string & newInterpreter);
 
-    typedef enum { rpPrint, rpShrink, rpSet, rpRemove, rpConvert } RPathOp;
+    typedef enum { rpPrint, rpShrink, rpSet, rpRemove } RPathOp;
 
     void modifyRPath(RPathOp op, string newRPath);
 
@@ -650,7 +629,7 @@ void ElfFile<ElfFileParamNames>::rewriteSectionsLibrary()
     /* Write out the replaced sections. */
     Elf_Off curOff = startOffset + phdrs.size() * sizeof(Elf_Phdr);
     writeReplacedSections(curOff, startPage, startOffset);
-    assert((off_t) curOff == startOffset + neededSpace);
+    assert(curOff == startOffset + neededSpace);
 
 
     /* Move the program header to the start of the new area. */
@@ -719,7 +698,7 @@ void ElfFile<ElfFileParamNames>::rewriteSectionsExecutable()
     Elf_Addr firstPage = startAddr - startOffset;
     debug("first page is 0x%llx\n", (unsigned long long) firstPage);
 
-    if ((off_t) rdi(hdr->e_shoff) < startOffset) {
+    if (rdi(hdr->e_shoff) < startOffset) {
         /* The section headers occur too early in the file and would be
            overwritten by the replaced sections. Move them to the end of the file
            before proceeding. */
@@ -775,7 +754,7 @@ void ElfFile<ElfFileParamNames>::rewriteSectionsExecutable()
 
     /* Write out the replaced sections. */
     writeReplacedSections(curOff, firstPage, 0);
-    assert((off_t) curOff == neededSpace);
+    assert(curOff == neededSpace);
 
 
     rewriteHeaders(firstPage + rdi(hdr->e_phoff));
@@ -1161,16 +1140,8 @@ void ElfFile<ElfFileParamNames>::modifyRPath(RPathOp op, string newRPath)
         return;
     }
 
-    /* Check if a DT_RPATH that could be converted to DT_RUNPATH exists. */
-    if (op == rpConvert && !rpath) {
-        debug("no RPATH to convert\n");
-        return;
-    }
 
     if (string(rpath ? rpath : "") == newRPath) return;
-
-    /* convert DT_RPATH to DT_RUNPATH */
-    if (op == rpConvert && rpath) newRPath = string(rpath ? rpath : "");
 
     changed = true;
 
@@ -1190,10 +1161,8 @@ void ElfFile<ElfFileParamNames>::modifyRPath(RPathOp op, string newRPath)
         dynRPath = 0;
     }
 
-    if (forceRPath && !dynRPath && dynRunPath) { /* convert DT_RUNPATH to DT_RPATH */
-        dynRunPath->d_tag = DT_RPATH;
-        dynRPath = dynRunPath;
-        dynRunPath = 0;
+    if (forceRPath && dynRPath && dynRunPath) { /* convert DT_RUNPATH to DT_RPATH */
+        dynRunPath->d_tag = DT_IGNORE;
     }
 
     if (newRPath.size() <= rpathSize) {
@@ -1421,7 +1390,6 @@ static bool shrinkRPath = false;
 static bool removeRPath = false;
 static bool setRPath = false;
 static bool printRPath = false;
-static bool convertRPath = false;
 static string newRPath;
 static set<string> neededLibsToRemove;
 static map<string, string> neededLibsToReplace;
@@ -1453,8 +1421,6 @@ static void patchElf2(ElfFile & elfFile)
         elfFile.modifyRPath(elfFile.rpShrink, "");
     else if (removeRPath)
         elfFile.modifyRPath(elfFile.rpRemove, "");
-    else if (convertRPath)
-        elfFile.modifyRPath(elfFile.rpConvert, "");
     else if (setRPath)
         elfFile.modifyRPath(elfFile.rpSet, newRPath);
 
@@ -1513,14 +1479,13 @@ void showHelp(const string & progName)
         fprintf(stderr, "syntax: %s\n\
   [--set-interpreter FILENAME]\n\
   [--print-interpreter]\n\
-  [--print-soname]\n\
-  [--set-soname SONAME]\n\
+  [--print-soname]\t\tPrints 'DT_SONAME' entry of .dynamic section. Raises an error if DT_SONAME doesn't exist\n\
+  [--set-soname SONAME]\t\tSets 'DT_SONAME' entry to SONAME.\n\
   [--set-rpath RPATH]\n\
   [--remove-rpath]\n\
   [--shrink-rpath]\n\
   [--print-rpath]\n\
   [--force-rpath]\n\
-  [--convert-rpath]\n\
   [--add-needed LIBRARY]\n\
   [--remove-needed LIBRARY]\n\
   [--replace-needed LIBRARY NEW_LIBRARY]\n\
@@ -1586,9 +1551,6 @@ int main(int argc, char * * argv)
                to DT_RUNPATH, and if neither is present, a DT_RPATH is
                added. */
             forceRPath = true;
-        }
-        else if (arg == "--convert-rpath") {
-            convertRPath = true;
         }
         else if (arg == "--print-needed") {
             printNeeded = true;
