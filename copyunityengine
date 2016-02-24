@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="16.02.01.1"
+appversion="16.02.24.1"
 
 appname=$(basename "$0")
 engines="$HOME/.local/share/UnityEngine2deb/Engines"
@@ -152,8 +152,10 @@ extractSDKfiles() {
 	cd /tmp
 	rm -rf $files
 
+	checksum="$(md5sum "$txz" | awk '{print $1}')"
 	echo ""
 	echo "-- archive saved at \`$txz'"
+	echo "-- md5 checksum: $checksum"
 }
 
 checkUnityVersionString() {
