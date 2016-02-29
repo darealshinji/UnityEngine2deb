@@ -1,3 +1,21 @@
+/*
+ *  PatchELF is a utility to modify properties of ELF executables and libraries
+ *  Copyright (C) 2004-2016  Eelco Dolstra <edolstra@gmail.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or (at
+ *  your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but
+ *  WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ *  General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <string>
 #include <vector>
 #include <set>
@@ -29,7 +47,7 @@ static bool debugMode = false;
 static bool forceRPath = false;
 
 static string fileName;
-
+static int pageSize = PAGESIZE;
 
 off_t fileSize, maxSize;
 unsigned char * contents = 0;
@@ -40,13 +58,7 @@ unsigned char * contents = 0;
 
 
 static unsigned int getPageSize(){
-#ifdef MIPSEL
-    /* The lemote fuloong 2f kernel defconfig sets a page size of
-       16KB. */
-    return 4096 * 4;
-#else
-    return 4096;
-#endif
+    return pageSize;
 }
 
 
@@ -787,11 +799,14 @@ void ElfFile<ElfFileParamNames>::rewriteHeaders(Elf_Addr phdrAddress)
     /* Rewrite the program header table. */
 
     /* If there is a segment for the program header table, update it.
-       (According to the ELF spec, it must be the first entry.) */
-    if (rdi(phdrs[0].p_type) == PT_PHDR) {
-        phdrs[0].p_offset = hdr->e_phoff;
-        wri(phdrs[0].p_vaddr, wri(phdrs[0].p_paddr, phdrAddress));
-        wri(phdrs[0].p_filesz, wri(phdrs[0].p_memsz, phdrs.size() * sizeof(Elf_Phdr)));
+       (According to the ELF spec, there can only be one.) */
+    for (unsigned int i = 0; i < phdrs.size(); ++i) {
+        if (rdi(phdrs[i].p_type) == PT_PHDR) {
+            phdrs[i].p_offset = hdr->e_phoff;
+            wri(phdrs[i].p_vaddr, wri(phdrs[i].p_paddr, phdrAddress));
+            wri(phdrs[i].p_filesz, wri(phdrs[i].p_memsz, phdrs.size() * sizeof(Elf_Phdr)));
+            break;
+        }
     }
 
     sortPhdrs();
@@ -1161,8 +1176,10 @@ void ElfFile<ElfFileParamNames>::modifyRPath(RPathOp op, string newRPath)
         dynRPath = 0;
     }
 
-    if (forceRPath && dynRPath && dynRunPath) { /* convert DT_RUNPATH to DT_RPATH */
-        dynRunPath->d_tag = DT_IGNORE;
+    if (forceRPath && !dynRPath && dynRunPath) { /* convert DT_RUNPATH to DT_RPATH */
+        dynRunPath->d_tag = DT_RPATH;
+        dynRPath = dynRunPath;
+        dynRunPath = 0;
     }
 
     if (newRPath.size() <= rpathSize) {
@@ -1478,9 +1495,10 @@ void showHelp(const string & progName)
 {
         fprintf(stderr, "syntax: %s\n\
   [--set-interpreter FILENAME]\n\
+  [--page-size SIZE]\n\
   [--print-interpreter]\n\
-  [--print-soname]\t\tPrints 'DT_SONAME' entry of .dynamic section. Raises an error if DT_SONAME doesn't exist\n\
-  [--set-soname SONAME]\t\tSets 'DT_SONAME' entry to SONAME.\n\
+  [--print-soname]\n\
+  [--set-soname SONAME]\n\
   [--set-rpath RPATH]\n\
   [--remove-rpath]\n\
   [--shrink-rpath]\n\
@@ -1513,6 +1531,11 @@ int main(int argc, char * * argv)
             if (++i == argc) error("missing argument");
             newInterpreter = argv[i];
         }
+        else if (arg == "--page-size") {
+            if (++i == argc) error("missing argument");
+            pageSize = atoi(argv[i]);
+            if (pageSize <= 0) error("invalid argument to --page-size");
+	}
         else if (arg == "--print-interpreter") {
             printInterpreter = true;
         }
@@ -1589,6 +1612,7 @@ int main(int argc, char * * argv)
     fileName = argv[i];
 
     patchElf();
+    if (contents) free(contents);
 
     return 0;
 }

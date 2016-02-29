@@ -1,5 +1,9 @@
 CXX := g++
-BIN = patchelf
+BIN  = patchelf
+
+PAGESIZE = $(shell getconf PAGESIZE 2>/dev/null || getconf PAGE_SIZE 2>/dev/null || echo 4096)
+DEFINES  = -DPACKAGE_STRING="\"PatchELF 0.9\"" -DPAGESIZE=$(PAGESIZE)
+
 
 all: $(BIN)
 
@@ -9,5 +13,5 @@ clean:
 distclean: clean
 
 $(BIN):
-	$(CXX) -w -s -DPACKAGE_STRING="\"PatchELF 0.8\"" -DHAVE_SYSCONF=1 -DHAVE_ELF_H=1 -o $@ $@.cpp
+	$(CXX) -w -s $(DEFINES) -o $@ $@.cpp
 

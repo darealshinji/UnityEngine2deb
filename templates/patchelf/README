@@ -1,5 +1,5 @@
-PatchELF was downloaded from:
-https://github.com/NixOS/patchelf/blob/dd299dc2a76662551eb96fede37ba370367c9ba8/src/patchelf.cc
+PatchELF 0.9 was downloaded from:
+https://github.com/NixOS/patchelf/
 
 
 Copyright (c) 2004-2016 Eelco Dolstra <eelco.dolstra@logicblox.com>
