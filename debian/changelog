@@ -1,3 +1,17 @@
+u2deb (16.02.24.1~trusty) trusty; urgency=low
+
+  * copyunityengine:
+      * parse commands in a getopt()-like way
+      * new option to create a tarball from a specified exe file
+      * print md5 checksum after creating an archive
+  * u2deb:
+      * clarify that the UNITY-SOFTWARE-LICENSE-AGREEMENT applies to games
+      * update PatchELF
+  * u2mojo:
+      * fix download of MojoSetup binaries and add MD5 check
+
+ -- Marshall Banana <djcj@gmx.de>  Thu, 31 Mar 2016 16:45:53 +0200
+
 u2deb (16.01.14.1~trusty) trusty; urgency=low
 
   * copyunityengine:
