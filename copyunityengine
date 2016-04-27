@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="16.02.24.1"
+appversion="16.04.27.1"
 
 appname=$(basename "$0")
 engines="$HOME/.local/share/UnityEngine2deb/Engines"
@@ -43,9 +43,10 @@ help() {
  Install Linux binaries into a Unity engine game and delete all previously
  installed binary files.
  You can use this script to create native Linux versions of games that were
- released for Windows only or to create native 64 bit versions if a Linux
- build was originally released only as 32 bit version.  You can also use it
- to install the screenselector plugin if the original build came without it.
+ released only for Windows and/or OSX, or to create native 64 bit versions if
+ a Linux build was originally released only as 32 bit version.  You can also
+ use it to install the screenselector plugin if the original build came without
+ it.
 
  Usage:
    $appname [ --no-sdk | --force-sdk ] <gamedir>
@@ -405,6 +406,31 @@ elif [ ! -e "$origpath" ]; then
 	errorExit "path to '$origpath' doesn't exist"
 elif [ ! -d "$origpath" ]; then
 	errorExit "'$origpath' is not a directory"
+fi
+
+if [ -d "$origpath/Contents/Data" -a \
+	 -d "$origpath/Contents/MacOS" -a \
+	 -f "$origpath/Contents/Info.plist" ]
+then
+	# OSX .app bundle
+	game="$(grep -A1 -e 'CFBundleName' "$origpath/Contents/Info.plist" | tail -n1 | sed 's|.*<string>||; s|<\/string>.*||')"
+	linuxdir="$(dirname "$origpath")/${game}-Linux"
+	echo "OSX .app bundle detected!"
+	echo "The game's directory layout needs to be restructured for Linux compatibility."
+	read -r -p "Should I copy all files to \`$linuxdir'? [Y/n] " response
+	case $response in
+		[Nn]*) echo "Aborted."; exit 0 ;;
+		*) ;;
+	esac
+	echo ""
+	mkdir -p "$linuxdir"
+	cp -rv "$origpath/Contents/Data" "$linuxdir/${game}_Data"
+	mkdir -p "$linuxdir/${game}_Data/Resources" "$linuxdir/${game}_Data/Mono"
+	cp -v "$origpath/Contents/Resources/unity default resources" "$linuxdir/${game}_Data/Resources"
+	if [ -f "$origpath/Contents/Resources/UnityPlayer.icns" ]; then
+		cp -v "$origpath/Contents/Resources/UnityPlayer.icns" "$linuxdir/${game}_Data/Resources"
+	fi
+	origpath="$linuxdir"
 fi
 
 datadir="$(find "$origpath" -type d -name \*_Data | head -n1)"
