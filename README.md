@@ -10,8 +10,8 @@ run `u2deb clean`. You can get a full list of options and environment variables 
 
 **copyunityengine**: This script will download and install GNU/Linux binaries of a Unity engine game and delete all previously
 installed binary files. Usage is `copyunityengine <gamedir>`.
-You can use this script to create native GNU/Linux versions of games that were released for
-Windows only or to create native 64 bit versions if a GNU/Linux build was originally released only as 32 bit version.
+You can use this script to create native GNU/Linux versions of games that were released only for
+Windows and/or OSX, or to create native 64 bit versions if a GNU/Linux build was originally released only as 32 bit version.
 You can also use it to install the screenselector plugin if the original build came without it.
 
 **u2mojo**: This script helps you to create portable [MojoSetup](http://www.icculus.org/mojosetup/)
