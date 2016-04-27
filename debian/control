@@ -23,6 +23,7 @@ Recommends: execstack,
             libgtk2.0-0,
             libgtk2.0-0:i386 [amd64],
             lintian
+Suggests: icnsutils
 Description: create Debian packages of Unity Engine games
  Games that were built on the Unity engine became quite popular these days.
  Those games can be built to run natively on GNU/Linux systems.

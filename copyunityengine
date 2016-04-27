@@ -408,6 +408,7 @@ elif [ ! -d "$origpath" ]; then
 	errorExit "'$origpath' is not a directory"
 fi
 
+have_icns="no"
 if [ -d "$origpath/Contents/Data" -a \
 	 -d "$origpath/Contents/MacOS" -a \
 	 -f "$origpath/Contents/Info.plist" ]
@@ -415,6 +416,7 @@ then
 	# OSX .app bundle
 	game="$(grep -A1 -e 'CFBundleName' "$origpath/Contents/Info.plist" | tail -n1 | sed 's|.*<string>||; s|<\/string>.*||')"
 	linuxdir="$(dirname "$origpath")/${game}-Linux"
+	echo ""
 	echo "OSX .app bundle detected!"
 	echo "The game's directory layout needs to be restructured for Linux compatibility."
 	read -r -p "Should I copy all files to \`$linuxdir'? [Y/n] " response
@@ -427,9 +429,8 @@ then
 	cp -rv "$origpath/Contents/Data" "$linuxdir/${game}_Data"
 	mkdir -p "$linuxdir/${game}_Data/Resources" "$linuxdir/${game}_Data/Mono"
 	cp -v "$origpath/Contents/Resources/unity default resources" "$linuxdir/${game}_Data/Resources"
-	if [ -f "$origpath/Contents/Resources/UnityPlayer.icns" ]; then
-		cp -v "$origpath/Contents/Resources/UnityPlayer.icns" "$linuxdir/${game}_Data/Resources"
-	fi
+	icns="$origpath/Contents/Resources/UnityPlayer.icns"
+	test ! -f "$icns" || have_icns="yes"
 	origpath="$linuxdir"
 fi
 
@@ -464,4 +465,10 @@ mv $version/x86 "${game}.x86"
 mv $version/x86_64 "${game}.x86_64"
 chmod a+x "${game}.x86" "${game}.x86_64"
 rm -rf $version
+
+if [ "$have_icns" = "yes" ]; then
+	echo ""
+	echo "Hint: use \`icns2png' (sudo apt-get install icnsutils) to convert the OSX icon to png:"
+	echo "$icns"
+fi
 
