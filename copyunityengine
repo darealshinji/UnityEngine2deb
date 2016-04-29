@@ -33,12 +33,12 @@ engines="$HOME/.local/share/UnityEngine2deb/Engines"
 links_url="https://raw.githubusercontent.com/darealshinji/UnityEngine2deb/master/links.txt"
 
 errorExit() {
-	echo "error: $1"
-	exit 1
+  echo "error: $1"
+  exit 1
 }
 
 help() {
-	cat << EOF
+  cat << EOF
 
  Install Linux binaries into a Unity engine game and delete all previously
  installed binary files.
@@ -80,251 +80,251 @@ help() {
                           available to download it.
 
 EOF
-	exit 0
+  exit 0
 }
 
 extractSDKfiles() {
-	exe="$1"
-	version="$2"
-	txz="$3"
+  exe="$1"
+  version="$2"
+  txz="$3"
 
-	echo ""
-	echo "-- extract SDK files"
-	files=`mktemp -d /tmp/unityengine-XXXXXXXXXX`
-	7z x $exe -o$files
+  echo ""
+  echo "-- extract SDK files"
+  files=`mktemp -d /tmp/unityengine-XXXXXXXXXX`
+  7z x $exe -o$files
 
-	set +e
-	# The directory names have non-ASCII characters that make it impossible
-	# to work with the shell. We're renaming them to their inode numbers
-	# and then we're moving the Linux-related directories into the top directory.
-	inodes="$(ls -1i "$files" | awk '{print $1}' | tr '\n' ' ')"
-	for n in $inodes; do
-		find $files -inum $n -exec mv -v '{}' $files/$n 2>/dev/null \;
-	done
-	find $files -type d -name linux*_withgfx_development* -exec mv '{}' "$files" 2>/dev/null \;
-	find $files -type d -name linux*_headless_development* -exec mv '{}' "$files" 2>/dev/null \;
-	find $files -type d -name linux*headlessstandaloneplayer -exec mv '{}' "$files" 2>/dev/null \;
-	find $files -type d -name linux*developmentstandaloneplayer -exec mv '{}' "$files" 2>/dev/null \;
-	set -e
+  set +e
+  # The directory names have non-ASCII characters that make it impossible
+  # to work with the shell. We're renaming them to their inode numbers
+  # and then we're moving the Linux-related directories into the top directory.
+  inodes="$(ls -1i "$files" | awk '{print $1}' | tr '\n' ' ')"
+  for n in $inodes; do
+    find $files -inum $n -exec mv -v '{}' $files/$n 2>/dev/null \;
+  done
+  find $files -type d -name linux*_withgfx_development* -exec mv '{}' "$files" 2>/dev/null \;
+  find $files -type d -name linux*_headless_development* -exec mv '{}' "$files" 2>/dev/null \;
+  find $files -type d -name linux*headlessstandaloneplayer -exec mv '{}' "$files" 2>/dev/null \;
+  find $files -type d -name linux*developmentstandaloneplayer -exec mv '{}' "$files" 2>/dev/null \;
+  set -e
 
-	echo ""
-	echo "-- move engine binaries"
-	mkdir -vp $files/$version/Mono/x86
-	mkdir -vp $files/$version/Mono/x86_64
-	mkdir -vp $files/$version/Plugins/x86
-	mkdir -vp $files/$version/Plugins/x86_64
+  echo ""
+  echo "-- move engine binaries"
+  mkdir -vp $files/$version/Mono/x86
+  mkdir -vp $files/$version/Mono/x86_64
+  mkdir -vp $files/$version/Plugins/x86
+  mkdir -vp $files/$version/Plugins/x86_64
 
-	if [ -d $files/linux32headlessstandaloneplayer ]; then
-		mv -v $files/linuxdevelopmentstandaloneplayer/LinuxPlayer $files/$version/x86
-		mv -v $files/linux64developmentstandaloneplayer/LinuxPlayer $files/$version/x86_64
-		mv -v $files/linux32headlessstandaloneplayer/Data/Mono/libmono.so $files/$version/Mono/x86
-		mv -v $files/linux64developmentstandaloneplayer/Data/Mono/libmono.so $files/$version/Mono/x86_64
-		if [ -d $files/linuxdevelopmentstandaloneplayer/Data/Plugins ]; then
-			mv -v $files/linuxdevelopmentstandaloneplayer/Data/Plugins/ScreenSelector.so $files/$version/Plugins/x86
-			mv -v $files/linux64developmentstandaloneplayer/Data/Plugins/ScreenSelector.so $files/$version/Plugins/x86_64
-		else
-			rm -r $files/$version/Plugins
-		fi
-	elif [ -f $files/linuxdevelopmentstandaloneplayer/Data/Mono/libmono.so ]; then
-		mv -v $files/linuxdevelopmentstandaloneplayer/LinuxPlayer $files/$version/x86
-		mv -v $files/linux64developmentstandaloneplayer/LinuxPlayer $files/$version/x86_64
-		mv -v $files/linuxdevelopmentstandaloneplayer/Data/Mono/libmono.so $files/$version/Mono/x86
-		mv -v $files/linux64developmentstandaloneplayer/Data/Mono/libmono.so $files/$version/Mono/x86_64
-		rm -r $files/$version/Plugins
-	else
-		mv -v $files/linux32_withgfx_development*/LinuxPlayer $files/$version/x86
-		mv -v $files/linux64_withgfx_development*/LinuxPlayer $files/$version/x86_64
-		mv -v $files/linux32_withgfx_development*/Data/Plugins/x86/ScreenSelector.so $files/$version/Plugins/x86
-		mv -v $files/linux64_withgfx_development*/Data/Plugins/x86_64/ScreenSelector.so $files/$version/Plugins/x86_64
-		mv -v $files/linux32_headless_development*/Data/Mono/x86/libmono.so $files/$version/Mono/x86
-		mv -v $files/linux64_headless_development*/Data/Mono/x86_64/libmono.so $files/$version/Mono/x86_64
-	fi
+  if [ -d $files/linux32headlessstandaloneplayer ]; then
+    mv -v $files/linuxdevelopmentstandaloneplayer/LinuxPlayer $files/$version/x86
+    mv -v $files/linux64developmentstandaloneplayer/LinuxPlayer $files/$version/x86_64
+    mv -v $files/linux32headlessstandaloneplayer/Data/Mono/libmono.so $files/$version/Mono/x86
+    mv -v $files/linux64developmentstandaloneplayer/Data/Mono/libmono.so $files/$version/Mono/x86_64
+    if [ -d $files/linuxdevelopmentstandaloneplayer/Data/Plugins ]; then
+      mv -v $files/linuxdevelopmentstandaloneplayer/Data/Plugins/ScreenSelector.so $files/$version/Plugins/x86
+      mv -v $files/linux64developmentstandaloneplayer/Data/Plugins/ScreenSelector.so $files/$version/Plugins/x86_64
+    else
+      rm -r $files/$version/Plugins
+    fi
+  elif [ -f $files/linuxdevelopmentstandaloneplayer/Data/Mono/libmono.so ]; then
+    mv -v $files/linuxdevelopmentstandaloneplayer/LinuxPlayer $files/$version/x86
+    mv -v $files/linux64developmentstandaloneplayer/LinuxPlayer $files/$version/x86_64
+    mv -v $files/linuxdevelopmentstandaloneplayer/Data/Mono/libmono.so $files/$version/Mono/x86
+    mv -v $files/linux64developmentstandaloneplayer/Data/Mono/libmono.so $files/$version/Mono/x86_64
+    rm -r $files/$version/Plugins
+  else
+    mv -v $files/linux32_withgfx_development*/LinuxPlayer $files/$version/x86
+    mv -v $files/linux64_withgfx_development*/LinuxPlayer $files/$version/x86_64
+    mv -v $files/linux32_withgfx_development*/Data/Plugins/x86/ScreenSelector.so $files/$version/Plugins/x86
+    mv -v $files/linux64_withgfx_development*/Data/Plugins/x86_64/ScreenSelector.so $files/$version/Plugins/x86_64
+    mv -v $files/linux32_headless_development*/Data/Mono/x86/libmono.so $files/$version/Mono/x86
+    mv -v $files/linux64_headless_development*/Data/Mono/x86_64/libmono.so $files/$version/Mono/x86_64
+  fi
 
-	echo ""
-	echo "-- strip engine binaries"
-	strip -v $files/$version/x86* $files/$version/Mono/x86*/*
-	if [ -d $files/$version/Plugins ]; then
-		strip -v $files/$version/Plugins/x86*/*
-	fi
+  echo ""
+  echo "-- strip engine binaries"
+  strip -v $files/$version/x86* $files/$version/Mono/x86*/*
+  if [ -d $files/$version/Plugins ]; then
+    strip -v $files/$version/Plugins/x86*/*
+  fi
 
-	echo ""
-	echo "-- create archive"
-	cd $files && tar cvfJ "$txz" $version
-	cd /tmp
-	rm -rf $files
+  echo ""
+  echo "-- create archive"
+  cd $files && tar cvfJ "$txz" $version
+  cd /tmp
+  rm -rf $files
 
-	checksum="$(md5sum "$txz" | awk '{print $1}')"
-	echo ""
-	echo "-- archive saved at \`$txz'"
-	echo "-- md5 checksum: $checksum"
+  checksum="$(md5sum "$txz" | awk '{print $1}')"
+  echo ""
+  echo "-- archive saved at \`$txz'"
+  echo "-- md5 checksum: $checksum"
 }
 
 checkUnityVersionString() {
-	version="$1"
-	length=$(($(printf "$version" | wc -m)))
-	msg="Incorrect version string!"
-	case $(echo "$version" | cut -d. -f1) in
-		4|5)
-			if [ $length -lt 5 ]; then
-				errorExit "$msg (too short)"
-			fi
-			if [ $length -gt 5 ]; then
-				errorExit "$msg (too long)"
-			fi
-			;;
-		*)
-			errorExit "$msg"
-			;;
-	esac
+  version="$1"
+  length=$(($(printf "$version" | wc -m)))
+  msg="Incorrect version string!"
+  case $(echo "$version" | cut -d. -f1) in
+    4|5)
+      if [ $length -lt 5 ]; then
+        errorExit "$msg (too short)"
+      fi
+      if [ $length -gt 5 ]; then
+        errorExit "$msg (too long)"
+      fi
+      ;;
+    *)
+      errorExit "$msg"
+      ;;
+  esac
 }
 
 downloadUnityEngine() {
-	version="$1"
-	sdk="$2"
-	forcesdk="$3"
-	exe=`mktemp -u /tmp/UnitySetup-XXXXXXXXXX --suffix=.exe`
-	txz="$engines/$version.tar.xz"
+  version="$1"
+  sdk="$2"
+  forcesdk="$3"
+  exe=`mktemp -u /tmp/UnitySetup-XXXXXXXXXX --suffix=.exe`
+  txz="$engines/$version.tar.xz"
 
-	bin="$(whereis -b aria2c | awk '{print $2}')"
-	have_aria2c="no"
-	if [ "x$bin" != "x" ]; then
-		have_aria2c="yes"
-	fi
-	if [ "$have_aria2c" = "yes" ]; then
-		# The SDKs are huge, usually over 1G.  If available, use aria2c to
-		# download the SDK because of its ability to pre-allocate space (avoids fragmentation).
-		download="aria2c --file-allocation=prealloc -d / -o"
-	else
-		download="wget -O"
-	fi
+  bin="$(whereis -b aria2c | awk '{print $2}')"
+  have_aria2c="no"
+  if [ "x$bin" != "x" ]; then
+    have_aria2c="yes"
+  fi
+  if [ "$have_aria2c" = "yes" ]; then
+    # The SDKs are huge, usually over 1G.  If available, use aria2c to
+    # download the SDK because of its ability to pre-allocate space (avoids fragmentation).
+    download="aria2c --file-allocation=prealloc -d / -o"
+  else
+    download="wget -O"
+  fi
 
-	decimal_ver="$(echo $version | tr -d .)"
-	major=$(echo "$version" | cut -d. -f1)
-	checkUnityVersionString $version
+  decimal_ver="$(echo $version | tr -d .)"
+  major=$(echo "$version" | cut -d. -f1)
+  checkUnityVersionString $version
 
-	mkdir -p "$engines"
-	if [ -f "$txz" ] && [ "$forcesdk" = "no" ]; then
-		echo "\`$version.tar.xz' already in cache."
-		echo "No need to download anything."
-		exit 0
-	fi
+  mkdir -p "$engines"
+  if [ -f "$txz" ] && [ "$forcesdk" = "no" ]; then
+    echo "\`$version.tar.xz' already in cache."
+    echo "No need to download anything."
+    exit 0
+  fi
 
-	### download pre-packaged engine binaries
-	if [ -f "$engines/links.txt" ]; then
-		mv -f "$engines/links.txt" "$engines/links.txt.old"
-	fi
-	# each line in links.txt has three fields with the following data
-	# separated by spaces: <version> <md5sum> <url>
-	wget -O "$engines/links.txt" "$links_url"
+  ### download pre-packaged engine binaries
+  if [ -f "$engines/links.txt" ]; then
+    mv -f "$engines/links.txt" "$engines/links.txt.old"
+  fi
+  # each line in links.txt has three fields with the following data
+  # separated by spaces: <version> <md5sum> <url>
+  wget -O "$engines/links.txt" "$links_url"
 
-	set +e
-	dldata="$(grep -F "$version" "$engines/links.txt")"
-	set -e
+  set +e
+  dldata="$(grep -F "$version" "$engines/links.txt")"
+  set -e
 
-	if [ x"$dldata" = x"" ] || [ "$forcesdk" = "yes" ]; then
-		if [ "$sdk" = "no" ]; then
-			echo "Requested engine version is not among the mirror list and SDK download is disabled."
-			echo "Run again without \`--no-sdk'"
-			exit 1
-		fi
+  if [ x"$dldata" = x"" ] || [ "$forcesdk" = "yes" ]; then
+    if [ "$sdk" = "no" ]; then
+      echo "Requested engine version is not among the mirror list and SDK download is disabled."
+      echo "Run again without \`--no-sdk'"
+      exit 1
+    fi
 
-		### download the Unity SDK
+    ### download the Unity SDK
 
-		bin="$(whereis -b 7z | awk '{print $2}')"
-		if [ "x$bin" = "x" ]; then
-			errorExit "you need 7zip to extract files from the Unity SDK setup package (\`sudo apt-get install p7zip-full')."
-		fi
+    bin="$(whereis -b 7z | awk '{print $2}')"
+    if [ "x$bin" = "x" ]; then
+      errorExit "you need 7zip to extract files from the Unity SDK setup package (\`sudo apt-get install p7zip-full')."
+    fi
 
-		# inform about bandwidth and disk space for Unity < v5.3.0
-		if [ $decimal_ver -lt 530 ]; then
-			echo ""
-			echo "You're about to download a Unity3D SDK.  Its file size may exceed 1G and"
-			echo "you might need up to 6G of additional free disk space to extract the"
-			read -r -p "downloaded file.  Do you really want to continue? [Y/n] " response
-			case $response in
-				[Nn]*)
-					exit 0
-					;;
-				*)
-					;;
-			esac
-		fi
+    # inform about bandwidth and disk space for Unity < v5.3.0
+    if [ $decimal_ver -lt 530 ]; then
+      echo ""
+      echo "You're about to download a Unity3D SDK.  Its file size may exceed 1G and"
+      echo "you might need up to 6G of additional free disk space to extract the"
+      read -r -p "downloaded file.  Do you really want to continue? [Y/n] " response
+      case $response in
+        [Nn]*)
+          exit 0
+          ;;
+        *)
+          ;;
+      esac
+    fi
 
-		echo ""
-		echo "-- download Unity $version SDK"
-		rm -f $exe
-		if [ $major = 5 ] && [ $decimal_ver -lt 530 ]; then
-			url="$(wget -q -O - "https://unity3d.com/get-unity/download/archive" | grep "UnitySetup64-$version" | cut -d '"' -f2)"
-		elif [ $major = 4 ]; then
-			url="http://download.unity3d.com/download_unity/UnitySetup-$version.exe"
-			set +e
-			wget -q --spider $url
-			set -e
-			exitCode=$(echo $?)
-			if [ $exitCode != 0 ]; then
-				url=""
-			fi
-		fi
-		if [ $decimal_ver -ge 530 ]; then
-			url=$(wget -q -O - "https://unity3d.com/get-unity/download/archive" | grep "Unity-$version.*\.torrent" | cut -d '"' -f2 | head -n1)
-		fi
-		if [ -z $url ]; then
-			errorExit "Requested version is not available on the web server!"
-		fi
+    echo ""
+    echo "-- download Unity $version SDK"
+    rm -f $exe
+    if [ $major = 5 ] && [ $decimal_ver -lt 530 ]; then
+      url="$(wget -q -O - "https://unity3d.com/get-unity/download/archive" | grep "UnitySetup64-$version" | cut -d '"' -f2)"
+    elif [ $major = 4 ]; then
+      url="http://download.unity3d.com/download_unity/UnitySetup-$version.exe"
+      set +e
+      wget -q --spider $url
+      set -e
+      exitCode=$(echo $?)
+      if [ $exitCode != 0 ]; then
+        url=""
+      fi
+    fi
+    if [ $decimal_ver -ge 530 ]; then
+      url=$(wget -q -O - "https://unity3d.com/get-unity/download/archive" | grep "Unity-$version.*\.torrent" | cut -d '"' -f2 | head -n1)
+    fi
+    if [ -z $url ]; then
+      errorExit "Requested version is not available on the web server!"
+    fi
 
-		# start the actual downloading
-		if [ $decimal_ver -ge 530 ]; then
-			if [ "$have_aria2c" = "no" ]; then
-				errorExit "aria2c is required to download binaries for engine version 5.3.0 or later"
-			fi
-			torrent=`mktemp -u /tmp/UnitySetup-XXXXXXXXXX --suffix=.torrent`
-			wget -O $torrent $url
+    # start the actual downloading
+    if [ $decimal_ver -ge 530 ]; then
+      if [ "$have_aria2c" = "no" ]; then
+        errorExit "aria2c is required to download binaries for engine version 5.3.0 or later"
+      fi
+      torrent=`mktemp -u /tmp/UnitySetup-XXXXXXXXXX --suffix=.torrent`
+      wget -O $torrent $url
 
-			torrent_files=`mktemp -d /tmp/unityengine-XXXXXXXXXX`
-			idx=$(aria2c -S $torrent | grep 'UnitySetup-Linux-Support-for-Editor.exe' | sed 's/|.*//g; s/ //g')
-			aria2c --select-file=$idx \
-				--bt-remove-unselected-file=true \
-				--file-allocation=none \
-				--seed-time=0 \
-				-d $torrent_files \
-				$torrent
+      torrent_files=`mktemp -d /tmp/unityengine-XXXXXXXXXX`
+      idx=$(aria2c -S $torrent | grep 'UnitySetup-Linux-Support-for-Editor.exe' | sed 's/|.*//g; s/ //g')
+      aria2c --select-file=$idx \
+        --bt-remove-unselected-file=true \
+        --file-allocation=none \
+        --seed-time=0 \
+        -d $torrent_files \
+        $torrent
 
-			find $torrent_files/* -type f -name "UnitySetup-Linux-Support-for-Editor.exe" -exec mv '{}' "$torrent_files" \;
-			exe="$torrent_files/UnitySetup-Linux-Support-for-Editor.exe"
-		else
-			$download $exe $url
-		fi
+      find $torrent_files/* -type f -name "UnitySetup-Linux-Support-for-Editor.exe" -exec mv '{}' "$torrent_files" \;
+      exe="$torrent_files/UnitySetup-Linux-Support-for-Editor.exe"
+    else
+      $download $exe $url
+    fi
 
-		extractSDKfiles $exe $version $txz
-		rm -f $exe
-		exit 0
-	fi
+    extractSDKfiles $exe $version $txz
+    rm -f $exe
+    exit 0
+  fi
 
-	### continue downloading pre-packaged engine binaries
-	md5_1=$(echo "$dldata" | awk '{print $2}')
-	url=$(echo "$dldata" | awk '{print $3}')
+  ### continue downloading pre-packaged engine binaries
+  md5_1=$(echo "$dldata" | awk '{print $2}')
+  url=$(echo "$dldata" | awk '{print $3}')
 
-	echo ""
-	echo "-- download Unity $version engine files"
-	wget -O "$txz" $url
-	md5_2=$(md5sum "$txz" | awk '{print $1}')
-	if [ "$md5_1" = "$md5_2" ]; then
-		echo "Checksum ok!"
-	else
-		echo ""
-		echo "Checksum mismatch!"
-		echo "Deleting \`$txz'"
-		rm -f "$txz"
-		exit 1
-	fi
+  echo ""
+  echo "-- download Unity $version engine files"
+  wget -O "$txz" $url
+  md5_2=$(md5sum "$txz" | awk '{print $1}')
+  if [ "$md5_1" = "$md5_2" ]; then
+    echo "Checksum ok!"
+  else
+    echo ""
+    echo "Checksum mismatch!"
+    echo "Deleting \`$txz'"
+    rm -f "$txz"
+    exit 1
+  fi
 }
 
 
 case x"$1" in
-	x|x--help|x-help|x-h|x-\?)
-		help;;
-	x-V|x-v|x--version|x-version)
-		echo $appversion; exit 0;;
+  x|x--help|x-help|x-h|x-\?)
+    help;;
+  x-V|x-v|x--version|x-version)
+    echo $appversion; exit 0;;
 esac
 
 keep="no"
@@ -336,76 +336,76 @@ no_sdk_opt_set="no"
 force_sdk_opt_set="no"
 createpackage="no"
 for opt; do
-	optarg="${opt#*=}"
-	case "$opt" in
-		"--no-sdk")
-			sdk="no"
-			forcesdk="no"
-			no_sdk_opt_set="yes"
-			;;
-		"--force-sdk")
-			sdk="yes"
-			forcesdk="yes"
-			force_sdk_opt_set="yes"
-			;;
-		"--download"|"-d")
-			dlonly="yes"
-			;;
-		"--print"|"-p")
-			printonly="yes"
-			;;
-		"--package")
-			createpackage="yes"
-			;;
-		"--help"|"-h"|"--version"|"-V")
-			;;
-		*)
-			origpath="$optarg"
-			;;
-	esac
+  optarg="${opt#*=}"
+  case "$opt" in
+    "--no-sdk")
+      sdk="no"
+      forcesdk="no"
+      no_sdk_opt_set="yes"
+      ;;
+    "--force-sdk")
+      sdk="yes"
+      forcesdk="yes"
+      force_sdk_opt_set="yes"
+      ;;
+    "--download"|"-d")
+      dlonly="yes"
+      ;;
+    "--print"|"-p")
+      printonly="yes"
+      ;;
+    "--package")
+      createpackage="yes"
+      ;;
+    "--help"|"-h"|"--version"|"-V")
+      ;;
+    *)
+      origpath="$optarg"
+      ;;
+  esac
 done
 
 if [ "$createpackage" = "yes" ]; then
-	version="$2"
-	exe="$3"
-	if [ $# -gt 3 ]; then
-		errorExit "too many arguments for \`--package'; usage is: $appname --package <version> <exe>"
-	fi
-	if [ $# -lt 3 ]; then
-		errorExit "missing arguments for \`--package'; usage is: $appname --package <version> <exe>"
-	fi
-	checkUnityVersionString $version
-	if [ -e "$PWD/$version.tar.xz" ]; then
-		errorExit "\`$PWD/$version.tar.xz' already exists"
-	fi
-	if [ ! -e "$exe" ]; then
-		errorExit "\`$exe' doesn't exist"
-	elif [ -d "$exe" ]; then
-		errorExit "\`$exe' is a directory"
-	fi
-	extractSDKfiles $exe $version "$PWD/$version.tar.xz"
-	exit 0
+  version="$2"
+  exe="$3"
+  if [ $# -gt 3 ]; then
+    errorExit "too many arguments for \`--package'; usage is: $appname --package <version> <exe>"
+  fi
+  if [ $# -lt 3 ]; then
+    errorExit "missing arguments for \`--package'; usage is: $appname --package <version> <exe>"
+  fi
+  checkUnityVersionString $version
+  if [ -e "$PWD/$version.tar.xz" ]; then
+    errorExit "\`$PWD/$version.tar.xz' already exists"
+  fi
+  if [ ! -e "$exe" ]; then
+    errorExit "\`$exe' doesn't exist"
+  elif [ -d "$exe" ]; then
+    errorExit "\`$exe' is a directory"
+  fi
+  extractSDKfiles $exe $version "$PWD/$version.tar.xz"
+  exit 0
 fi
 
 if [ "$no_sdk_opt_set" = "yes" ] && [ "$force_sdk_opt_set" = "yes" ]; then
-	errorExit "you cannot use \`--no-sdk' and \`--force-sdk' together"
+  errorExit "you cannot use \`--no-sdk' and \`--force-sdk' together"
 fi
 
 if [ "$dlonly" = "yes" ]; then
-	version="$origpath"
-	if [ -z "$version" ]; then
-		errorExit "no version string specified"
-	fi
-	downloadUnityEngine $version $sdk $forcesdk
-	exit 0
+  version="$origpath"
+  if [ -z "$version" ]; then
+    errorExit "no version string specified"
+  fi
+  downloadUnityEngine $version $sdk $forcesdk
+  exit 0
 fi
 
 if [ -z "$origpath" ]; then
-	errorExit "no path specified"
+  errorExit "no path specified"
 elif [ ! -e "$origpath" ]; then
-	errorExit "path to '$origpath' doesn't exist"
+  errorExit "path to '$origpath' doesn't exist"
 elif [ ! -d "$origpath" ]; then
-	errorExit "'$origpath' is not a directory"
+  errorExit "'$origpath' is not a directory"
 fi
 
 # OSX .app bundle
@@ -413,60 +413,60 @@ have_icns="no"
 osxAppBundle="no"
 osxdir="$origpath/Contents"
 if [ -d "$osxdir/Data" -a \
-	 -d "$osxdir/MacOS" -a \
-	 -d "$osxdir/Resources" -a \
-	 -f "$osxdir/Info.plist" ]
+     -d "$osxdir/MacOS" -a \
+     -d "$osxdir/Resources" -a \
+     -f "$osxdir/Info.plist" ]
 then
-	osxAppBundle="yes"
-	if [ "$printonly" = "no" ]; then
-		game="$(grep -A1 -e 'CFBundleName' "$osxdir/Info.plist" | tail -n1 | sed 's|.*<string>||; s|<\/string>.*||')"
-		linuxdir="$(dirname "$origpath")/${game}-Linux"
-		echo ""
-		echo "OSX .app bundle detected!"
-		echo "The game's directory layout needs to be restructured for Linux compatibility."
-		read -r -p "Should I copy all files to \`$linuxdir'? [Y/n] " response
-		case $response in
-			[Nn]*) echo "Aborted."; exit 0 ;;
-			*) ;;
-		esac
-		echo ""
-		mkdir -p "$linuxdir"
-		cp -rv "$osxdir/Data" "$linuxdir/${game}_Data"
-		test ! -d "$osxdir/Resources/Data" || cp -rv "$osxdir/Resources/Data"/* "$linuxdir/${game}_Data"
-		mkdir -p "$linuxdir/${game}_Data/Resources" "$linuxdir/${game}_Data/Mono"
-		cp -v "$osxdir/Resources/unity default resources" "$linuxdir/${game}_Data/Resources"
-		icns="$osxdir/Resources/UnityPlayer.icns"
-		test ! -f "$icns" || have_icns="yes"
-		origpath="$linuxdir"
-	fi
+  osxAppBundle="yes"
+  if [ "$printonly" = "no" ]; then
+    game="$(grep -A1 -e 'CFBundleName' "$osxdir/Info.plist" | tail -n1 | sed 's|.*<string>||; s|<\/string>.*||')"
+    linuxdir="$(dirname "$origpath")/${game}-Linux"
+    echo ""
+    echo "OSX .app bundle detected!"
+    echo "The game's directory layout needs to be restructured for Linux compatibility."
+    read -r -p "Should I copy all files to \`$linuxdir'? [Y/n] " response
+    case $response in
+      [Nn]*) echo "Aborted."; exit 0 ;;
+      *) ;;
+    esac
+    echo ""
+    mkdir -p "$linuxdir"
+    cp -rv "$osxdir/Data" "$linuxdir/${game}_Data"
+    test ! -d "$osxdir/Resources/Data" || cp -rv "$osxdir/Resources/Data"/* "$linuxdir/${game}_Data"
+    mkdir -p "$linuxdir/${game}_Data/Resources" "$linuxdir/${game}_Data/Mono"
+    cp -v "$osxdir/Resources/unity default resources" "$linuxdir/${game}_Data/Resources"
+    icns="$osxdir/Resources/UnityPlayer.icns"
+    test ! -f "$icns" || have_icns="yes"
+    origpath="$linuxdir"
+  fi
 fi
 
-if [ "$osxAppBundle" = "yes" -a "$printonly" = "yes" ]; then
-	versionFileA="$osxdir/Resources/Data/globalgamemanagers"
-	versionFileB="$osxdir/Data/mainData"
+if [ "$osxAppBundle" = "yes" ] && [ "$printonly" = "yes" ]; then
+  versionFileA="$osxdir/Resources/Data/globalgamemanagers"
+  versionFileB="$osxdir/Data/mainData"
 else
-	datadir="$(find "$origpath" -type d -name \*_Data | head -n1)"
-	game="$(basename "$datadir" | sed 's/_Data$//')"
-	versionFileA="$datadir/globalgamemanagers"
-	versionFileB="$datadir/mainData"
+  datadir="$(find "$origpath" -type d -name \*_Data | head -n1)"
+  game="$(basename "$datadir" | sed 's/_Data$//')"
+  versionFileA="$datadir/globalgamemanagers"
+  versionFileB="$datadir/mainData"
 fi
 if [ -f "$versionFileA" ]; then
-	versionFile="$versionFileA"
+  versionFile="$versionFileA"
 elif [ -f "$versionFileB" ]; then
-	versionFile="$versionFileB"
+  versionFile="$versionFileB"
 else
-	errorExit "cannot find \`mainData' or \`globalgamemanagers'"
+  errorExit "cannot find \`mainData' or \`globalgamemanagers'"
 fi
 version="$(head -c 30 "$versionFile" | strings | head -c5)"
 txz="$engines/$version.tar.xz"
 
 if [ "$printonly" = "yes" ]; then
-	echo "Used Unity engine: version $version"
-	exit 0
+  echo "Used Unity engine: version $version"
+  exit 0
 fi
 
 if [ ! -f "$txz" ]; then
-	downloadUnityEngine $version $sdk $forcesdk
+  downloadUnityEngine $version $sdk $forcesdk
 fi
 
 cd "$origpath"
@@ -474,8 +474,8 @@ rm -rvf "${game}" "${game}."* "${game}_Data/Mono/mono.dll" "${game}_Data/Mono/x8
 
 tar xvf "$txz"
 if [ -d $version/Plugins ]; then
-	mkdir -p "${game}_Data/Plugins"
-	mv $version/Plugins/* "${game}_Data/Plugins"
+  mkdir -p "${game}_Data/Plugins"
+  mv $version/Plugins/* "${game}_Data/Plugins"
 fi
 mv $version/Mono/* "${game}_Data/Mono"
 mv $version/x86 "${game}.x86"
@@ -484,12 +484,12 @@ chmod a+x "${game}.x86" "${game}.x86_64"
 rm -rf $version
 
 if [ "$osxAppBundle" = "yes" ]; then
-	echo ""
-	echo "files saved to \`$linuxdir'"
+  echo ""
+  echo "files saved to \`$linuxdir'"
 fi
 if [ "$have_icns" = "yes" ]; then
-	echo ""
-	echo "Hint: use \`icns2png' (sudo apt-get install icnsutils) to convert the OSX icon to png:"
-	echo "$icns"
+  echo ""
+  echo "Hint: use \`icns2png' (sudo apt-get install icnsutils) to convert the OSX icon to png:"
+  echo "$icns"
 fi
 
