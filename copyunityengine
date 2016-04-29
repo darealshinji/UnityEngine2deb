@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="16.04.27.1"
+appversion="16.04.29.1"
 
 appname=$(basename "$0")
 engines="$HOME/.local/share/UnityEngine2deb/Engines"
@@ -408,39 +408,56 @@ elif [ ! -d "$origpath" ]; then
 	errorExit "'$origpath' is not a directory"
 fi
 
+# OSX .app bundle
 have_icns="no"
-if [ -d "$origpath/Contents/Data" -a \
-	 -d "$origpath/Contents/MacOS" -a \
-	 -f "$origpath/Contents/Info.plist" ]
+osxAppBundle="no"
+osxdir="$origpath/Contents"
+if [ -d "$osxdir/Data" -a \
+	 -d "$osxdir/MacOS" -a \
+	 -d "$osxdir/Resources" -a \
+	 -f "$osxdir/Info.plist" ]
 then
-	# OSX .app bundle
-	game="$(grep -A1 -e 'CFBundleName' "$origpath/Contents/Info.plist" | tail -n1 | sed 's|.*<string>||; s|<\/string>.*||')"
-	linuxdir="$(dirname "$origpath")/${game}-Linux"
-	echo ""
-	echo "OSX .app bundle detected!"
-	echo "The game's directory layout needs to be restructured for Linux compatibility."
-	read -r -p "Should I copy all files to \`$linuxdir'? [Y/n] " response
-	case $response in
-		[Nn]*) echo "Aborted."; exit 0 ;;
-		*) ;;
-	esac
-	echo ""
-	mkdir -p "$linuxdir"
-	cp -rv "$origpath/Contents/Data" "$linuxdir/${game}_Data"
-	mkdir -p "$linuxdir/${game}_Data/Resources" "$linuxdir/${game}_Data/Mono"
-	cp -v "$origpath/Contents/Resources/unity default resources" "$linuxdir/${game}_Data/Resources"
-	icns="$origpath/Contents/Resources/UnityPlayer.icns"
-	test ! -f "$icns" || have_icns="yes"
-	origpath="$linuxdir"
+	osxAppBundle="yes"
+	if [ "$printonly" = "no" ]; then
+		game="$(grep -A1 -e 'CFBundleName' "$osxdir/Info.plist" | tail -n1 | sed 's|.*<string>||; s|<\/string>.*||')"
+		linuxdir="$(dirname "$origpath")/${game}-Linux"
+		echo ""
+		echo "OSX .app bundle detected!"
+		echo "The game's directory layout needs to be restructured for Linux compatibility."
+		read -r -p "Should I copy all files to \`$linuxdir'? [Y/n] " response
+		case $response in
+			[Nn]*) echo "Aborted."; exit 0 ;;
+			*) ;;
+		esac
+		echo ""
+		mkdir -p "$linuxdir"
+		cp -rv "$osxdir/Data" "$linuxdir/${game}_Data"
+		test ! -d "$osxdir/Resources/Data" || cp -rv "$osxdir/Resources/Data"/* "$linuxdir/${game}_Data"
+		mkdir -p "$linuxdir/${game}_Data/Resources" "$linuxdir/${game}_Data/Mono"
+		cp -v "$osxdir/Resources/unity default resources" "$linuxdir/${game}_Data/Resources"
+		icns="$osxdir/Resources/UnityPlayer.icns"
+		test ! -f "$icns" || have_icns="yes"
+		origpath="$linuxdir"
+	fi
 fi
 
-datadir="$(find "$origpath" -type d -name \*_Data | head -n1)"
-game="$(basename "$datadir" | sed 's/_Data$//')"
-versionFile="mainData"
-if [ -f "$datadir/globalgamemanagers" ]; then
-	versionFile="globalgamemanagers"
+if [ "$osxAppBundle" = "yes" -a "$printonly" = "yes" ]; then
+	versionFileA="$osxdir/Resources/Data/globalgamemanagers"
+	versionFileB="$osxdir/Data/mainData"
+else
+	datadir="$(find "$origpath" -type d -name \*_Data | head -n1)"
+	game="$(basename "$datadir" | sed 's/_Data$//')"
+	versionFileA="$datadir/globalgamemanagers"
+	versionFileB="$datadir/mainData"
 fi
-version="$(head -c 30 "$datadir/$versionFile" | strings | head -c5)"
+if [ -f "$versionFileA" ]; then
+	versionFile="$versionFileA"
+elif [ -f "$versionFileB" ]; then
+	versionFile="$versionFileB"
+else
+	errorExit "cannot find \`mainData' or \`globalgamemanagers'"
+fi
+version="$(head -c 30 "$versionFile" | strings | head -c5)"
 txz="$engines/$version.tar.xz"
 
 if [ "$printonly" = "yes" ]; then
@@ -466,6 +483,10 @@ mv $version/x86_64 "${game}.x86_64"
 chmod a+x "${game}.x86" "${game}.x86_64"
 rm -rf $version
 
+if [ "$osxAppBundle" = "yes" ]; then
+	echo ""
+	echo "files saved to \`$linuxdir'"
+fi
 if [ "$have_icns" = "yes" ]; then
 	echo ""
 	echo "Hint: use \`icns2png' (sudo apt-get install icnsutils) to convert the OSX icon to png:"
