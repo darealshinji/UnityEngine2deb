@@ -25,52 +25,47 @@ Recommended dependencies: `execstack lintian libgtk2.0-0 libgtk2.0-0:i386 libglu
 
 **Examples:**
 
+You can use the builds from [here](https://github.com/darealshinji/simple-unity3d-example/releases) to test the scripts.
+
 Build 32 and 64 bit packages of a native game and store the platform independent
 files in a separate "-data" package:
 ```
-wget -O env.zip http://www.moddb.com/downloads/mirror/64567/100/dfda248f3f6f8dc9c4f9ef92b9abe1aa
-unzip env.zip -d env-game
-
-export PKGNAME=env-game
-export UPSTREAMNAME=Env
-./u2deb prepare env-game --data
+./u2deb prepare example-game-linux --data
 ./u2deb build
 ```
 
 Build a 64 bit package from a 32 bit native game:
 ```
-wget http://superhotgame-new.azurewebsites.net/BUILDS/SUPERHOT_Prototype_Linux.zip
-unzip SUPERHOT_Prototype_Linux.zip
-
-export PKGNAME=superhot-prototype
-export UPSTREAMNAME="SUPERHOT Prototype"
-./copyunityengine Linux
-./u2deb prepare Linux --no-x86
+./copyunityengine example-game-linux-x86
+./u2deb prepare example-game-linux-x86 --no-x86
 ./u2deb build
 ```
 
 Build packages from a Windows-only game:
 ```
-wget -O coelophyte.zip http://tinyurl.com/o2h6cpb
-unzip coelophyte.zip -d coelophyte
-
-./copyunityengine coelophyte
-./u2deb prepare coelophyte
+./copyunityengine example-game-win32
+rm -f example-game-win32/*.exe example-game-win32/*.pdb example-game-win32/*_Data/Mono/mono.dll
+./u2deb prepare example-game-win32
 ./u2deb build
 ```
 
-Build a MojoSetup installer:
+Build packages from an OS X .app bundle:
 ```
-wget -O env.zip http://www.moddb.com/downloads/mirror/64567/100/dfda248f3f6f8dc9c4f9ef92b9abe1aa
-unzip env.zip -d env-game
-echo "Env is an abstract first-person physics platformer." > /tmp/env-game-description
-echo "Homepage: http://www.moddb.com/games/env" >> /tmp/env-game-description
+./copyunityengine example-game.app
+./u2deb prepare example-game-linux
+./u2deb build
+```
 
-export FULLNAME=Env
-export SHORTNAME=env-game
-export VENDOR="SamChester"
+Build a MojoSetup installer and export variables:
+```
+echo "This is a simple Unity 3D test project." > /tmp/example-game-description
+echo "Homepage: http://www.unity3d.com/" >> /tmp/example-game-description
+
+export FULLNAME="Test project"
+export SHORTNAME=example-game
+export VENDOR="djcj"
 export VERSION=1.0
-./u2mojo --readme=/tmp/env-game-description env-game
+./u2mojo --readme=/tmp/example-game-description example-game
 ```
 
 **Package this tool:**
