@@ -17,6 +17,7 @@
 5.0.2 3eb04566537ba9f2e714036c775bb1ec https://dropbox.com/s/79jqxls577kdmiu/5.0.2.tar.xz
 5.0.1 ca2c86a54600aa077e3d8bb10338d29b https://dropbox.com/s/q9nwigaaidpohfm/5.0.1.tar.xz
 5.0.0 6c8a5f408ba0a335cc843eff78a1a2c8 https://dropbox.com/s/rgwumah9nicfean/5.0.0.tar.xz
+4.7.2 dd197924e17f1a88720835e930122af3 https://dropbox.com/s/k6ca6460w5tu5rp/4.7.2.tar.xz
 4.7.1 124143b7e31949360ad7dfb262453ff5 https://dropbox.com/s/nkvuvfn0imnvwe6/4.7.1.tar.xz
 4.7.0 291c5ac0b88836f6872701d18b2e87e8 https://dropbox.com/s/rdosntaspjhv07w/4.7.0.tar.xz
 4.6.9 d5871cc37a3eb0f9b34481cf422f4a26 https://dropbox.com/s/6zpunem54szoibq/4.6.9.tar.xz
