@@ -209,13 +209,12 @@ downloadUnityEngine() {
   if [ -f "$engines/links.txt" ]; then
     mv -f "$engines/links.txt" "$engines/links.txt.old"
   fi
-  # each line in links.txt has three fields with the following data
-  # separated by spaces: <version> <md5sum> <url>
+  # each line in links.txt has 3 or 4 fields with the following data
+  # separated by spaces: <version> <md5sum> <url> [<mirror>]
   wget -O "$engines/links.txt" "$links_url"
 
-  set +e
-  dldata="$(grep -F "$version" "$engines/links.txt")"
-  set -e
+  regex="$(echo $version | sed 's|\.|\\.|g')"
+  dldata="$(grep "$regex" "$engines/links.txt" || true)"
 
   if [ x"$dldata" = x"" ] || [ "$forcesdk" = "yes" ]; then
     if [ "$sdk" = "no" ]; then
@@ -278,6 +277,7 @@ downloadUnityEngine() {
   ### continue downloading pre-packaged engine binaries
   md5_1=$(echo "$dldata" | awk '{print $2}')
   url=$(echo "$dldata" | awk '{print $3}')
+  #mirror=$(echo "$dldata" | awk '{print $4}')  # currently unused
 
   echo ""
   echo "-- download Unity $version engine files"
