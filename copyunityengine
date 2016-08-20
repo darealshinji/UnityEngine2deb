@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="16.07.05.1"
+appversion="16.08.20.1"
 
 appname=$(basename "$0")
 engines="$HOME/.local/share/UnityEngine2deb/Engines"
@@ -50,11 +50,11 @@ help() {
  Some Unity 5 games may not work correctly afterwards.
 
  Usage:
-   $appname [ --no-sdk | --force-sdk ] <gamedir>
-   $appname -p | --print <gamedir>
-   $appname -d | --download [ --no-sdk | --force-sdk ] <version>
+   $appname [--no-sdk|--force-sdk] [-y|--yes] <gamedir>
+   $appname -p|--print <gamedir>
+   $appname -d|--download [--no-sdk|--force-sdk] [-y|--yes] <version>
    $appname --package <version> <exe>
-   $appname -h | --help
+   $appname -h|--help
 
  Options:
        --no-sdk         don't download the SDK if a mirrored engine package
@@ -66,6 +66,7 @@ help() {
                           and exit.  Download location is:
                           \`$engines'
        --package        create an engine package from a specified SDK file
+   -y, --yes            always assume "yes" on questions (use with care!)
 
    -h, --help           print this message
    -V, --version        display version info and quit
@@ -231,7 +232,7 @@ downloadUnityEngine() {
     fi
 
     # inform about bandwidth and disk space for Unity < v5.3.0
-    if [ $decimal_ver -lt 530 ]; then
+    if [ $decimal_ver -lt 530 ] && [ "$assume_yes" = "no" ]; then
       echo ""
       echo "You're about to download a Unity3D SDK.  Its file size may exceed 1G and"
       echo "you might need up to 6G of additional free disk space to extract the"
@@ -310,6 +311,7 @@ dlonly="no"
 no_sdk_opt_set="no"
 force_sdk_opt_set="no"
 createpackage="no"
+assume_yes="no"
 for opt; do
   optarg="${opt#*=}"
   case "$opt" in
@@ -331,6 +333,9 @@ for opt; do
       ;;
     "--package")
       createpackage="yes"
+      ;;
+    "--yes"|"-y")
+      assume_yes="yes"
       ;;
     "--help"|"-h"|"--version"|"-V")
       ;;
@@ -399,11 +404,13 @@ then
     echo ""
     echo "OSX .app bundle detected!"
     echo "The game's directory layout needs to be restructured for Linux compatibility."
-    read -r -p "Should I copy all files to \`$linuxdir'? [Y/n] " response
-    case $response in
-      [Nn]*) echo "Aborted."; exit 0 ;;
-      *) ;;
-    esac
+    if [ "$assume_yes" = "no" ]; then
+      read -r -p "Should I copy all files to \`$linuxdir'? [Y/n] " response
+      case $response in
+        [Nn]*) echo "Aborted."; exit 0 ;;
+        *) ;;
+      esac
+    fi
     echo ""
     mkdir -p "$linuxdir"
     cp -rv "$osxdir/Data" "$linuxdir/${game}_Data"
@@ -444,8 +451,18 @@ if [ ! -f "$txz" ]; then
   downloadUnityEngine $version $sdk $forcesdk
 fi
 
+delete_bins="yes"
+if [ "$assume_yes" = "no" ]; then
+  read -r -p "Do you want to delete the old binary files from the game directory? [Y/n] " response
+  case $response in
+    [Nn]*) echo "Keeping files."; delete_bins="no" ;;
+    *) ;;
+  esac
+fi
 cd "$origpath"
-rm -rvf "${game}" "${game}."* "${game}_Data/Mono/mono.dll" "${game}_Data/Mono/x86"* "${game}_Data/Plugins"
+if [ "$delete_bins" = "yes" ]; then
+  rm -rvf *.pdb "${game}" "${game}."* "${game}_Data/Mono/mono.dll" "${game}_Data/Mono/x86"* "${game}_Data/Plugins"
+fi
 
 tar xvf "$txz"
 if [ -d $version/Plugins ]; then

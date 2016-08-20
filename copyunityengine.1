@@ -3,15 +3,15 @@
 copyunityengine \- install Linux binaries into a Unity engine game
 
 .SH SYNOPSIS
-.B copyunityengine \fR[\fB\-\-no\-sdk \fR| \fB\-\-force\-sdk\fR] <gamedir>
+.B copyunityengine \fR[\fB\-\-no\-sdk\fR|\fB\-\-force\-sdk\fR] [\fB\-y\fR|\fB\-\-yes\fR] <gamedir>
 .br
-.B copyunityengine \-p\fR| \fB\-\-print  \fR<gamedir>
+.B copyunityengine \-p\fR|\fB\-\-print  \fR<gamedir>
 .br
-.B copyunityengine \-d\fR| \fB\-\-download  \fR[\fB\-\-no\-sdk \fR| \fB\-\-force\-sdk\fR] <version>
+.B copyunityengine \-d\fR|\fB\-\-download  \fR[\fB\-\-no\-sdk\fR|\fB\-\-force\-sdk\fR] [\fB\-y\fR|\fB\-\-yes\fR] <version>
 .br
 .B copyunityengine \-\-package \fR<version> <exe>
 .br
-.B copyunityengine \-h\fR| \fB\-\-help
+.B copyunityengine \-h\fR|\fB\-\-help
 
 .SH DESCRIPTION
 Install Linux binaries into a Unity engine game and delete all previously installed binary files.
@@ -37,6 +37,9 @@ Download location is
 .TP
 \fB\-\-package
 create an engine package from a specified SDK file
+.TP
+\fB\-y, \-\-yes
+always assume "yes" on questions (use with care!)
 .TP
 \fB<version>
 engine version, separated by points; pattern is x.x.x;
