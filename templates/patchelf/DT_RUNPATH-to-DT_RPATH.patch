@@ -2,7 +2,7 @@ Otherwise the option --force-rpath won't work.
 
 --- a/patchelf.cpp
 +++ b/patchelf.cpp
-@@ -1176,8 +1176,10 @@
+@@ -1266,8 +1266,10 @@
          dynRPath = 0;
      }
  
