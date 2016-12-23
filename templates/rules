@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-# Copyright (c) 2014-2015, djcj <djcj@gmx.de>
+# Copyright (c) 2014-2016, djcj <djcj@gmx.de>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -93,7 +93,7 @@ endif
 
 
 override_dh_installdocs:
-	dh_installdocs -A debian/USLA debian/USLA.pdf debian/USLA.rtf
+	dh_installdocs -A debian/UnityTOS.pdf debian/UnityTOS.rtf
 
 
 # Unity engine games don't provide any shared libraries
