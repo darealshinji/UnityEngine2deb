@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+set -x
 
 # This is a small example recipe showing how to
 # create an AppImage (https://github.com/probonopd/AppImageKit/wiki)
@@ -42,8 +44,6 @@ EOF
 cp ./usr/bin/${LOWERAPP}_Data/Resources/UnityPlayer.png ${LOWERAPP}.png
 
 get_apprun
-
-#patch_usr
 
 GLIBC_NEEDED=$(glibc_needed)
 VERSION=$VER1.glibc$GLIBC_NEEDED
