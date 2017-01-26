@@ -2,7 +2,7 @@
 
 set -e
 
-# Copyright (c) 2015-2016, djcj <djcj@gmx.de>
+# Copyright (c) 2015-2017, djcj <djcj@gmx.de>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="16.08.20.1"
+appversion="17.01.25.1"
 
 appname=$(basename "$0")
 engines="$HOME/.local/share/UnityEngine2deb/Engines"
@@ -235,7 +235,7 @@ downloadUnityEngine() {
     if [ $decimal_ver -lt 530 ] && [ "$assume_yes" = "no" ]; then
       echo ""
       echo "You're about to download a Unity3D SDK.  Its file size may exceed 1G and"
-      echo "you might need up to 6G of additional free disk space to extract the"
+      echo "you might need up to 7.5G of additional free disk space to extract the"
       read -r -p "downloaded file.  Do you really want to continue? [Y/n] " response
       case $response in
         [Nn]*)
