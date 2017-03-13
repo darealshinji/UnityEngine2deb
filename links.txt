@@ -7,6 +7,7 @@
 5.4.2 b29d26530f94a35bdb469e303abb2e3d https://drive.google.com/uc?export=download&id=0BxClEVSW8QykNUdZUC15ZW5yUm8 https://dropbox.com/s/s7sb565g2hizvuv/5.4.2.tar.xz
 5.4.1 893be9a43a306e148acb620b218e2abc https://drive.google.com/uc?export=download&id=0BxClEVSW8QykZFRvYzZQM1dSR1E https://dropbox.com/s/e5z8wmteghz21tf/5.4.1.tar.xz
 5.4.0 b451ecf89f7c98036213f34d1f1e0085 https://drive.google.com/uc?export=download&id=0BxClEVSW8QykOGR2QUNuckVjeEk https://dropbox.com/s/n4zw3nvp0r9cl60/5.4.0.tar.xz
+5.3.8 3adf3b87048c8a5b4203182444f2474a https://drive.google.com/uc?export=download&id=0BxClEVSW8QykVWQtalpnWjBPSWs https://dropbox.com/s/8ibms8y6yvq559e/5.3.8.tar.xz
 5.3.7 c0d7651ac32bf33e7aa70d65091faea7 https://drive.google.com/uc?export=download&id=0BxClEVSW8QykRkExT1BZeGRvTWc https://dropbox.com/s/97qaoqh8mkxri6o/5.3.7.tar.xz
 5.3.6 519d7e9dfff8006c179ac0f852dbeca7 https://drive.google.com/uc?export=download&id=0BxClEVSW8QykeW1Gc0g3Q205cEU https://dropbox.com/s/q6z66hlfyjrr1ot/5.3.6.tar.xz
 5.3.5 be4dcfe0645148a2e475743f949f1e85 https://drive.google.com/uc?export=download&id=0BxClEVSW8QykYklVSGVkQ3JyVHc https://dropbox.com/s/abvjz2zflpjjxad/5.3.5.tar.xz
