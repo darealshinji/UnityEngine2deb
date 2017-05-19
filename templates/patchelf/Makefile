@@ -2,7 +2,7 @@ CXX := g++
 BIN  = patchelf
 
 PAGESIZE = $(shell getconf PAGESIZE 2>/dev/null || getconf PAGE_SIZE 2>/dev/null || echo 4096)
-DEFINES  = -DPACKAGE_STRING="\"PatchELF 0.10\"" -DPAGESIZE=$(PAGESIZE)
+DEFINES  = -DPACKAGE_STRING="\"PatchELF\"" -DPAGESIZE=$(PAGESIZE)
 
 
 all: $(BIN)
