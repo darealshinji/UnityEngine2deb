@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="16.02.04.1"
+appversion="17.05.19.1"
 
 appname=$(basename "$0")
 scriptpath="$(dirname "$(readlink -f "$0")")"
@@ -380,7 +380,7 @@ if [ $mode = "prepare" ] ; then
 [Desktop Entry]
 Name=$UPSTREAMNAME
 Comment=$SHORTDESCRIPTION
-Exec=/usr/games/$name
+Exec=$name
 Type=Application
 Categories=Game;
 StartupNotify=true
@@ -419,6 +419,7 @@ EOF
   cat "$templates/copyright.in" >> "$debian/copyright"
 
   [ $datapackage = "yes" ] && datadeps=", ${name}-data (= \${binary:Version})"
+  printf '%s\n' "`cat "$topsrc/description"`" | fold -s -w 79 | sed 's/^/ /g; s/^ $/ ./g; s/ $//g' > "$topsrc/description_processed"
   cat >> "$debian/control.in" << EOF
 Source: $name
 Section: games
@@ -433,7 +434,7 @@ Architecture: any
 Depends: \${misc:Depends}, \${shlibs:Depends}, libpulse0$datadeps
 Description: $SHORTDESCRIPTION
 EOF
-  printf '%s\n' "`cat "$topsrc/description"`" | fold -s -w 79 | sed 's/^/ /g; s/^ $/ ./g; s/ $//g' >> "$debian/control.in"
+  cat "$topsrc/description_processed" >> "$debian/control.in"
 
   if [ $datapackage = "yes" ] ; then
     cat >> "$debian/control.in" << EOF
@@ -444,7 +445,7 @@ Depends: \${misc:Depends}
 Recommends: $name
 Description: $SHORTDESCRIPTION - game data
 EOF
-    printf '%s\n' "`cat "$topsrc/description"`" | fold -s -w 79 | sed 's/^/ /g; s/^ $/ ./g; s/ $//g' >> "$debian/control.in"
+    cat "$topsrc/description_processed" >> "$debian/control.in"
     echo " ." >> "$debian/control.in"
     echo " This package installs the $name game data." >> "$debian/control.in"
   fi
@@ -516,6 +517,10 @@ application/package name: $name
              disable x86? $disable_x86
           disable x86_64? $disable_x86_64
             use patchelf? $patchelf
+
+    detailed description:
+$(cat "$topsrc/description_processed")
+
 
 The files are prepared. Run '$appname build' to build Debian packages.
 Or modify the the files in '$builddir' first.

@@ -33,6 +33,7 @@ ICONPREFIX = usr/share/games/
 ICONPKG    = $(NAME)-data
 endif
 ICONDEST   = $(CURDIR)/debian/$(ICONPKG)/usr/share
+bindir     = $(CURDIR)/debian/$(NAME)/usr/games/
 libdir     = $(CURDIR)/debian/$(NAME)/$(LIBPREFIX)/$(NAME)/
 datadir    = $(CURDIR)/debian/$(NAME)-data/usr/share/games/$(NAME)/
 plugindir  = source/$(NAME)_Data/Plugins
@@ -45,7 +46,7 @@ plugindir  = source/$(NAME)_Data/Plugins
 override_dh_auto_install:
 	mkdir -p $(libdir)
 	mkdir -p $(ICONDEST)
-	mkdir -p $(CURDIR)/debian/$(NAME)/usr/games
+	mkdir -p $(bindir)
 	mkdir -p $(CURDIR)/debian/$(NAME)/usr/share/applications
 
 	# create icons
@@ -54,7 +55,13 @@ override_dh_auto_install:
 	# install files
 	cp -r source/* $(libdir)
 	install -m644 $(NAME).desktop $(CURDIR)/debian/$(NAME)/usr/share/applications
-	dh_link -p$(NAME) $(LIBPREFIX)/$(NAME)/$(NAME) usr/games/$(NAME)
+
+	# create launcher script;
+	# don't use a symlink to avoid 'There is no data folder' errors
+	echo '#!/bin/sh' > $(bindir)$(NAME)
+	echo 'cd "/$(LIBPREFIX)/$(NAME)" && ./$(NAME) $$*' >> $(bindir)$(NAME)
+	echo 'exit $$?' >> $(bindir)$(NAME)
+	chmod a+x $(bindir)$(NAME)
 
 ifeq ($(DATAPACKAGE), yes)
 	# remove data package files from /$(LIBPREFIX)
