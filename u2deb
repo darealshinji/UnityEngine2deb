@@ -380,7 +380,7 @@ if [ $mode = "prepare" ] ; then
 [Desktop Entry]
 Name=$UPSTREAMNAME
 Comment=$SHORTDESCRIPTION
-Exec=$name
+Exec=/usr/games/$name
 Type=Application
 Categories=Game;
 StartupNotify=true
