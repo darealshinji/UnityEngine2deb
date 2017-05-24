@@ -17,7 +17,7 @@ You can also create native 64 bit versions if a GNU/Linux build was originally r
 **u2mojo**: This script helps you to create portable [MojoSetup](http://www.icculus.org/mojosetup/)
 installers for any GNU/Linux distribution.
 
-Minimum dependencies: `debhelper imagemagick aria2¹ p7zip-full¹ wget¹`
+Minimum dependencies: `build-essential debhelper imagemagick aria2¹ p7zip-full¹ wget¹`
 
 Recommended dependencies: `execstack lintian libgtk2.0-0 libgtk2.0-0:i386 libglu1-mesa libglu1-mesa:i386`
 
