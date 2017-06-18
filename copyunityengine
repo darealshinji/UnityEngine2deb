@@ -120,7 +120,10 @@ extractSDKfiles() {
     mv -v $files/linux64developmentstandaloneplayer/LinuxPlayer $files/$version/x86_64
     mv -v $files/linux32headlessstandaloneplayer/Data/Mono/libmono.so $files/$version/Mono/x86
     mv -v $files/linux64developmentstandaloneplayer/Data/Mono/libmono.so $files/$version/Mono/x86_64
-    if [ -d $files/linuxdevelopmentstandaloneplayer/Data/Plugins ]; then
+    if [ -d $files/linuxdevelopmentstandaloneplayer/Data/Plugins/x86 ]; then
+      mv -v $files/linuxdevelopmentstandaloneplayer/Data/Plugins/x86/ScreenSelector.so $files/$version/Plugins/x86
+      mv -v $files/linux64developmentstandaloneplayer/Data/Plugins/x86_64/ScreenSelector.so $files/$version/Plugins/x86_64
+    elif [ -f $files/linuxdevelopmentstandaloneplayer/Data/Plugins/ScreenSelector.so ]; then
       mv -v $files/linuxdevelopmentstandaloneplayer/Data/Plugins/ScreenSelector.so $files/$version/Plugins/x86
       mv -v $files/linux64developmentstandaloneplayer/Data/Plugins/ScreenSelector.so $files/$version/Plugins/x86_64
     else
