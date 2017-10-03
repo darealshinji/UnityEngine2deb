@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="17.01.25.1"
+appversion="17.10.03.1"
 
 appname=$(basename "$0")
 engines="$HOME/.local/share/UnityEngine2deb/Engines"
@@ -418,8 +418,12 @@ then
     mkdir -p "$linuxdir"
     cp -rv "$osxdir/Data" "$linuxdir/${game}_Data"
     test ! -d "$osxdir/Resources/Data" || cp -rv "$osxdir/Resources/Data"/* "$linuxdir/${game}_Data"
-    mkdir -p "$linuxdir/${game}_Data/Resources" "$linuxdir/${game}_Data/Mono"
+    mkdir -p "$linuxdir/${game}_Data/Resources" "$linuxdir/${game}_Data/Mono" "$linuxdir/${game}_Data/Plugins"
     cp -v "$osxdir/Resources/unity default resources" "$linuxdir/${game}_Data/Resources"
+    # Why are Linux plugins sometimes bundled? Not that I complain about it...
+    test ! -d "$osxdir/Plugins/x86" || cp -rv "$osxdir/Plugins/x86" "$linuxdir/${game}_Data/Plugins"
+    test ! -d "$osxdir/Plugins/x86_64" || cp -rv "$osxdir/Plugins/x86_64" "$linuxdir/${game}_Data/Plugins"
+    test ! -f "$osxdir/Resources/ScreenSelector.png" || cp -v "$osxdir/Resources/ScreenSelector.png"/* "$linuxdir/${game}_Data"
     icns="$osxdir/Resources/UnityPlayer.icns"
     test ! -f "$icns" || have_icns="yes"
     origpath="$linuxdir"
@@ -464,13 +468,14 @@ if [ "$assume_yes" = "no" ]; then
 fi
 cd "$origpath"
 if [ "$delete_bins" = "yes" ]; then
-  rm -rvf *.pdb "${game}" "${game}."* "${game}_Data/Mono/mono.dll" "${game}_Data/Mono/x86"* "${game}_Data/Plugins"
+  rm -rvf *.pdb "${game}" "${game}."* "${game}_Data/Mono/mono.dll" "${game}_Data/Mono/x86"* "${game}_Data/Plugins"/*.dll
 fi
 
 tar xvf "$txz"
 if [ -d $version/Plugins ]; then
-  mkdir -p "${game}_Data/Plugins"
-  mv $version/Plugins/* "${game}_Data/Plugins"
+  mkdir -p "${game}_Data/Plugins/x86" "${game}_Data/Plugins/x86_64"
+  mv -f $version/Plugins/x86/* "${game}_Data/Plugins/x86"
+  mv -f $version/Plugins/x86_64/* "${game}_Data/Plugins/x86_64"
 fi
 mv $version/Mono/* "${game}_Data/Mono"
 mv $version/x86 "${game}.x86"
