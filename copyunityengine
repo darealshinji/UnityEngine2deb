@@ -26,7 +26,7 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="17.10.03.1"
+appversion="17.10.08.1"
 
 appname=$(basename "$0")
 engines="$HOME/.local/share/UnityEngine2deb/Engines"
@@ -423,7 +423,7 @@ then
     # Why are Linux plugins sometimes bundled? Not that I complain about it...
     test ! -d "$osxdir/Plugins/x86" || cp -rv "$osxdir/Plugins/x86" "$linuxdir/${game}_Data/Plugins"
     test ! -d "$osxdir/Plugins/x86_64" || cp -rv "$osxdir/Plugins/x86_64" "$linuxdir/${game}_Data/Plugins"
-    test ! -f "$osxdir/Resources/ScreenSelector.png" || cp -v "$osxdir/Resources/ScreenSelector.png"/* "$linuxdir/${game}_Data"
+    test ! -f "$osxdir/Resources/ScreenSelector.png" || cp -v "$osxdir/Resources/ScreenSelector.png" "$linuxdir/${game}_Data"
     icns="$osxdir/Resources/UnityPlayer.icns"
     test ! -f "$icns" || have_icns="yes"
     origpath="$linuxdir"
