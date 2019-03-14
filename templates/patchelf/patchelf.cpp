@@ -16,10 +16,6 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * Commit: https://github.com/NixOS/patchelf/commit/2a9cefd7d637d160d12dc7946393778fa8abbc58
- */
-
 #include <string>
 #include <vector>
 #include <set>
@@ -49,7 +45,7 @@ static bool debugMode = false;
 
 static bool forceRPath = false;
 
-static std::string fileName;
+static std::vector<std::string> fileNames;
 static int pageSize = PAGESIZE;
 
 typedef std::shared_ptr<std::vector<unsigned char>> FileContents;
@@ -139,8 +135,11 @@ private:
         ElfFile * elfFile;
         bool operator ()(const Elf_Phdr & x, const Elf_Phdr & y)
         {
-            if (x.p_type == PT_PHDR) return true;
+            // A PHDR comes before everything else.
             if (y.p_type == PT_PHDR) return false;
+            if (x.p_type == PT_PHDR) return true;
+
+            // Sort non-PHDRs by address.
             return elfFile->rdi(x.p_paddr) < elfFile->rdi(y.p_paddr);
         }
     };
@@ -333,7 +332,12 @@ static FileContents readFile(std::string fileName,
     int fd = open(fileName.c_str(), O_RDONLY);
     if (fd == -1) throw SysError(fmt("opening '", fileName, "'"));
 
-    if ((size_t) read(fd, contents->data(), size) != size)
+    size_t bytesRead = 0;
+    ssize_t portion;
+    while ((portion = read(fd, contents->data() + bytesRead, size - bytesRead)) > 0)
+        bytesRead += portion;
+
+    if (bytesRead != size)
         throw SysError(fmt("reading '", fileName, "'"));
 
     close(fd);
@@ -398,10 +402,13 @@ ElfFile<ElfFileParamNames>::ElfFile(FileContents fileContents)
         error("wrong ELF type");
 
     if ((size_t) (rdi(hdr->e_phoff) + rdi(hdr->e_phnum) * rdi(hdr->e_phentsize)) > fileContents->size())
-        error("missing program headers");
+        error("program header table out of bounds");
+
+    if (rdi(hdr->e_shnum) == 0)
+        error("no section headers. The input file is probably a statically linked, self-decompressing binary");
 
     if ((size_t) (rdi(hdr->e_shoff) + rdi(hdr->e_shnum) * rdi(hdr->e_shentsize)) > fileContents->size())
-        error("missing section headers");
+        error("section header table out of bounds");
 
     if (rdi(hdr->e_phentsize) != sizeof(Elf_Phdr))
         error("program headers have wrong size");
@@ -468,7 +475,7 @@ void ElfFile<ElfFileParamNames>::sortShdrs()
     /* Sort the sections by offset. */
     CompShdr comp;
     comp.elfFile = this;
-    sort(shdrs.begin(), shdrs.end(), comp);
+    sort(shdrs.begin() + 1, shdrs.end(), comp);
 
     /* Restore the sh_link mappings. */
     for (unsigned int i = 1; i < rdi(hdr->e_shnum); ++i)
@@ -494,7 +501,12 @@ static void writeFile(std::string fileName, FileContents contents)
     if (fd == -1)
         error("open");
 
-    if (write(fd, contents->data(), contents->size()) != (off_t) contents->size())
+    size_t bytesWritten = 0;
+    ssize_t portion;
+    while ((portion = write(fd, contents->data() + bytesWritten, contents->size() - bytesWritten)) > 0)
+        bytesWritten += portion;
+
+    if (bytesWritten != contents->size())
         error("write");
 
     if (close(fd) != 0)
@@ -563,8 +575,12 @@ template<ElfFileParams>
 Elf_Shdr & ElfFile<ElfFileParamNames>::findSection(const SectionName & sectionName)
 {
     Elf_Shdr * shdr = findSection2(sectionName);
-    if (!shdr)
-        error("cannot find section '" + sectionName + "'");
+    if (!shdr) {
+        std::string extraMsg = "";
+        if (sectionName == ".interp" || sectionName == ".dynamic" || sectionName == ".dynstr")
+            extraMsg = ". The input file is most likely statically linked";
+        error("cannot find section '" + sectionName + "'" + extraMsg);
+    }
     return *shdr;
 }
 
@@ -626,7 +642,8 @@ void ElfFile<ElfFileParamNames>::writeReplacedSections(Elf_Off & curOff,
     for (auto & i : replacedSections) {
         std::string sectionName = i.first;
         Elf_Shdr & shdr = findSection(sectionName);
-        memset(contents + rdi(shdr.sh_offset), 'X', rdi(shdr.sh_size));
+        if (shdr.sh_type != SHT_NOBITS)
+            memset(contents + rdi(shdr.sh_offset), 'X', rdi(shdr.sh_size));
     }
 
     for (auto & i : replacedSections) {
@@ -1258,10 +1275,8 @@ void ElfFile<ElfFileParamNames>::modifyRPath(RPathOp op,
         dynRPath = 0;
     }
 
-    if (forceRPath && !dynRPath && dynRunPath) { /* convert DT_RUNPATH to DT_RPATH */
-        dynRunPath->d_tag = DT_RPATH;
-        dynRPath = dynRunPath;
-        dynRunPath = 0;
+    if (forceRPath && dynRPath && dynRunPath) { /* convert DT_RUNPATH to DT_RPATH */
+        dynRunPath->d_tag = DT_IGNORE;
     }
 
     if (newRPath.size() <= rpathSize) {
@@ -1552,7 +1567,7 @@ static bool printNeeded = false;
 static bool noDefaultLib = false;
 
 template<class ElfFile>
-static void patchElf2(ElfFile && elfFile)
+static void patchElf2(ElfFile && elfFile, std::string fileName)
 {
     if (printInterpreter)
         printf("%s\n", elfFile.getInterpreter().c_str());
@@ -1594,17 +1609,19 @@ static void patchElf2(ElfFile && elfFile)
 
 static void patchElf()
 {
-    if (!printInterpreter && !printRPath && !printSoname && !printNeeded)
-        debug("patching ELF file '%s'\n", fileName.c_str());
+    for (auto fileName : fileNames) {
+        if (!printInterpreter && !printRPath && !printSoname && !printNeeded)
+            debug("patching ELF file '%s'\n", fileName.c_str());
 
-    debug("Kernel page size is %u bytes\n", getPageSize());
+        debug("Kernel page size is %u bytes\n", getPageSize());
 
-    auto fileContents = readFile(fileName);
+        auto fileContents = readFile(fileName);
 
-    if (getElfType(fileContents).is32Bit)
-        patchElf2(ElfFile<Elf32_Ehdr, Elf32_Phdr, Elf32_Shdr, Elf32_Addr, Elf32_Off, Elf32_Dyn, Elf32_Sym, Elf32_Verneed>(fileContents));
-    else
-        patchElf2(ElfFile<Elf64_Ehdr, Elf64_Phdr, Elf64_Shdr, Elf64_Addr, Elf64_Off, Elf64_Dyn, Elf64_Sym, Elf64_Verneed>(fileContents));
+        if (getElfType(fileContents).is32Bit)
+            patchElf2(ElfFile<Elf32_Ehdr, Elf32_Phdr, Elf32_Shdr, Elf32_Addr, Elf32_Off, Elf32_Dyn, Elf32_Sym, Elf32_Verneed>(fileContents), fileName);
+        else
+            patchElf2(ElfFile<Elf64_Ehdr, Elf64_Phdr, Elf64_Shdr, Elf64_Addr, Elf64_Off, Elf64_Dyn, Elf64_Sym, Elf64_Verneed>(fileContents), fileName);
+    }
 }
 
 
@@ -1727,11 +1744,12 @@ int mainWrapped(int argc, char * * argv)
             printf(PACKAGE_STRING "\n");
             return 0;
         }
-        else break;
+        else {
+            fileNames.push_back(arg);
+        }
     }
 
-    if (i == argc) error("missing filename");
-    fileName = argv[i];
+    if (fileNames.empty()) error("missing filename");
 
     patchElf();
 
