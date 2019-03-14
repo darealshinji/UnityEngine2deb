@@ -146,23 +146,20 @@ endif
 
 override_dh_gencontrol:
 	dh_gencontrol
-	sed -i 's/^Architecture: all/_Architecture: all/g' debian/$(NAME)/DEBIAN/control
 
 # fix architecture when packaging i386 on foreign system
 ifeq ($(ARCH), x86)
 ifneq ($(DEB_HOST_ARCH), i386)
-	sed -i 's/^Architecture: .*/Architecture: i386/g' debian/$(NAME)/DEBIAN/control
+	sed -i 's/Architecture: $(DEB_HOST_ARCH)/Architecture: i386/g' debian/$(NAME)/DEBIAN/control
 endif
 endif
 
 # fix architecture when packaging amd64 on foreign system
 ifeq ($(ARCH), x86_64)
 ifneq ($(DEB_HOST_ARCH), amd64)
-	sed -i 's/Architecture: .*/Architecture: amd64/g' debian/$(NAME)/DEBIAN/control
+	sed -i 's/Architecture: $(DEB_HOST_ARCH)/Architecture: amd64/g' debian/$(NAME)/DEBIAN/control
 endif
 endif
-
-	sed -i 's/^_Architecture: all/Architecture: all/g' debian/$(NAME)/DEBIAN/control
 
 
 override_dh_builddeb:
