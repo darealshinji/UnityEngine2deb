@@ -26,11 +26,19 @@ LANG=C
 LANGUAGE=C
 LC_ALL=C
 
-appversion="17.05.19.1"
+appversion="19.03.14.1"
 
 appname=$(basename "$0")
 scriptpath="$(dirname "$(readlink -f "$0")")"
 wdconf="$HOME/.config/UnityEngie2deb/workingdir"
+
+deb_arch=$(dpkg-architecture -qDEB_HOST_ARCH)
+if [ $deb_arch = "amd64" ] || [ $deb_arch = "i386" ]; then
+  host_intel="yes"
+else
+  host_intel="no"
+fi
+assumed_dependencies="libc6, libgcc1, libgl1-mesa-glx | libgl1, libglu1-mesa, libgtk2.0-0, libgdk-pixbuf2.0-0, libglib2.0-0, libstdc++6, libx11-6, libxcursor1"
 
 errorExit() {
   echo "error: $1"
@@ -342,7 +350,7 @@ if [ $mode = "prepare" ] ; then
   if [ -z "$VERSION" ] ; then
     echo ""
     echo "Enter the game's release version. It should begin with a number"
-    read -p "and mustn't contain and spaces or underscores: " VERSION
+    read -p "and mustn't contain any spaces or underscores: " VERSION
   fi
   if [ -z "$MAINTAINER" ] ; then
     echo ""
@@ -431,9 +439,14 @@ Homepage: $HOMEPAGE
 
 Package: $name
 Architecture: any
-Depends: \${misc:Depends}, \${shlibs:Depends}, libpulse0$datadeps
-Description: $SHORTDESCRIPTION
 EOF
+  deb_arch=$(dpkg-architecture -qDEB_HOST_ARCH)
+  if [ $host_intel = "yes" ]; then
+    echo "Depends: \${misc:Depends}, \${shlibs:Depends}, libpulse0$datadeps" >> "$debian/control.in"
+  else
+    echo "Depends: \${misc:Depends}, $assumed_dependencies, libpulse0$datadeps" >> "$debian/control.in"
+  fi
+  echo "Description: $SHORTDESCRIPTION" >> "$debian/control.in"
   cat "$topsrc/description_processed" >> "$debian/control.in"
 
   if [ $datapackage = "yes" ] ; then
