@@ -1,4 +1,5 @@
 # the Unity engine is closed-source
+hardening-no-pie
 embedded-library
 
 # no point to replace a single png file with a symlink
