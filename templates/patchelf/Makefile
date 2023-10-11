@@ -1,17 +1,14 @@
-CXX := g++
-BIN  = patchelf
-
-PAGESIZE = $(shell getconf PAGESIZE 2>/dev/null || getconf PAGE_SIZE 2>/dev/null || echo 4096)
-DEFINES  = -DPACKAGE_STRING="\"PatchELF\"" -DPAGESIZE=$(PAGESIZE)
+CXXFLAGS = -O3 -Wall -Wextra -Wcast-qual -I. -std=c++17 -D_FILE_OFFSET_BITS=64 -DPACKAGE_STRING='"PatchELF 0.18.0"'
+LDFLAGS  = -s
 
 
-all: $(BIN)
+all: patchelf
 
 clean:
-	rm -f $(BIN)
+	-rm -f patchelf
 
 distclean: clean
 
-$(BIN):
-	$(CXX) -std=c++11 -w -s $(DEFINES) -o $@ $@.cpp
+patchelf: patchelf.cpp
+	$(CXX) $(CXXFLAGS) $^ -o $@ $(LDFLAGS)
 
